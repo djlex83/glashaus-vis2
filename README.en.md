@@ -2,6 +2,13 @@
 
 [Deutsch](README.md) · **English**
 
+[![Live demo](https://img.shields.io/badge/Live_demo-open-3a8452)](https://djlex83.github.io/glashaus-vis2/)
+[![ioBroker VIS 2](https://img.shields.io/badge/ioBroker-VIS%202-2d6bb0)](https://github.com/ioBroker/ioBroker.vis-2)
+[![No dependencies](https://img.shields.io/badge/dependencies-none-6760c4)](#quick-start)
+[![License: MIT](https://img.shields.io/badge/license-MIT-bf7a14)](LICENSE)
+
+**Live demo:** [Home](https://djlex83.github.io/glashaus-vis2/) · [Energy](https://djlex83.github.io/glashaus-vis2/energie.html) · [Heating](https://djlex83.github.io/glashaus-vis2/heizung.html) · [Appliances](https://djlex83.github.io/glashaus-vis2/geraete.html) · [Driveway](https://djlex83.github.io/glashaus-vis2/einfahrt.html) · [House](https://djlex83.github.io/glashaus-vis2/haus.html) · [Rooms](https://djlex83.github.io/glashaus-vis2/zimmer.html)
+
 A dashboard design for a smart home running ioBroker: frosted-glass tiles, calm typography and a line drawing behind every page that dissolves into particles when you touch it. Every page is a single self-contained HTML file, without frameworks or build tooling. It runs in any browser, on a wall-mounted tablet, or serves as a template for VIS 2.
 
 > All values are demo values and the house is fictional. The table “In VIS 2 übernehmen” (use in VIS 2) on every page lists which ioBroker data point belongs where (with sample IDs).
@@ -46,7 +53,7 @@ python3 -m http.server 8765 --directory docs       # then open http://localhost:
 bash .claude/skills/glashaus/check.sh              # checks syntax and leftover placeholders
 ```
 
-`docs/` is already built and can be served directly with GitHub Pages.
+`docs/` is already built and served by GitHub Pages as the [live demo](https://djlex83.github.io/glashaus-vis2/).
 
 ## Structure
 
@@ -79,6 +86,10 @@ The page files contain markers (`/*COMMON_JS*/`, `/*BASE_CSS*/`, `<!--SPRITE-->`
 ## Privacy
 
 This repository deliberately contains **no real house**: floor plan, street view, names, places, waste collection dates, fees and all device IDs are invented or replaced. If you adapt it for your own home, do the same before publishing (see the privacy section in the skill).
+
+## Contributing
+
+Anyone is welcome to fork the project, change it and propose improvements as a pull request, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

@@ -2,6 +2,13 @@
 
 **Deutsch** · [English](README.en.md)
 
+[![Live-Demo](https://img.shields.io/badge/Live--Demo-ansehen-3a8452)](https://djlex83.github.io/glashaus-vis2/)
+[![ioBroker VIS 2](https://img.shields.io/badge/ioBroker-VIS%202-2d6bb0)](https://github.com/ioBroker/ioBroker.vis-2)
+[![Ohne Abhängigkeiten](https://img.shields.io/badge/Abh%C3%A4ngigkeiten-keine-6760c4)](#schnellstart)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-bf7a14)](LICENSE)
+
+**Live-Demo:** [Zuhause](https://djlex83.github.io/glashaus-vis2/) · [Energie](https://djlex83.github.io/glashaus-vis2/energie.html) · [Heizung](https://djlex83.github.io/glashaus-vis2/heizung.html) · [Geräte](https://djlex83.github.io/glashaus-vis2/geraete.html) · [Einfahrt](https://djlex83.github.io/glashaus-vis2/einfahrt.html) · [Haus](https://djlex83.github.io/glashaus-vis2/haus.html) · [Zimmer](https://djlex83.github.io/glashaus-vis2/zimmer.html)
+
 Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhige Typografie und je Seite eine Linienzeichnung im Hintergrund, die bei Berührung in Partikel zerfließt. Jede Seite ist eine einzelne HTML-Datei ohne Build-Werkzeuge und ohne Framework. Sie läuft im Browser, auf einem Wand-Tablet oder als Vorlage für VIS 2.
 
 > Alle Werte sind Demo-Werte, das Haus ist erfunden. Die Tabelle „In VIS 2 übernehmen“ auf jeder Seite zeigt, welcher ioBroker-Datenpunkt wohin gehört (mit Beispiel-IDs).
@@ -44,7 +51,7 @@ python3 -m http.server 8765 --directory docs       # dann http://localhost:8765 
 bash .claude/skills/glashaus/check.sh              # Syntax und Platzhalter prüfen
 ```
 
-`docs/` ist fertig gebaut und kann direkt mit GitHub Pages ausgeliefert werden.
+`docs/` ist fertig gebaut und wird über GitHub Pages als [Live-Demo](https://djlex83.github.io/glashaus-vis2/) ausgeliefert.
 
 ## Aufbau
 
@@ -77,6 +84,10 @@ Unter [`.claude/skills/glashaus/SKILL.md`](.claude/skills/glashaus/SKILL.md) lie
 ## Datenschutz
 
 Dieses Repository enthält bewusst **kein echtes Haus**: Grundriss, Hausansicht, Namen, Orte, Abfuhrtermine, Gebühren und alle Geräte-IDs sind erfunden oder ersetzt. Wer es für das eigene Zuhause nutzt, sollte vor einem Veröffentlichen dasselbe tun (siehe Abschnitt „Datenschutz“ im Skill).
+
+## Mitmachen
+
+Jeder darf das Projekt forken, verändern und Verbesserungen als Pull Request vorschlagen, siehe [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Lizenz
 
