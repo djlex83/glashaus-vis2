@@ -1,10 +1,16 @@
 # Glashaus · Design-Dashboard für ioBroker VIS 2
 
+**Deutsch** · [English](README.en.md)
+
 Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhige Typografie und je Seite eine Linienzeichnung im Hintergrund, die bei Berührung in Partikel zerfließt. Jede Seite ist eine einzelne HTML-Datei ohne Build-Werkzeuge und ohne Framework. Sie läuft im Browser, auf einem Wand-Tablet oder als Vorlage für VIS 2.
 
 > Alle Werte sind Demo-Werte, das Haus ist erfunden. Die Tabelle „In VIS 2 übernehmen“ auf jeder Seite zeigt, welcher ioBroker-Datenpunkt wohin gehört (mit Beispiel-IDs).
 
-![Startseite](screenshots/start.png)
+![Partikel: Über die Zeichnung streichen](screenshots/partikel.gif)
+
+| Hausmodell drehen und aufklappen | Zimmer mit Lichtszenen |
+|---|---|
+| ![Hausmodell](screenshots/hausmodell.gif) | ![Zimmer](screenshots/zimmer.gif) |
 
 ## Seiten
 
