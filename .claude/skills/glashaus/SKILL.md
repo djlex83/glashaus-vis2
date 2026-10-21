@@ -50,6 +50,13 @@ Screenshots ohne Nachtmodus und mit fertig eingeblendeten Kacheln: Chrome headle
 `TZ=America/Los_Angeles chrome --headless=new --hide-scrollbars --window-size=1440,2400 --virtual-time-budget=7000 --force-prefers-reduced-motion --screenshot=out.png http://127.0.0.1:8765/index.html`
 (der Nachtmodus richtet sich nach der Uhrzeit, Reduced Motion zeigt die Kacheln sofort und das Motiv statisch).
 
+**Animierte Vorschaubilder (GIFs)** für die README: `tools/record.mjs` steuert Chrome über das DevTools-Protokoll und nimmt per Screencast auf.
+1. Server für `docs/` auf Port 8766 starten.
+2. `node tools/record.mjs <szene> <ordner>` ausführen. Szenen: `partikel` (Maus durchs Motiv), `haus` (Modell drehen, aufklappen), `zimmer` (Lichtszenen), `kamera` (Auto kommt, Popup), `skyline` (3D drehen), `theme` (hell/dunkel), `einrichten` (Möbel ziehen und drehen). Für `einrichten` zuerst `probe` ausführen, im Screenshot die Koordinaten eines Möbelgriffs ablesen und als `x y zielX zielY` mitgeben.
+3. Mit dem ffmpeg-Befehl aus dem Dateikopf ein GIF machen (18 fps, 800 px breit, Ziel unter etwa 5 MB).
+4. Stichproben-Bilder aus dem Ordner ansehen, bevor das GIF verwendet wird: richtiger Ausschnitt, keine privaten Daten.
+Anderer Chrome-Pfad: Umgebungsvariable `CHROME`.
+
 ## Design
 
 Forma-Look: Hintergrund #EBE9E5 / dunkel #111110, Schrift Geist, Akzent Instrument Serif kursiv (`.it`), Glas-Kacheln (`.glass.tile`), Pills (`.pill ok|warn|crit|info|idle`). Farben nur über Tokens; neue Tokens in `:root` und in **beiden** Dunkel-Blöcken von base.css ergänzen. Animationen respektieren `prefers-reduced-motion` (`RM`).
