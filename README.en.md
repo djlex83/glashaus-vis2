@@ -11,6 +11,10 @@ A dashboard design for a smart home running ioBroker: frosted-glass tiles, calm 
 | Rotate and explode the house model | Rooms with light scenes |
 |---|---|
 | ![House model](screenshots/hausmodell.gif) | ![Room](screenshots/zimmer.gif) |
+| **Camera: car arrives, live pop-up** | **Energy: rotate the 3D yearly skyline** |
+| ![Camera](screenshots/kamera.gif) | ![Skyline](screenshots/skyline.gif) |
+| **Switch light and dark** | **Room edit mode: drag and rotate furniture** |
+| ![Light and dark](screenshots/theme.gif) | ![Edit mode](screenshots/einrichten.gif) |
 
 ## Pages
 

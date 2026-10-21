@@ -11,6 +11,10 @@ Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhig
 | Hausmodell drehen und aufklappen | Zimmer mit Lichtszenen |
 |---|---|
 | ![Hausmodell](screenshots/hausmodell.gif) | ![Zimmer](screenshots/zimmer.gif) |
+| **Kamera: Auto kommt heim, Live-Popup** | **Energie: Jahres-Skyline in 3D drehen** |
+| ![Kamera](screenshots/kamera.gif) | ![Skyline](screenshots/skyline.gif) |
+| **Hell und dunkel umschalten** | **Zimmer einrichten: Möbel ziehen und drehen** |
+| ![Hell und dunkel](screenshots/theme.gif) | ![Einrichten](screenshots/einrichten.gif) |
 
 ## Seiten
 
