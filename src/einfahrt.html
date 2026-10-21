@@ -1,0 +1,483 @@
+<meta charset="utf-8">
+<title>Glashaus Einfahrt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all}
+/* Garage */
+.garage svg{width:100%;max-width:300px;height:auto;display:block;margin:0 auto}
+.garage .house{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linejoin:round}
+.garage .opening{fill:color-mix(in srgb,var(--fg) 6%,transparent)}
+.garage .panel{fill:color-mix(in srgb,var(--fg) 10%,var(--bg));stroke:var(--fg-3);stroke-width:1}
+.garage .door{transition:transform 6s cubic-bezier(.45,0,.25,1)}
+.garage .led{stroke:var(--track);stroke-width:4;stroke-linecap:round;transition:stroke .3s}
+.garage[data-led="open"] .led{stroke:var(--sun);animation:ledb .6s steps(2) infinite;filter:drop-shadow(0 0 6px var(--sun))}
+.garage[data-led="close"] .led{stroke:var(--crit);animation:ledb .6s steps(2) infinite;filter:drop-shadow(0 0 6px var(--crit))}
+@keyframes ledb{50%{opacity:.25}}
+.gstate{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:14px 0 10px}
+.gstate b{font-size:30px;font-weight:550;letter-spacing:-.03em}
+.contacts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+
+/* Kamera */
+.camtile .cframe{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9;background:#111;box-shadow:inset 0 0 0 1px var(--stroke)}
+.camtile canvas{display:block;width:100%;height:100%}
+.camtile .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+/* Autos */
+.car{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--track)}
+.car:last-of-type{border-bottom:0}
+.car .ico{width:44px;height:44px;border-radius:14px;grid-row:span 4}
+.car .nm{font-weight:550;font-size:16px;display:flex;align-items:center;gap:8px}
+.car .st{font-size:13px;color:var(--fg-2)}
+.car .ok-t{color:var(--ok);font-weight:550}
+.car .big{font-size:26px;font-weight:550;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c);display:inline-block}
+.dot.live{animation:blink 1.6s ease-in-out infinite}
+/* Woche */
+.week{display:grid;grid-template-columns:72px minmax(0,1fr);gap:8px 12px;align-items:center}
+.week .day{font-size:12.5px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.week .day b{color:var(--fg);font-weight:550}
+.week .track{position:relative;height:28px;border-radius:7px;background:var(--track)}
+.week .trip{position:absolute;top:3px;bottom:3px;border-radius:5px;background:var(--c);opacity:.85;transform-origin:left;animation:grow-x .8s var(--spring) both;animation-delay:calc(var(--k)*30ms)}
+.week .trip.open{background:repeating-linear-gradient(90deg,var(--c) 0 6px,transparent 6px 10px);opacity:.9}
+.week .trip.nostart{border-top-left-radius:0;border-bottom-left-radius:0;-webkit-mask:linear-gradient(90deg,transparent,#000 14px);mask:linear-gradient(90deg,transparent,#000 14px)}
+.week .now{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg);border-radius:1px}
+@keyframes grow-x{from{transform:scaleX(0)}}
+.wticks{grid-column:2;display:flex;justify-content:space-between;font-size:11px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--fg-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+/* Fahrten */
+.trips{list-style:none;margin:0;padding:0}
+.trips li{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:11px 0;border-bottom:1px solid var(--track)}
+.trips li:last-child{border-bottom:0}
+.trips time{font-size:12.5px;color:var(--fg-2);font-variant-numeric:tabular-nums;line-height:1.25}
+.trips .who{font-weight:550;font-size:14px;display:flex;align-items:center;gap:8px}
+.trips .when{font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.trips .when i{font-style:normal;color:var(--warn)}
+.zw{display:inline-flex;padding:3px;border-radius:99px;background:var(--track);gap:2px}
+.zw button{border:0;background:transparent;height:26px;padding:0 10px;border-radius:99px;font-size:12px;font-weight:500;color:var(--fg-2);cursor:pointer;transition:background .4s var(--ease),color .3s}
+.zw button[aria-pressed="true"]{background:var(--c);color:#fff}
+.trips li.offen .zw{box-shadow:0 0 0 1.5px color-mix(in srgb,var(--warn) 70%,transparent)}
+@media (max-width:760px){.trips li{grid-template-columns:54px minmax(0,1fr)}.trips .zw{grid-column:1/-1;justify-self:start}}
+/* Monat */
+.msum{display:grid;gap:16px}
+.msum .row{display:grid;gap:6px}
+.msum .hd{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.msum .hd b{font-weight:550}
+.msum .hd span{color:var(--fg-2);font-variant-numeric:tabular-nums}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--track)}
+.stack i{display:block;background:var(--c);transition:flex-grow .6s var(--ease)}
+.stack i+i{margin-left:2px}
+/* Besucher */
+.guests{list-style:none;margin:0;padding:0}
+.guests li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.guests li:last-child{border-bottom:0}
+.guests .ico{width:34px;height:34px;border-radius:11px}
+.guests small{display:block;font-size:12px;color:var(--fg-2)}
+.guests time{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+.gsum{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+/* Tonnen */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal .wd{font-size:11.5px;color:var(--fg-3);text-align:center;padding-bottom:2px}
+.cal .c{min-height:64px;border-radius:12px;padding:7px 7px 6px;background:color-mix(in srgb,var(--fg) 3%,transparent);display:flex;flex-direction:column;gap:3px;animation:rise .8s var(--ease) both;animation-delay:calc(var(--k)*12ms)}
+.cal .c>b{font-size:12.5px;font-weight:500;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.cal .c.past{opacity:.38}
+.cal .c.today{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.cal .c.today>b{color:var(--fg);font-weight:650}
+.cal .c.m1>b::after{content:attr(data-m);margin-left:4px;color:var(--fg-3);font-weight:400}
+.cal i{display:block;font-style:normal;font-size:11px;font-weight:550;line-height:1;padding:4px 6px;border-radius:6px;background:var(--c);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal i.y{color:#2b2205}
+.leer{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 14px}
+.leer button{width:26px;height:26px;border-radius:8px;border:0;cursor:pointer;font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums;background:var(--track);color:var(--fg-3);transition:background .3s,color .3s,transform .4s var(--spring)}
+.leer button[aria-pressed="true"]{background:var(--bin-rest);color:var(--bg)}
+.leer button:active{transform:scale(.9)}
+.lrow{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.lrow .nm{font-weight:550;font-size:15px}
+.lrow .st{font-size:12.5px;color:var(--fg-2)}
+.tsize{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px;font-size:13.5px}
+.tip{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:13px;background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.tip.warn{background:color-mix(in srgb,var(--warn) 14%,transparent)}
+@media (max-width:760px){.cal .c{min-height:54px;padding:5px}.cal i{font-size:10px;padding:3px 4px}}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">einfahrt</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung des Hauses von der Straße, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="#" aria-current="page">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">Einfahrt · Kamera · Fahrtenbuch · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span>Wer kommt, wer fährt,</span><span class="it">das Haus schreibt mit.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-lede>Autos, Fahrten und Besuch an der Einfahrt im Blick.</p>
+      <div class="ctas">
+        <button class="ink" type="button" data-live>Live ansehen <svg><use href="#i-arrow"/></svg></button>
+        <a class="uline" href="#fahrten">Zum Fahrtenbuch <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-8 camtile" style="--i:0">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--crit)"><svg><use href="#i-cam"/></svg></span>Carport-Kamera</h2><span class="pill crit live">Live</span></div>
+    <div class="cframe"><canvas id="camcv" aria-label="Live-Bild der Carport-Kamera (Demo)"></canvas></div>
+    <div class="btns"><button class="btn" type="button" data-cplay="auto">Auto kommt heim</button><button class="btn" type="button" data-cplay="paket">Paketbote</button><button class="btn" type="button" data-cpop>Als Popup zeigen</button></div>
+    <p class="small muted" style="margin:12px 0 0">Bei jeder Bewegung schreibt das Script 30 Sekunden lang jede Sekunde ein neues Bild. Die KI erkennt Kennzeichen, Richtung und Lieferdienste.</p>
+  </article>
+
+  <article class="glass tile s-4" style="--i:1">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-garage"/></svg></span>Autos</h2><span class="small muted">bekannte Kennzeichen</span></div>
+    <div data-cars></div>
+    <p class="small muted" style="margin:10px 0 0">Neue Autos per Telegram-Knopf „Als bekannt speichern“.</p>
+  </article>
+
+  <div class="s-12" id="woche">
+    <div class="sec-h"><h2>Die Woche <span class="it">unterwegs.</span></h2><span class="small legend" data-legend></span></div>
+  </div>
+  <article class="glass tile s-12" style="--i:2">
+    <div class="week" data-week></div>
+  </article>
+
+  <article class="glass tile s-8" id="fahrten" style="--i:3">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--grid)"><svg><use href="#i-clock"/></svg></span>Fahrten</h2><span class="pill warn" data-open>offen</span></div>
+    <ul class="trips" data-trips></ul>
+  </article>
+
+  <article class="glass tile s-4" style="--i:4">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--batt)"><svg><use href="#i-chart"/></svg></span><span data-mname>Oktober</span></h2></div>
+    <div class="msum" data-month></div>
+    <hr class="sep">
+    <div class="legend" data-plegend></div>
+    <div class="btns" style="display:flex;gap:8px;margin-top:14px"><button class="btn" type="button" data-csv><svg><use href="#i-copy"/></svg><span>CSV kopieren</span></button></div>
+    <p class="small muted" style="margin:10px 0 0">Ohne km-Stände ein privates Fahrtenbuch. Telegram: <code class="code">/fahrtenbuch</code></p>
+  </article>
+
+  <article class="glass tile s-6 garage" id="garage" style="--i:5" data-led="off">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--ok)"><svg><use href="#i-garage"/></svg></span>Garage</h2><span class="pill info">nur Anzeige</span></div>
+    <svg viewBox="0 0 240 170" aria-hidden="true">
+      <path class="house" d="M20 160V62L120 14l100 48v98"/>
+      <line class="led" x1="56" y1="58" x2="184" y2="58"/>
+      <rect class="opening" x="56" y="68" width="128" height="92"/>
+      <clipPath id="gclip"><rect x="56" y="68" width="128" height="92"/></clipPath>
+      <g clip-path="url(#gclip)"><g class="door" id="door">
+        <rect class="panel" x="58" y="70" width="124" height="17" rx="2"/><rect class="panel" x="58" y="88" width="124" height="17" rx="2"/>
+        <rect class="panel" x="58" y="106" width="124" height="17" rx="2"/><rect class="panel" x="58" y="124" width="124" height="17" rx="2"/>
+        <rect class="panel" x="58" y="142" width="124" height="17" rx="2"/></g></g>
+      <line x1="12" y1="160" x2="228" y2="160" class="house"/>
+    </svg>
+    <div class="gstate"><b data-gs>Zu</b><span class="small muted" data-gsub>seit 18:42</span></div>
+    <div class="contacts"><span class="pill ok" data-c1>Kontakt zu · true</span><span class="pill idle" data-c2>Kontakt offen · false</span></div>
+    <button class="btn" type="button" data-gsim>Fahrt simulieren</button>
+  </article>
+
+
+  <article class="glass tile s-6" style="--i:6">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--sun)"><svg><use href="#i-bell"/></svg></span>Besucherbuch</h2><span class="small muted">7 Tage</span></div>
+    <div class="gsum"><span class="pill info">3 Lieferdienste</span><span class="pill ok">1 Gast</span><span class="pill idle">4 unbekannt</span><span class="pill warn">2 Nachtalarme</span></div>
+    <ul class="guests">
+      <li><span class="ico" style="--c:var(--sun)"><svg><use href="#i-box"/></svg></span><span>DHL mit Paket<small>Person · gelbe Jacke · Linie</small></span><time>heute 14:12</time></li>
+      <li><span class="ico" style="--c:var(--ok)"><svg><use href="#i-home"/></svg></span><span>Tante Anna<small>Gast bis Samstag · fährt ein</small></span><time>gestern 18:03</time></li>
+      <li><span class="ico" style="--c:var(--fg-3)"><svg><use href="#i-garage"/></svg></span><span>Unbekannt · XY ··· 12<small>weißer Transporter · wendet</small></span><time>gestern 11:40</time></li>
+      <li><span class="ico" style="--c:var(--sun)"><svg><use href="#i-box"/></svg></span><span>Amazon<small>Person mit Paket</small></span><time>Mo 09:15</time></li>
+      <li><span class="ico" style="--c:var(--crit)"><svg><use href="#i-bell"/></svg></span><span>Nachtalarm<small>Person im Hof · Video gesendet</small></span><time>So 02:41</time></li>
+    </ul>
+    <p class="small muted" style="margin:10px 0 0">Fremde Kennzeichen nur gekürzt, eigene Autos und Gäste vollständig.</p>
+  </article>
+
+  <div class="s-12" id="tonnen">
+    <div class="sec-h"><h2>Die Tonnen <span class="it">an die Straße.</span></h2><span class="small legend" data-tlegend></span></div>
+  </div>
+  <article class="glass tile s-8" style="--i:7">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Abfuhrkalender</h2><span class="pill" data-tnext>–</span></div>
+    <div class="cal" data-cal></div>
+    <p class="small muted" style="margin:12px 0 0" data-psm></p>
+  </article>
+
+  <article class="glass tile s-4" style="--i:8">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-rest)"><svg><use href="#i-chart"/></svg></span>Restmüll-Gebühr</h2><span class="small muted" data-gjahr></span></div>
+    <div class="lrow"><div class="ring" data-lring style="--c:var(--bin-rest)"></div><div><div class="nm" data-lnum>–</div><div class="st">12 Leerungen sind in der Jahresgebühr enthalten</div></div></div>
+    <p class="small muted" style="margin:8px 0 4px">Rausgestellt (antippen zum Ändern)</p>
+    <div class="leer" data-leer></div>
+    <div class="tsize"><span>Restmüll <small class="muted">Liter</small></span><span class="zw" data-size="rest"></span></div>
+    <div class="tsize"><span>Biotonne <small class="muted">Liter</small></span><span class="zw" data-size="bio"></span></div>
+    <hr class="sep">
+    <dl class="kv" data-geb></dl>
+    <p class="tip" data-tip hidden></p>
+  </article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Live-Popup, Autos, Fahrtenbuch, Garage</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Widget → Datenpunkt</h3>
+        <div class="tbl"><table>
+          <tr><th>Widget</th><th>Datenpunkt</th><th>Hinweis</th></tr>
+          <tr><td>Live-Popup</td><td><code>0_userdata.0.Einfahrt.liveAktiv</code></td><td>Sichtbarkeit des Popups; true, solange Bewegung erkannt wird</td></tr>
+          <tr><td>Live-Bild</td><td><code>0_userdata.0.Einfahrt.liveBild</code></td><td>Image-Widget mit Binding als Quelle, URL ändert sich jede Sekunde (web.0, Port 8082)</td></tr>
+          <tr><td>Popup-Text</td><td><code>0_userdata.0.Einfahrt.bewegung</code></td><td>JSON: ziel, status, name, kennzeichen, fahrzeug, richtung, beschreibung, bild</td></tr>
+          <tr><td>Auto zuhause</td><td><code>0_userdata.0.Einfahrt.autos.&lt;KENNZEICHEN&gt;.zuhause</code></td><td>dazu <code>.seit</code> und <code>.name</code>; entsteht bei der ersten Fahrt</td></tr>
+          <tr><td>Wallboxen</td><td><code>mywallbox.0.597213</code> Carport · <code>mywallbox.0.840021</code> Garage</td><td>Adapter aktivieren, dann <code>charging.charging_power</code> und <code>chargingData.last_session.added_energy</code></td></tr>
+          <tr><td>Unterwegs</td><td><code>0_userdata.0.Einfahrt.unterwegs</code></td><td>JSON der offenen Fahrten</td></tr>
+          <tr><td>Fahrtenbuch</td><td><code>0_userdata.0.Einfahrt.fahrten</code></td><td>JSON-Liste, 400 Tage; <code>fahrtMinuten</code> geht nach InfluxDB</td></tr>
+          <tr><td>Zweck</td><td>Telegram-Knöpfe</td><td>bei der Rückkehr, sonst <code>/fahrten</code></td></tr>
+          <tr><td>Garage zu</td><td><code>zigbee.0.00158da5cd4eb01c.contact</code></td><td>true = zu</td></tr>
+          <tr><td>Garage offen</td><td><code>zigbee.0.00158d470c5b8a00.contact</code></td><td>true = ganz offen; beide false = fährt</td></tr>
+          <tr><td>Garage-Status</td><td><code>javascript.0.CurrentDoorState</code></td><td>0 offen · 1 zu · 2 öffnet · 3 schließt</td></tr>
+          <tr><td>Abfuhrkalender</td><td><code>0_userdata.0.Muell.termine</code></td><td>JSON <code>[{datum, art}]</code>, nächste 60 Tage, nachts neu vom Abfallkalender</td></tr>
+          <tr><td>Restmüll rausgestellt</td><td><code>0_userdata.0.Muell.restLeerungen</code></td><td>JSON-Datumsliste des Jahres, gesetzt per Telegram-Knopf „Restmüll rausgestellt“</td></tr>
+          <tr><td>Carport-LED</td><td><code>wled.0.6fe7eba7af9e</code></td><td>Preset 6 öffnen (gelb), 7 schließen (rot)</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <h3>Projekt-CSS</h3>
+        <p>Garage wie bisher. Das Live-Popup ist ein eigenes Widget-Set: Image-Widget plus Text, sichtbar per Binding auf <code>liveAktiv</code>.</p>
+<pre class="css" id="vis-css">/* Garagentor: Lamellen fahren nach oben */
+.gh-door{transition:transform 6s cubic-bezier(.45,0,.25,1)}
+.gh-door.offen{transform:translateY(-92%)}
+.gh-door.faehrt{transform:translateY(-45%)}
+
+/* WLED-Leiste über dem Tor */
+.gh-led{background:rgba(21,21,20,.08);height:4px;border-radius:2px}
+.gh-led.oeffnet{background:#bf7a14;animation:gh-blink .6s steps(2) infinite}
+.gh-led.schliesst{background:#bd3d2c;animation:gh-blink .6s steps(2) infinite}
+@keyframes gh-blink{50%{opacity:.25}}
+
+@media (prefers-reduced-motion:reduce){
+  .gh-door{transition:none}
+  .gh-led{animation:none!important}
+}</pre>
+        <button class="btn" type="button" data-copy="#vis-css"><svg><use href="#i-copy"/></svg><span>CSS kopieren</span></button>
+        <p style="margin-top:10px">Beispiel CSS-Klasse: <code>gh-door {v:javascript.0.CurrentDoorState; v==0 ? 'offen' : v>=2 ? 'faehrt' : ''}</code></p>
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Entwurf für ioBroker VIS 2 · Alle Werte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('einfahrt');
+
+/* Garage: Kontakte → Zustand, WLED-Preset während der Fahrt */
+const G={state:'zu',busy:false};
+function garage(st){const g=$('#garage'),door=$('#door');G.state=st;window.GH_GARAGE=st;
+  const pos={zu:0,offen:-86,oeffnet:-86,schliesst:0}[st];door.style.transform='translateY('+pos+'px)';
+  g.dataset.led=st==='oeffnet'?'open':st==='schliesst'?'close':'off';
+  $('[data-gs]').textContent={zu:'Zu',offen:'Offen',oeffnet:'Öffnet …',schliesst:'Schließt …'}[st];
+  $('[data-gsub]').textContent=st==='zu'?'beide Kontakte stimmen':st==='offen'?'Nachtwarnung ab 22 Uhr per Telegram':'WLED Preset '+(st==='oeffnet'?'6 · gelb':'7 · rot');
+  const c1=$('[data-c1]'),c2=$('[data-c2]');
+  c1.className='pill '+(st==='zu'?'ok':'idle');c1.textContent='Kontakt zu · '+(st==='zu');
+  c2.className='pill '+(st==='offen'?'warn':'idle');c2.textContent='Kontakt offen · '+(st==='offen')}
+$('[data-gsim]').addEventListener('click',()=>{if(G.busy)return;G.busy=true;const to=G.state==='zu'?'oeffnet':'schliesst';garage(to);
+  setTimeout(()=>{garage(to==='oeffnet'?'offen':'zu');G.busy=false},RM?50:6000)});
+garage('zu');
+
+
+/* Kamera-Kachel */
+const CAM = camScene($('#camcv'), { ir: () => document.body.classList.contains('night') });
+CAM.idle();
+$$('[data-cplay]').forEach(b => b.addEventListener('click', () => {
+  const p = b.dataset.cplay === 'paket';
+  CAM.play(p ? 'person' : 'auto', { parcel: p, color: '#3d5f94', label: 'Kleinwagen', onDetect: () => toast(p ? 'DHL mit Paket erkannt (Demo)' : 'Kleinwagen erkannt · fährt ein (Demo)') });
+}));
+$('[data-cpop]').addEventListener('click', () => window.GH_MOTION && GH_MOTION(GH_MDEMO.auto));
+$('[data-live]').addEventListener('click', () => window.GH_MOTION && GH_MOTION(GH_MDEMO.auto));
+
+/* Fahrtenbuch (Demo-Daten im Format von 0_userdata.0.Einfahrt.fahrten) */
+const CARS = [{ id: 'a', n: 'Kombi', c: 'var(--home)' }, { id: 'b', n: 'Kleinwagen', c: 'var(--sun)' }, { id: 'c', n: 'Elektroauto', c: 'var(--grid)' }];
+const PUR = [['Privat', 'var(--home)'], ['Arbeit', 'var(--grid)'], ['Geschäftlich', 'var(--batt)'], ['Einkauf', 'var(--sun)']];
+const NOW = Date.now(), DAY = 86400000, sod = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const T = [], OPEN = {};
+(function () {
+  const r = rng(11), first = new Date(NOW); first.setDate(1); first.setHours(0, 0, 0, 0);
+  for (let d0 = sod(first.getTime()); d0 <= sod(NOW); d0 += DAY) {
+    const wd = new Date(d0).getDay(), work = wd > 0 && wd < 6, h = (x) => d0 + x * 3600000 + (r() - .5) * 1200000;
+    const plan = work ? [['a', h(7.2), h(17.1), 'Arbeit'], ['b', h(7.75), h(8.2), 'Privat'], ['b', h(16.3), h(17.6), 'Einkauf']]
+      : [['a', h(10), h(11.3), 'Einkauf'], ['b', h(14), h(18.4), 'Privat']];
+    if (wd === 3) plan.push(['b', h(9.5), h(11), 'Geschäftlich']);
+    if (wd === 2 || wd === 4) plan.push(['c', h(9.8), h(11.4), 'Einkauf']);
+    if (wd === 0) plan.push(['c', h(13.5), h(17), 'Privat']);
+    for (const [car, ab, an, z] of plan) {
+      if (ab > NOW) continue;
+      if (an > NOW) { OPEN[car] = ab; continue; }
+      const seen = r() > .82;
+      T.push({ id: T.length + '', car, ab: seen ? null : ab, abFrueh: seen ? ab - 3600000 * (1 + r() * 2) : null, an, min: seen ? null : Math.round((an - ab) / 60000), zweck: z });
+    }
+  }
+  T.sort((x, y) => x.an - y.an);
+  T.slice(-2).forEach(t => (t.zweck = ''));
+})();
+const hm = ts => new Date(ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+const dur = m => m == null ? '' : m >= 60 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : m + ' min';
+const dayLbl = ts => { const d = sod(ts); return d === sod(NOW) ? 'heute' : d === sod(NOW - DAY) ? 'gestern' : new Date(ts).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }); };
+const carOf = id => CARS.find(c => c.id === id);
+const lastHome = id => { const l = T.filter(t => t.car === id).pop(); return l ? l.an : sod(NOW); };
+
+function cars() {
+  $('[data-cars]').innerHTML = CARS.map(c => {
+    const away = OPEN[c.id], since = away || lastHome(c.id), last = T.filter(t => t.car === c.id).pop();
+    return '<div class="car"><span class="ico" style="--c:' + c.c + '"><svg><use href="#i-garage"/></svg></span>' +
+      '<div class="nm">' + c.n + ' <span class="pill ' + (away ? 'warn live' : 'ok') + '">' + (away ? 'unterwegs' : 'zuhause') + '</span></div>' +
+      '<div class="big">seit ' + hm(since) + '<span class="unit"> · ' + dur(Math.round((NOW - since) / 60000)) + '</span></div>' +
+      '<div class="st">' + (last ? 'Letzte Fahrt ' + dayLbl(last.an) + ' ' + (last.ab ? hm(last.ab) : '?') + '–' + hm(last.an) + (last.zweck ? ' · ' + last.zweck : '') : 'noch keine Fahrt') + '</div></div>';
+  }).join('');
+  const weg = CARS.filter(c => OPEN[c.id]), da = CARS.length - weg.length;
+  $('[data-lede]').innerHTML = (weg.length ? weg.map(c => c.n + ' seit <b>' + hm(OPEN[c.id]) + '</b> unterwegs').join(', ') + ', ' : '') +
+    '<b>' + (da === CARS.length ? (weg.length ? 'alle drei' : 'Alle drei') : da) + '</b> ' + (da === 1 ? 'Auto' : 'Autos') + ' zuhause. Heute <b>' + T.filter(t => sod(t.an) === sod(NOW)).length + ' Fahrten</b>.';
+}
+
+function week() {
+  $('[data-legend]').innerHTML = CARS.map(c => '<span><i class="dot" style="--c:' + c.c + '"></i>' + c.n + '</span>').join('') + '<span><i class="dot" style="--c:var(--fg-3)"></i>Abfahrt nicht gesehen: verblasst</span>';
+  let h = '', k = 0;
+  for (let i = 6; i >= 0; i--) {
+    const d0 = sod(NOW - i * DAY), d1 = d0 + DAY, lab = new Date(d0).toLocaleDateString('de-DE', { weekday: 'short' }), dt = new Date(d0).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    h += '<div class="day"><b>' + lab + '</b> ' + dt + '</div><div class="track">';
+    const lane = (car) => car === 'a' ? 'top:3px;bottom:15px' : 'top:15px;bottom:3px';
+    for (const t of T) {
+      if (t.an < d0 || t.an >= d1) continue;
+      const s = t.ab || Math.max(d0, t.abFrueh || d0), l = (s - d0) / DAY * 100, w = Math.max(.6, (t.an - s) / DAY * 100), c = carOf(t.car);
+      h += '<span class="trip' + (t.ab ? '' : ' nostart') + '" style="--k:' + (k++) + ';--c:' + c.c + ';left:' + l + '%;width:' + w + '%;' + lane(t.car) + '" title="' + c.n + ' · ' + (t.ab ? hm(t.ab) : 'nach ' + hm(t.abFrueh)) + '–' + hm(t.an) + (t.zweck ? ' · ' + t.zweck : '') + '"></span>';
+    }
+    if (i === 0) {
+      for (const c of CARS) if (OPEN[c.id]) h += '<span class="trip open" style="--k:' + (k++) + ';--c:' + c.c + ';left:' + ((OPEN[c.id] - d0) / DAY * 100) + '%;width:' + ((NOW - OPEN[c.id]) / DAY * 100) + '%;' + lane(c.id) + '" title="' + c.n + ' unterwegs seit ' + hm(OPEN[c.id]) + '"></span>';
+      h += '<span class="now" style="left:' + ((NOW - d0) / DAY * 100) + '%"></span>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="wticks"><span>0</span><span>3</span><span>6</span><span>9</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>';
+  $('[data-week]').innerHTML = h;
+}
+
+function trips() {
+  const list = T.slice(-8).reverse();
+  $('[data-trips]').innerHTML = list.map(t => {
+    const c = carOf(t.car);
+    return '<li class="' + (t.zweck ? '' : 'offen') + '" data-t="' + t.id + '"><time>' + dayLbl(t.an) + '</time><div><div class="who"><i class="dot" style="--c:' + c.c + '"></i>' + c.n + '</div>' +
+      '<div class="when">' + (t.ab ? hm(t.ab) : '<i>nach ' + hm(t.abFrueh) + '</i>') + ' – ' + hm(t.an) + (t.min != null ? ' · ' + dur(t.min) : ' · Abfahrt nicht gesehen') + '</div></div>' +
+      '<div class="zw" role="group" aria-label="Zweck">' + PUR.map(([p, col]) => '<button type="button" style="--c:' + col + '" aria-pressed="' + (t.zweck === p) + '">' + p + '</button>').join('') + '</div></li>';
+  }).join('');
+  const open = T.filter(t => !t.zweck).length, op = $('[data-open]');
+  op.textContent = open ? open + ' ohne Zweck' : 'alle erfasst'; op.className = 'pill ' + (open ? 'warn' : 'ok');
+}
+$('[data-trips]').addEventListener('click', e => {
+  const b = e.target.closest('.zw button'); if (!b) return;
+  const t = T.find(x => x.id === b.closest('li').dataset.t); t.zweck = b.textContent;
+  trips(); month(); cars(); toast('Zweck gespeichert: ' + t.zweck + ' (Demo)');
+});
+
+function month() {
+  const m0 = new Date(NOW); m0.setDate(1); m0.setHours(0, 0, 0, 0);
+  $('[data-mname]').textContent = m0.toLocaleDateString('de-DE', { month: 'long' });
+  const list = T.filter(t => t.an >= m0.getTime());
+  $('[data-month]').innerHTML = CARS.map(c => {
+    const l = list.filter(t => t.car === c.id), min = l.reduce((s, t) => s + (t.min || 0), 0);
+    const parts = PUR.map(([p, col]) => [l.filter(t => t.zweck === p).length, col, p]).concat([[l.filter(t => !t.zweck).length, 'var(--fg-3)', 'offen']]);
+    return '<div class="row"><div class="hd"><b>' + c.n + '</b><span>' + l.length + ' Fahrten · ' + Math.round(min / 60) + ' h</span></div><div class="stack">' +
+      parts.filter(x => x[0]).map(([n, col, p]) => '<i style="--c:' + col + ';flex-grow:' + n + '" title="' + n + '× ' + p + '"></i>').join('') + '</div></div>';
+  }).join('');
+  $('[data-plegend]').innerHTML = PUR.map(([p, col]) => '<span><i class="dot" style="--c:' + col + '"></i>' + p + '</span>').join('');
+}
+$('[data-csv]').addEventListener('click', () => {
+  const m0 = new Date(NOW); m0.setDate(1); m0.setHours(0, 0, 0, 0);
+  const rows = ['Datum;Fahrzeug;Abfahrt;Ankunft;Dauer (min);Zweck'].concat(T.filter(t => t.an >= m0.getTime()).map(t =>
+    [new Date(t.an).toLocaleDateString('de-DE'), carOf(t.car).n, t.ab ? hm(t.ab) : '', hm(t.an), t.min ?? '', t.zweck].join(';')));
+  const csv = rows.join('\n');
+  (navigator.clipboard ? navigator.clipboard.writeText(csv) : Promise.reject()).then(() => toast('CSV mit ' + (rows.length - 1) + ' Demo-Fahrten kopiert'), () => toast('Kopieren nicht erlaubt · echte CSV per Telegram /fahrtenbuch'));
+});
+
+cars(); week(); trips(); month();
+setInterval(cars, 60000);
+
+/* Tonnen: Kalender für 6 Wochen ab diesem Montag, Restmüll-Leerungen und Gebühr 2026 (Beispielgebühren) */
+const GEB = { rest: { 40: [160, 3], 60: [180, 4.5], 80: [200, 6], 120: [230, 9], 240: [330, 18] }, bio: { 60: 50, 120: 70, 240: 100 } };   // erfundene Beispielwerte: Jahresgebühr inkl. 12 Leerungen, je weitere Leerung
+const MK = 'glashaus.muell';
+const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const MV = (() => {
+  let v = null; try { v = JSON.parse(localStorage.getItem(MK)); } catch (e) {}
+  // Demo: alle bisherigen Abfuhren rausgestellt außer vier
+  const skip = ['01-29', '03-24', '06-02', '08-11'];
+  return Object.assign({ rest: 120, bio: 120, raus: MUELL.rest.filter(d => tageBis(d) < 0).map(iso).filter(x => !skip.includes(x.slice(5))) }, v || {});
+})();
+const saveMV = () => { try { localStorage.setItem(MK, JSON.stringify(MV)); } catch (e) {} };
+const eur = v => de(v, 2) + ' €';
+const restKosten = (L, n) => GEB.rest[L][0] + Math.max(0, n - 12) * GEB.rest[L][1];
+
+function tonnenKal() {
+  const now = new Date(), mo = tag12(now); mo.setDate(mo.getDate() - (mo.getDay() + 6) % 7);
+  let h = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(w => '<span class="wd">' + w + '</span>').join('');
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(mo); d.setDate(mo.getDate() + i);
+    const n = tageBis(d), ts = muellAm(d), psm = MUELL.psm.some(x => +x === +tag12(d));
+    h += '<div class="c' + (n < 0 ? ' past' : '') + (n === 0 ? ' today' : '') + (d.getDate() === 1 || i === 0 ? ' m1' : '') + '" style="--k:' + i + '"><b data-m="' + d.toLocaleDateString('de-DE', { month: 'short' }) + '">' + d.getDate() + '</b>' +
+      ts.map(t => '<i' + (t.k === 'gelb' ? ' class="y"' : '') + ' style="--c:' + t.c + '">' + t.kurz + '</i>').join('') + (psm ? '<i style="--c:var(--crit)">Problemstoffe</i>' : '') + '</div>';
+  }
+  $('[data-cal]').innerHTML = h;
+  $('[data-tlegend]').innerHTML = TONNEN.map(t => '<span title="' + t.takt + '"><i class="dot" style="--c:' + t.c + '"></i>' + t.n + '</span>').join('');
+  const L = TONNEN.map(t => ({ ...t, d: muellNext(t.k) })).filter(t => t.d).sort((a, b) => a.d - b.d), nx = L[0];
+  const tp = $('[data-tnext]');
+  if (nx) { const n = tageBis(nx.d), w = L.filter(t => +t.d === +nx.d).map(t => t.n).join(' + ');
+    tp.className = 'pill ' + (n <= 1 ? 'warn live' : 'info'); tp.textContent = (n === 1 ? 'Heute Abend rausstellen: ' : inTagen(n)[0].toUpperCase() + inTagen(n).slice(1) + ': ') + w; }
+  const ps = MUELL.psm.filter(d => tageBis(d) >= 0);
+  $('[data-psm]').textContent = 'Tonnen bis 6 Uhr an die Straße. Ansage am Vorabend um 18 Uhr auf beiden Echos und per Telegram. Problemstoffmobil in der Stadt: ' +
+    (ps.length ? ps.map(fmtTag).join(', ') : MUELL.psm.map(fmtTag).join(' und ') + ' (vorbei, Termine ' + (MUELL_Y + 1) + ' folgen mit dem neuen Kalender)') + '.';
+}
+
+function tonnenGeb() {
+  const vorbei = MUELL.rest.filter(d => tageBis(d) < 0), m = vorbei.filter(d => MV.raus.includes(iso(d))).length;
+  const hoch = vorbei.length ? Math.round(m / vorbei.length * MUELL.rest.length) : 0;
+  $('[data-gjahr]').textContent = MUELL_Y;
+  ring($('[data-lring]'), m / 12, m + '/12');
+  $('[data-lnum]').textContent = m + ' Leerungen bisher' + (m > 12 ? ' · ' + (m - 12) + ' extra' : '');
+  $('[data-leer]').innerHTML = vorbei.map(d => '<button type="button" data-raus="' + iso(d) + '" aria-pressed="' + MV.raus.includes(iso(d)) + '" title="' + fmtTag(d) + '">' + d.getDate() + '</button>').join('');
+  [['rest', [40, 60, 80, 120, 240]], ['bio', [60, 120, 240]]].forEach(([k, sz]) => {
+    $('[data-size="' + k + '"]').innerHTML = sz.map(l => '<button type="button" data-l="' + l + '" aria-pressed="' + (MV[k] === l) + '" style="--c:var(--bin-' + k + ')">' + l + '</button>').join(''); });
+  const L = MV.rest, rest = restKosten(L, hoch), bio = GEB.bio[MV.bio];
+  $('[data-geb]').innerHTML = '<dt>Extra bisher (' + Math.max(0, m - 12) + ' × ' + eur(GEB.rest[L][1]) + ')</dt><dd>' + eur(Math.max(0, m - 12) * GEB.rest[L][1]) + '</dd>' +
+    '<dt>Hochrechnung ' + MUELL_Y + ': ' + hoch + ' Leerungen</dt><dd>' + eur(rest) + '</dd><dt>Biotonne ' + MV.bio + ' L (alle Leerungen)</dt><dd>' + eur(bio) + '</dd>' +
+    '<dt><b>Müll im Jahr</b></dt><dd><b>' + eur(rest + bio) + '</b></dd>';
+  // Gleiche Menge in einer anderen Tonnengröße (volle Tonnen angenommen); mehr Leerungen als Abfuhrtermine gehen nicht
+  const alt = Object.keys(GEB.rest).map(Number).filter(s => s !== L).map(s => ({ s, n: Math.ceil(hoch * L / s) })).filter(a => a.n <= MUELL.rest.length)
+    .map(a => ({ ...a, k: restKosten(a.s, a.n) })).sort((a, b) => a.k - b.k)[0];
+  const tip = $('[data-tip]'); tip.hidden = !hoch;
+  if (alt && alt.k < rest - 5) { tip.className = 'tip'; tip.innerHTML = 'Bei voller Tonne wäre eine <b>' + alt.s + '-L-Tonne</b> mit ' + alt.n + ' Leerungen günstiger: ' + eur(alt.k) + ', also <b>' + eur(rest - alt.k) + '</b> weniger im Jahr.'; }
+  else if (hoch < 12) { tip.className = 'tip warn'; tip.innerHTML = 'Nur ' + hoch + ' von 12 bezahlten Leerungen genutzt. Nicht genutzte Pflichtleerungen werden nicht erstattet.'; }
+  else { tip.className = 'tip'; tip.innerHTML = 'Die ' + L + '-L-Tonne passt: Eine andere Größe wäre bei dieser Menge nicht günstiger.'; }
+}
+document.addEventListener('click', e => {
+  const r = e.target.closest('[data-raus]');
+  if (r) { const d = r.dataset.raus; MV.raus = MV.raus.includes(d) ? MV.raus.filter(x => x !== d) : MV.raus.concat(d).sort(); saveMV(); tonnenGeb(); toast(MV.raus.includes(d) ? 'Restmüll ' + fmtTag(new Date(d + 'T12:00')) + ' rausgestellt' : 'Leerung entfernt'); return; }
+  const s = e.target.closest('[data-size] button');
+  if (s) { MV[s.parentNode.dataset.size] = +s.dataset.l; saveMV(); tonnenGeb(); }
+});
+tonnenKal(); tonnenGeb(); setInterval(tonnenKal, 60000);
+</script>

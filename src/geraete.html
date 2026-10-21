@@ -1,0 +1,584 @@
+<meta charset="utf-8">
+<title>Glashaus Geräte</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-moz-range-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow);transition:transform .3s var(--spring)}
+.slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--fg);border:3px solid var(--bg)}
+.slider:active::-webkit-slider-thumb{transform:scale(1.25)}
+.code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all}
+
+.code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all}
+/* Waschmaschine · Hisense 12 kg */
+:root{--wm-body:#2c2d30;--wm-body2:#1d1e21;--wm-top:#0f1012;--wm-ring:#f2f2ef;--wm-glass:#0a0b0c}
+.wm{display:grid;grid-template-columns:230px minmax(0,1fr) minmax(0,250px);gap:30px;align-items:center}
+@media (max-width:1060px){.wm{grid-template-columns:200px minmax(0,1fr)}.wm-side{grid-column:1/-1}}
+@media (max-width:640px){.wm{grid-template-columns:minmax(0,1fr)}.wm-fig{justify-self:center}}
+.wm-fig{width:230px;max-width:100%}
+.wm-fig svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 22px 26px var(--shadow))}
+.wm-fig.shake svg{animation:shake .11s linear infinite}
+@keyframes shake{25%{transform:translate(.6px,-.4px)}50%{transform:translate(-.5px,.3px)}75%{transform:translate(.4px,.5px)}}
+.wm .laundry.blur{filter:blur(1.4px)}
+.wm .wave{animation:wmw 2.6s linear infinite}
+.wm .wave2{animation-duration:4.1s;animation-direction:reverse;opacity:.5}
+@keyframes wmw{to{transform:translateX(40px)}}
+.wm .water{transition:transform 2.4s var(--ease)}
+.wm .foam{transition:opacity 1.5s}
+.wm .foam circle{animation:bob 1.8s ease-in-out infinite alternate}
+.wm .foam circle:nth-child(2n){animation-delay:.6s}.wm .foam circle:nth-child(3n){animation-delay:1.1s}
+@keyframes bob{to{transform:translateY(-2.5px)}}
+.wm .knob{transition:transform 1.2s var(--spring);transform-box:fill-box;transform-origin:center}
+.wm .door{transition:transform 1.4s var(--spring);transform-box:view-box;transform-origin:20px 178px}
+.wm[data-state="open"] .door{transform:scaleX(.18) skewY(-6deg)}
+.wm[data-state="done"] .ringglow{opacity:1;animation:rglow 2s ease-in-out infinite}
+.wm .ringglow{opacity:0;transition:opacity .6s}
+@keyframes rglow{50%{opacity:.35}}
+.wm-prog{font-size:clamp(26px,2.6vw,36px);font-weight:500;letter-spacing:-.035em;line-height:1.05;margin:6px 0 2px}
+.wm-rest{font-size:clamp(46px,5vw,64px);line-height:1;margin:10px 0 18px}
+.wm-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.phases{display:flex;gap:6px;margin-bottom:18px}
+.ph{min-width:0}
+.ph i{display:block;height:6px;border-radius:3px;background:var(--track);overflow:hidden;position:relative}
+.ph i::after{content:"";position:absolute;inset:0;width:var(--f,0%);background:var(--home);border-radius:3px;transition:width .9s var(--ease)}
+.ph.cur i::after{background:linear-gradient(90deg,var(--home),color-mix(in srgb,var(--home) 60%,#fff));}
+.ph span{display:block;font-size:12px;color:var(--fg-3);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph.cur span{color:var(--fg);font-weight:550}
+.ph.done span{color:var(--fg-2)}
+.wm .chips2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip2{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:99px;font-size:12.5px;background:var(--track);color:var(--fg-2)}
+.chip2 b{color:var(--fg);font-weight:550;margin-right:4px}
+.sunline{font-size:13px;color:var(--fg-2);margin:0 0 14px}
+.sunline b{color:var(--sun);font-weight:600}
+.wm-side h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2);margin:0 0 10px;font-weight:550}
+.dose{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:13px;margin-bottom:10px}
+.dose svg{width:16px;height:16px;color:var(--c)}
+.dose i{grid-column:2/4;height:4px;border-radius:2px;background:var(--track);position:relative;overflow:hidden}
+.dose i::after{content:"";position:absolute;inset:0;width:var(--f);background:var(--c);border-radius:2px}
+.dose b{font-weight:550;font-variant-numeric:tabular-nums}
+.wm-side .kv{margin-top:6px}
+.wm-drum{display:flex;align-items:center;gap:12px;margin:14px 0}
+.wm-drum .ring{--sz:52px}
+.wm-drum .ring b{font-size:12px}
+.wm-drum small{font-size:12.5px;color:var(--fg-2);line-height:1.3}
+/* Trockner · Bosch WTX87M Serie 8 */
+:root{--dr-body:#f6f6f4;--dr-body2:#e3e4e2;--dr-chrome1:#ffffff;--dr-chrome2:#9da1a6}
+.dr .door{transform-origin:24px 152px}
+.dr .warm{transition:opacity 1.6s,fill 1.6s}
+.dr .steam circle{animation:steam 3.2s ease-in infinite}
+@keyframes steam{0%{transform:translateY(0);opacity:0}25%{opacity:.7}100%{transform:translateY(-46px);opacity:0}}
+.dr .steam{transition:opacity 1.5s}
+.target{margin:2px 0 18px}
+.ttrack{position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,color-mix(in srgb,var(--cool) 60%,transparent),color-mix(in srgb,var(--sun) 60%,transparent));margin:8px 8px 10px}
+.tmark{position:absolute;top:-4px;width:2px;height:14px;margin-left:-1px;background:var(--fg);border-radius:1px}
+.tdot{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow);transition:left .9s var(--ease)}
+.tscale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--fg-3)}
+.tscale b{color:var(--fg);font-weight:550}
+.tank2{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.tank2 .tk{width:34px;height:46px;border-radius:7px;background:var(--track);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--stroke);flex:none}
+.tank2 .tk i{position:absolute;left:0;right:0;bottom:0;height:var(--f,0%);background:color-mix(in srgb,var(--cool) 70%,transparent);transition:height 1s var(--ease)}
+.tank2 small{font-size:12.5px;color:var(--fg-2);line-height:1.35}
+.tank2 b{color:var(--fg);font-weight:550}
+/* Spülmaschine · Siemens iQ700 vollintegriert (SN87YX) */
+:root{--sp-front:#ece7de;--sp-tub1:#e7e9ec;--sp-tub2:#b9bec4;--sp-wood:#c9b28f;--sp-plinth:#2d2e30}
+.sp .front{opacity:.16;transition:opacity 1.1s var(--ease)}
+.sp[data-view="front"] .front{opacity:.97}
+.sp .dishes{transition:opacity 1.2s var(--ease),transform 1.2s var(--ease)}
+.sp[data-state="idle"] .dishes{opacity:0;transform:translateY(-8px)}
+.sp .heat{transition:opacity 1.6s}
+.sp .steam circle{animation:steam 3s ease-in infinite}
+.sp .tl{transition:opacity .8s}
+.sp .tlglow{animation:tlg 3s ease-in-out infinite}
+@keyframes tlg{50%{opacity:.55}}
+.sp .drops{transition:opacity 2s}
+.sp .ph{min-width:62px}
+.sp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:8px}
+.sp-oma{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--track);font-size:12.5px;color:var(--fg-2);line-height:1.35}
+.sp-oma b{color:var(--fg);font-weight:550}
+/* Alexa */
+.echo{padding:12px 0;border-bottom:1px solid var(--track)}
+.echo:last-of-type{border-bottom:0}
+.echo-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.echo-h b{font-weight:550}
+.eq{display:inline-flex;gap:3px;align-items:flex-end;height:18px;margin-left:8px;vertical-align:middle}
+.eq i{width:3px;height:4px;border-radius:2px;background:var(--fg-3);transition:background .3s}
+.echo.talk .eq i{background:var(--home);animation:eq .5s ease-in-out infinite alternate;animation-delay:calc(var(--k)*90ms)}
+@keyframes eq{to{height:18px}}
+.vol{display:grid;grid-template-columns:auto minmax(0,1fr) 3ch;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.vol svg{width:18px;height:18px;color:var(--fg-2)}
+.profile{margin-top:12px;font-size:12.5px;color:var(--fg-2)}
+.profile b{color:var(--fg);font-weight:550}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">geräte</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="#" aria-current="page">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">Hausgeräte · Ansagen · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span>Waschen, trocknen, spülen,</span><span class="it">das Haus sagt Bescheid.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-lede>Waschmaschine, Trockner und Spülmaschine im Blick.</p>
+      <div class="ctas">
+        <a class="ink" href="#wm">Zu den Geräten <svg><use href="#i-arrow"/></svg></a>
+        <a class="uline" href="#echos">Zu den Echos <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-12 wm" id="wm" style="--i:3" data-state="run">
+    <div class="wm-fig" id="wmfig"><svg id="wmsvg" viewBox="0 0 220 312" role="img" aria-label="Hisense Waschmaschine 12 kg mit Blick in die Trommel"></svg></div>
+    <div class="wm-info">
+      <div class="wm-top"><span class="ico" style="--c:var(--home)"><svg><use href="#i-washer"/></svg></span><span class="eyebrow" style="margin:0" data-wsub>Hisense · ConnectLife</span><span class="pill info live" data-wpill>Läuft</span></div>
+      <div class="wm-prog"><span data-wprog>Baumwolle</span> <span class="it">40 °C</span></div>
+      <div class="num wm-rest"><span data-wrest>0:42</span><span class="unit" data-wrunit>h verbleibend</span></div>
+      <div class="phases" data-phases></div>
+      <div class="chips2"><span class="chip2"><b>1400</b>U/min</span><span class="chip2"><b>AutoDose</b>an</span><span class="chip2"><b>Extra Spülen</b>aus</span><span class="chip2"><b>Kindersicherung</b>an</span></div>
+      <p class="sunline" data-wsun></p>
+      <div class="btns"><button class="btn" type="button" data-wplay><svg><use href="#i-play"/></svg><span>Zeitraffer</span></button><button class="btn" type="button" data-wdoor hidden>Tür öffnen</button></div>
+    </div>
+    <div class="wm-side">
+      <h3>AutoDose</h3>
+      <div class="dose" style="--c:var(--home);--f:62%"><svg><use href="#i-drop"/></svg><span>Waschmittel</span><b>620 ml</b><i></i></div>
+      <div class="dose" style="--c:var(--grid);--f:18%"><svg><use href="#i-drop"/></svg><span>Weichspüler</span><b>180 ml</b><i></i></div>
+      <div class="wm-drum"><div class="ring" id="r-drum" style="--c:var(--warn)"></div><small>Trommelreinigung<br>fällig nach 30 Wäschen</small></div>
+      <h3>Oktober</h3>
+      <dl class="kv"><dt>Waschgänge</dt><dd>14</dd><dt>Strom</dt><dd>6,8 kWh</dd><dt>Wasser</dt><dd>612 l</dd><dt>Kosten</dt><dd>2,38 €</dd></dl>
+    </div>
+  </article>
+
+  <article class="glass tile s-12 wm dr" id="dr" style="--i:4" data-state="run">
+    <div class="wm-fig" id="drfig"><svg id="drsvg" viewBox="0 0 220 300" role="img" aria-label="Bosch Wärmepumpentrockner Serie 8 mit Blick in die Edelstahltrommel"></svg></div>
+    <div class="wm-info">
+      <div class="wm-top"><span class="ico" style="--c:var(--heat)"><svg><use href="#i-dryer"/></svg></span><span class="eyebrow" style="margin:0" data-dsub>Bosch · Home Connect</span><span class="pill info live" data-dpill>Trocknen</span></div>
+      <div class="wm-prog"><span>Baumwolle</span> <span class="it">schranktrocken</span></div>
+      <div class="num wm-rest"><span data-drest>1:25</span><span class="unit" data-drunit>h verbleibend</span></div>
+      <div class="phases" data-dphases></div>
+      <div class="target" aria-label="Trocknungsziel schranktrocken">
+        <div class="ttrack"><span class="tmark" style="left:60%"></span><span class="tdot" data-tdot style="left:0%"></span></div>
+        <div class="tscale"><span>nass</span><span>bügeltrocken</span><b>schranktrocken</b><span>plus</span><span>extra</span></div>
+      </div>
+      <p class="sunline" data-dsun></p>
+      <div class="btns"><button class="btn" type="button" data-dplay><svg><use href="#i-play"/></svg><span>Zeitraffer</span></button><button class="btn" type="button" data-ddoor hidden>Tür öffnen</button></div>
+    </div>
+    <div class="wm-side">
+      <h3>Wärmepumpe</h3>
+      <div class="tank2"><span class="tk"><i data-dtank></i></span><small>Kondenswasser bisher<br><b data-dwater>–</b> · geschätzt</small></div>
+      <dl class="kv"><dt>Fortschritt</dt><dd data-dpct>–</dd><dt>Tür</dt><dd data-ddoorst>geschlossen</dd><dt>AutoClean</dt><dd>aktiv</dd></dl>
+      <hr class="sep">
+      <h3>Ansage</h3>
+      <p class="small muted" style="margin:0">Echo Küche bei Trocknungsende. Bleibt die Tür 45 min zu, kommt eine Erinnerung. Zwischen 23 und 7 Uhr wird die Ansage um 7:00 nachgeholt.</p>
+    </div>
+  </article>
+
+  <article class="glass tile s-12 wm sp" id="sp" style="--i:4" data-state="run" data-view="inside">
+    <div class="wm-fig" id="spfig"><svg id="spsvg" viewBox="0 0 220 300" role="img" aria-label="Vollintegrierte Spülmaschine im Röntgenblick mit Körben, Sprüharmen und timeLight-Anzeige am Boden"></svg></div>
+    <div class="wm-info">
+      <div class="wm-top"><span class="ico" style="--c:var(--cool)"><svg><use href="#i-dish"/></svg></span><span class="eyebrow" style="margin:0" data-ssub>Siemens iQ700 · Home Connect</span><span class="pill info live" data-spill>Reinigen</span></div>
+      <div class="wm-prog"><span>Eco</span> <span class="it">50 °C</span></div>
+      <div class="num wm-rest"><span data-srest>0:48</span><span class="unit" data-srunit>h verbleibend</span></div>
+      <div class="phases" data-sphases></div>
+      <p class="sunline" data-ssun></p>
+      <div class="btns"><button class="btn" type="button" data-splay><svg><use href="#i-play"/></svg><span>Zeitraffer</span></button><button class="btn" type="button" data-sview>Front zeigen</button><button class="btn" type="button" data-sout hidden>Ausgeräumt</button></div>
+    </div>
+    <div class="wm-side">
+      <h3>Pflegemittel</h3>
+      <div class="dose" style="--c:var(--cool);--f:24%"><svg><use href="#i-drop"/></svg><span>Klarspüler</span><b>bald nachfüllen</b><i></i></div>
+      <p class="small muted" style="margin:0 0 14px">Meldung über <code>RinseAidNearlyEmpty</code>. Einen Salzstand meldet dieses Modell nicht.</p>
+      <dl class="kv"><dt>Fortschritt</dt><dd data-spct>–</dd><dt>Trocknung</dt><dd>Zeolith</dd><dt>Ansage</dt><dd>Echo Küche</dd></dl>
+      <div class="sp-oma"><b>Spülmaschine bei Opa</b> · Siemens SN63HX<br>Seit 2022 nicht mit Home Connect verbunden, deshalb noch keine Werte.</div>
+    </div>
+  </article>
+
+  <article class="glass tile s-12" id="echos" style="--i:6">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-speaker"/></svg></span>Ansagen</h2><span class="small muted">alexa2</span></div>
+    <div class="echo" data-echo="0"><div class="echo-h"><b>Echo Küche <span class="eq"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i></span></b><button class="btn" type="button" data-test>Testansage</button></div>
+      <div class="vol"><svg><use href="#i-speaker"/></svg><input class="slider" type="range" min="0" max="100" value="40" aria-label="Lautstärke Echo Küche"><span data-vv>40</span></div></div>
+    <div class="echo" data-echo="1"><div class="echo-h"><b>Echo Opa <span class="eq"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i></span></b><button class="btn" type="button" data-test>Testansage</button></div>
+      <div class="vol"><svg><use href="#i-speaker"/></svg><input class="slider" type="range" min="0" max="100" value="40" aria-label="Lautstärke Echo Opa"><span data-vv>40</span></div></div>
+    <p class="profile" data-profile>Profil: 10:00 → 40 · 20:00 → 20</p>
+  </article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Hausgeräte, Echos</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Widget → Datenpunkt</h3>
+        <div class="tbl"><table>
+          <tr><th>Widget</th><th>Datenpunkt</th><th>Hinweis</th></tr>
+          <tr><td>Waschmaschine</td><td><code>0_userdata.0.connectlife.waschmaschine.*</code></td><td>Script ConnectLife_Waschmaschine; Energy_estimate ist %, nicht kWh</td></tr>
+          <tr><td>Trockner</td><td><code>homeconnect.0.*</code> (Bosch WTX87M)</td><td>Fertig-Ansage per Script Hausgeraete_Ansagen</td></tr>
+          <tr><td>Spülmaschine</td><td><code>homeconnect.0.*</code> (Siemens SN87YX)</td><td>Klarspüler: <code>RinseAidNearlyEmpty</code></td></tr>
+          <tr><td>Echo Küche</td><td><code>alexa2.0.Echo-Devices.G0RJ59EB7RV83LRC</code></td><td>Commands.speak-volume</td></tr>
+          <tr><td>Echo Opa</td><td><code>alexa2.1.Echo-Devices.G0N9KPF7GM177HYX</code></td><td>Commands.speak-volume</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <h3>Projekt-CSS</h3>
+        <p>Dasselbe Projekt-CSS wie in der Ansicht Zuhause. Die Gerätebilder sind Inline-SVG und laufen in einem HTML-Widget.</p>
+
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Entwurf für ioBroker VIS 2 · Alle Werte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('geraete');
+const setP=el=>el.style.setProperty('--p',(el.value-el.min)/(el.max-el.min)*100+'%');
+$$('.slider').forEach(setP);document.addEventListener('input',e=>{if(e.target.classList.contains('slider'))setP(e.target)});
+
+/* Waschmaschine: Hisense 12 kg, Demo-Programm Baumwolle 40 °C · 130 min */
+const WM=(function(){
+  const wm=$('#wm'),svg=$('#wmsvg'),CX=110,CY=178,RG=72;
+  const PH=[['Waschen',70],['Spülen',40],['Schleudern',20]],TOTAL=130;
+  let el=88*60,speed=1,state='run';
+  /* Gerät zeichnen */
+  let holes='';for(const[r,n]of[[58,30],[47,24],[36,18]])for(let i=0;i<n;i++){const a=i/n*Math.PI*2;holes+='<circle cx="'+(CX+r*Math.cos(a)).toFixed(1)+'" cy="'+(CY+r*Math.sin(a)).toFixed(1)+'" r="1.5"/>'}
+  const lift='<path d="M'+CX+','+(CY-66)+' l-7,13 q7,5 14,0 Z" fill="#2a2b2e"/>';
+  const cloth=['M-11,-6 C-5,-13 8,-11 12,-3 C14,6 4,12 -5,10 C-12,8 -15,0 -11,-6Z','M-9,-8 C0,-12 11,-6 10,2 C9,10 -2,12 -8,6 C-13,1 -14,-5 -9,-8Z','M-13,-3 C-8,-10 6,-9 12,-4 C15,2 9,9 0,8 C-8,9 -15,4 -13,-3Z'];
+  const cols=['#5f7fae','#d8c7a4','#9aa0a8','#b0604f','#e9e6df','#6b8f72'];
+  let laundry='';for(let i=0;i<6;i++)laundry+='<path data-c="'+i+'" d="'+cloth[i%3]+'" fill="'+cols[i]+'" opacity=".92"/>';
+  let wave='M'+(CX-RG-80)+',0';for(let x=0;x<2*RG+160;x+=20)wave+=' q5,-3 10,0 t10,0';wave+=' V'+(2*RG+20)+' H'+(CX-RG-80)+'Z';
+  let foam='';for(let i=0;i<14;i++)foam+='<circle cx="'+(CX-50+i*7.5+(i%3)*2)+'" cy="'+(-2-(i%4)*2.2)+'" r="'+(2+(i*7%5)*.7)+'" fill="#fff" opacity=".8"/>';
+  svg.innerHTML='<defs><linearGradient id="wmB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--wm-body)"/><stop offset="1" stop-color="var(--wm-body2)"/></linearGradient>'+
+    '<radialGradient id="wmK" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fbfbfb"/><stop offset=".5" stop-color="#b9bcc0"/><stop offset="1" stop-color="#6e7277"/></radialGradient>'+
+    '<radialGradient id="wmG" cx=".5" cy=".5" r=".5"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>'+
+    '<clipPath id="wmC"><circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'"/></clipPath></defs>'+
+    '<rect x="24" y="306" width="14" height="6" rx="2" fill="#111"/><rect x="182" y="306" width="14" height="6" rx="2" fill="#111"/>'+
+    '<rect x="0" y="0" width="220" height="308" rx="7" fill="url(#wmB)" stroke="rgba(255,255,255,.07)"/>'+
+    '<rect x="0" y="0" width="220" height="34" rx="7" fill="var(--wm-top)"/><rect x="0" y="27" width="220" height="7" fill="var(--wm-top)"/>'+
+    '<line x1="74" y1="0" x2="74" y2="34" stroke="rgba(255,255,255,.06)"/><line x1="0" y1="34.5" x2="220" y2="34.5" stroke="rgba(255,255,255,.12)"/>'+
+    '<text x="12" y="14" font-size="8.5" font-weight="700" fill="#fff" font-family="var(--font)" letter-spacing="-.2">Hisense</text>'+
+    '<text x="12" y="25" font-size="3.6" fill="#b9bbbe" font-family="var(--font)">ConnectLife   Steam   12kg</text>'+
+    '<rect x="10" y="37" width="52" height="14" rx="2" fill="#141517"/><rect x="14" y="39" width="44" height="3" rx="1" fill="#26272a"/>'+
+    '<g class="knob" id="wmknob"><circle cx="98" cy="16" r="11.5" fill="url(#wmK)"/><path d="M98 6v4" stroke="#55595e" stroke-width="1.2" stroke-linecap="round"/></g>'+
+    '<g font-family="var(--font)"><text x="132" y="10" font-size="3.4" fill="#7c7f84">Sportkleidung</text>'+
+    '<rect x="129" y="13.3" width=".9" height="5.4" fill="#4fd1c5"/><text x="132" y="18" font-size="5.6" fill="#fff" data-dprog>Baumwolle</text>'+
+    '<text x="132" y="24.5" font-size="3.4" fill="#7c7f84">Jeans</text>'+
+    '<text x="190" y="18" font-size="6" font-weight="600" fill="#fff" text-anchor="end" data-dtime>0:42</text>'+
+    '<text x="190" y="9" font-size="3" fill="#7c7f84" text-anchor="end" data-dclock>12:00</text></g>'+
+    '<circle cx="207" cy="11" r="3.2" fill="none" stroke="#c9cbce" stroke-width=".8"/><path d="M205.6 21.5l3 2-3 2z" fill="#c9cbce"/>'+
+    '<circle cx="185" cy="283" r="17" fill="none" stroke="rgba(255,255,255,.1)"/>'+
+    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="92" fill="#232427" stroke="var(--wm-ring)" stroke-width="1.8"/>'+
+    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="92" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
+    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+6)+'" fill="#151618"/>'+
+    '<g clip-path="url(#wmC)"><rect x="'+(CX-RG)+'" y="'+(CY-RG)+'" width="'+2*RG+'" height="'+2*RG+'" fill="var(--wm-glass)"/>'+
+      '<g id="wmdrum"><circle cx="'+CX+'" cy="'+CY+'" r="66" fill="#1b1c1f"/><g fill="#0d0e10">'+holes+'</g><circle cx="'+CX+'" cy="'+CY+'" r="14" fill="#232427"/>'+
+        lift+'<g transform="rotate(120 '+CX+' '+CY+')">'+lift+'</g><g transform="rotate(240 '+CX+' '+CY+')">'+lift+'</g></g>'+
+      '<g class="laundry" id="wmlaundry">'+laundry+'</g>'+
+      '<g class="water" id="wmwater" style="transform:translateY('+(CY+RG+4)+'px)"><g class="foam" id="wmfoam">'+foam+'</g>'+
+        '<path class="wave wave2" d="'+wave+'" fill="rgba(120,175,225,.28)"/><path class="wave" d="'+wave+'" fill="rgba(140,190,235,.32)"/></g>'+
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="url(#wmG)"/>'+
+      '<path d="M'+(CX-52)+','+(CY-34)+' A62,62 0 0 1 '+(CX+14)+','+(CY-62)+'" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="5" stroke-linecap="round"/></g></g>';
+  /* Phasenleiste */
+  $('[data-phases]').innerHTML=PH.map(([n,m],i)=>'<div class="ph" data-i="'+i+'" style="flex:'+m+'"><i></i><span>'+n+'</span></div>').join('')+'<div class="ph" data-i="3" style="flex:12"><i></i><span>Fertig</span></div>';
+  const drum=$('#wmdrum'),water=$('#wmwater'),foamG=$('#wmfoam'),lG=$('#wmlaundry'),items=[...lG.children],fig=$('#wmfig');
+  const phaseAt=m=>{let acc=0;for(let i=0;i<PH.length;i++){if(m<acc+PH[i][1])return{i,f:(m-acc)/PH[i][1]};acc+=PH[i][1]}return{i:3,f:1}};
+  const fmt=s=>Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');
+  let mode='still';
+  function ui(){
+    const m=el/60,p=phaseAt(m),rest=Math.max(0,TOTAL*60-el);
+    mode=state!=='run'?'still':['wash','rinse','spin','still'][p.i];
+    $$('.ph',wm).forEach((x,i)=>{x.classList.toggle('cur',i===p.i&&state==='run');x.classList.toggle('done',i<p.i);x.style.setProperty('--f',(i<p.i?100:i===p.i?p.f*100:0)+'%')});
+    $('[data-wrest]').textContent=state==='run'?fmt(rest):'0:00';
+    $('[data-wrunit]').textContent=state==='run'?'h verbleibend':state==='done'?'fertig':'Tür offen';
+    $('[data-dtime]').textContent=state==='run'?fmt(rest):'Ende';
+    $('[data-dclock]').textContent=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    const pill=$('[data-wpill]');
+    pill.className='pill '+(state==='run'?'info live':state==='done'?'ok live':'idle');
+    pill.textContent=state==='run'?PH[Math.min(2,p.i)][0]:state==='done'?'Fertig · bitte ausräumen':'Wäsche entnommen';
+    const end=new Date(Date.now()+rest*1000/Math.max(1,speed));
+    $('[data-wsub]').textContent=state==='run'?'Fertig um '+end.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'Hisense · ConnectLife';
+    $('[data-wdoor]').hidden=state!=='done';
+    const s=D[nowIdx()],cover=Math.min(100,Math.round(100*Math.max(0,s.pv+Math.max(0,-s.batt))/Math.max(.01,s.home)));
+    $('[data-wsun]').innerHTML=state!=='run'?'Letzter Waschgang: Baumwolle 40 °C · 0,46 kWh · 48 l · 0,16 €':
+      s.pv>.3?'Läuft gerade zu <b>'+cover+' %</b> mit Sonnen- und Batteriestrom.':s.batt<-.05?'Läuft gerade aus der <b>Batterie</b>.':'Läuft gerade mit Netzstrom.';
+    wm.dataset.state=state;
+  }
+  function tick(){
+    if(state!=='run')return ui();
+    el+=speed;
+    if(el>=TOTAL*60){el=TOTAL*60;state='done';speed=1;stopPlay();toast('Ansage auf Echo Küche: „Die Waschmaschine ist fertig.“')}
+    ui();
+  }
+  /* Trommel, Wäsche, Wasser */
+  let a=0,v=0,blend=0,lvl=0,t0=performance.now(),last=t0;
+  const LV={wash:.36,rinse:.44,spin:.02,still:0};
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000;
+    let vt=0;
+    if(mode==='wash')vt=150*Math.cos(t*.9);else if(mode==='rinse')vt=110*Math.cos(t*.7);else if(mode==='spin')vt=1500;
+    if(RM)vt=0;
+    v+=(vt-v)*Math.min(1,dt*(mode==='spin'?.8:2.5));a=(a+v*dt)%360;
+    drum.setAttribute('transform','rotate('+a.toFixed(1)+' '+CX+' '+CY+')');
+    const press=mode==='spin'&&v>500?1:0;blend+=(press-blend)*Math.min(1,dt*2);
+    items.forEach((it,i)=>{const off=i/items.length;
+      const th1=Math.PI/2+(off-.5)*1.6+.35*Math.sin(t*1.6+i*1.7)+v/700,r1=36+9*Math.sin(t*1.3+i*2.3);
+      const th2=a*Math.PI/180+off*Math.PI*2,r2=56;
+      const th=th1+(th2-th1)*blend,r=r1+(r2-r1)*blend;
+      it.setAttribute('transform','translate('+(CX+r*Math.cos(th)).toFixed(1)+' '+(CY+r*Math.sin(th)).toFixed(1)+') rotate('+((th*57.3+t*30*(1-blend))%360).toFixed(0)+')')});
+    lG.classList.toggle('blur',v>700);fig.classList.toggle('shake',v>1000&&!RM);
+    const lt=state==='open'?0:LV[mode];lvl+=(lt-lvl)*Math.min(1,dt*.8);
+    water.style.transform='translateY('+(CY+RG+4-lvl*2*RG).toFixed(1)+'px)';
+    foamG.style.opacity=mode==='wash'?1:0;
+    requestAnimationFrame(frame);
+  }
+  /* Zeitraffer und Tür */
+  let pt=0;
+  const playBtn=$('[data-wplay]');
+  function stopPlay(){clearInterval(pt);pt=0;playBtn.querySelector('span').textContent='Zeitraffer';playBtn.querySelector('use').setAttribute('href','#i-play')}
+  playBtn.addEventListener('click',()=>{if(pt){stopPlay();speed=1;return}
+    if(state!=='run'){state='run';el=0}speed=1;
+    $('#wmknob').style.transform='rotate('+(Math.random()*120+60).toFixed(0)+'deg)';
+    playBtn.querySelector('span').textContent='Stopp';playBtn.querySelector('use').setAttribute('href','#i-pause');
+    pt=setInterval(()=>{el+=12;if(el>=TOTAL*60){el=TOTAL*60-1}tick()},50)});
+  $('[data-wdoor]').addEventListener('click',()=>{state='open';ui();toast('Tür offen · Wäsche entnommen');setTimeout(()=>{state='idle';ui()},3500)});
+  ring($('#r-drum'),12/30,'12/30');
+  ui();setInterval(tick,1000);requestAnimationFrame(frame);
+  return{summary:()=>state==='run'?'Waschmaschine noch <b>'+Math.ceil((TOTAL*60-el)/60)+' min</b>':state==='done'?'Waschmaschine <b>fertig</b>':'Waschmaschine <b>leer</b>'};
+})();
+
+/* Trockner: Bosch WTX87M, Demo-Programm Baumwolle schranktrocken · 145 min */
+const DR=(function(){
+  const box=$('#dr'),svg=$('#drsvg'),CX=110,CY=152,RG=66;
+  const PH=[['Trocknen',125],['Abkühlen',20]],TOTAL=145;
+  let el=60*60,state='run',crease=0;
+  let holes='';for(let x=-60;x<=60;x+=6.5)for(let y=-60;y<=60;y+=6.5){if(x*x+y*y<60*60&&x*x+y*y>13*13)holes+='<circle cx="'+(CX+x+((Math.round(y/6.5)%2)?3.2:0)).toFixed(1)+'" cy="'+(CY+y).toFixed(1)+'" r="1.3"/>'}
+  let ribs='';for(let i=0;i<4;i++){const a=i*Math.PI/2+.3,p=(r,d)=>(CX+r*Math.cos(a+d)).toFixed(1)+','+(CY+r*Math.sin(a+d)).toFixed(1);
+    ribs+='<polygon points="'+p(11,-.5)+' '+p(64,-.1)+' '+p(64,.1)+' '+p(11,.5)+'" fill="url(#drR)" stroke="#9fa3a8" stroke-width=".6"/>'}
+  const cloth=['M-11,-6 C-5,-13 8,-11 12,-3 C14,6 4,12 -5,10 C-12,8 -15,0 -11,-6Z','M-9,-8 C0,-12 11,-6 10,2 C9,10 -2,12 -8,6 C-13,1 -14,-5 -9,-8Z','M-13,-3 C-8,-10 6,-9 12,-4 C15,2 9,9 0,8 C-8,9 -15,4 -13,-3Z'];
+  const cols=['#c9b391','#6a86b3','#e8e3d8','#9c5a4c','#7d8f7a','#d3d6da'];
+  let laundry='';for(let i=0;i<6;i++)laundry+='<path d="'+cloth[i%3]+'" fill="'+cols[i]+'"/>';
+  let steam='';for(let i=0;i<9;i++)steam+='<circle cx="'+(CX-36+i*9)+'" cy="'+(CY+30-(i%3)*6)+'" r="'+(2.2+(i%3))+'" fill="#fff" style="animation-delay:'+(i*.37).toFixed(2)+'s"/>';
+  const tiny=(x,y,t,a)=>'<text x="'+x+'" y="'+y+'" font-size="2.6" fill="#8b8e92" text-anchor="'+(a||'start')+'" font-family="var(--font)">'+t+'</text>';
+  svg.innerHTML='<defs><linearGradient id="drB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--dr-body)"/><stop offset="1" stop-color="var(--dr-body2)"/></linearGradient>'+
+    '<linearGradient id="drC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--dr-chrome1)"/><stop offset=".45" stop-color="var(--dr-chrome2)"/><stop offset=".7" stop-color="#e9eaec"/><stop offset="1" stop-color="#8e9297"/></linearGradient>'+
+    '<radialGradient id="drD" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#f1f2f3"/><stop offset=".7" stop-color="#b8bcc1"/><stop offset="1" stop-color="#7b8086"/></radialGradient>'+
+    '<linearGradient id="drR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbfbfb"/><stop offset="1" stop-color="#c3c6ca"/></linearGradient>'+
+    '<radialGradient id="drW" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="var(--c,#ff9a4a)" stop-opacity=".55"/><stop offset="1" stop-color="var(--c,#ff9a4a)" stop-opacity="0"/></radialGradient>'+
+    '<radialGradient id="drG" cx=".5" cy=".5" r=".5"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>'+
+    '<clipPath id="drClip"><circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'"/></clipPath></defs>'+
+    '<rect x="16" y="294" width="14" height="6" rx="2" fill="#9a9c9f"/><rect x="190" y="294" width="14" height="6" rx="2" fill="#9a9c9f"/>'+
+    '<rect x="0" y="0" width="220" height="296" rx="6" fill="url(#drB)" stroke="rgba(0,0,0,.09)"/>'+
+    '<line x1="0" y1="42" x2="220" y2="42" stroke="rgba(0,0,0,.08)"/><line x1="0" y1="256" x2="220" y2="256" stroke="rgba(0,0,0,.06)"/>'+
+    '<text x="9" y="9" font-size="3" fill="#8b8e92" font-family="var(--font)">AutoClean</text>'+
+    '<rect x="8" y="14" width="50" height="11" rx="1.6" fill="#2a2b2d"/><rect x="11" y="16" width="44" height="1.3" rx=".6" fill="#c8cbcf"/>'+
+    '<text x="33" y="23.2" font-size="4" font-weight="700" fill="#fff" text-anchor="middle" font-family="var(--font)" letter-spacing=".5">BOSCH</text>'+
+    tiny(66,12,'Handtücher')+tiny(66,17,'Daunen')+tiny(66,22,'Synthetik')+tiny(66,27,'Mix')+tiny(66,32,'Hygiene')+
+    tiny(134,12,'Baumwolle','end')+tiny(134,17,'Pflegeleicht','end')+tiny(134,22,'Schnell','end')+tiny(134,27,'Outdoor','end')+tiny(134,32,'Jeans','end')+
+    '<g class="knob" id="drknob"><circle cx="100" cy="22" r="10" fill="url(#drC)"/><circle cx="100" cy="22" r="6.3" fill="#3a3c3f"/><circle cx="100" cy="15" r=".9" fill="#e44"/></g>'+
+    '<text x="212" y="8" font-size="3" fill="#8b8e92" text-anchor="end" font-family="var(--font)">Serie | 8</text>'+
+    '<rect x="140" y="11" width="72" height="26" rx="2" fill="#121314"/>'+
+    '<text x="144" y="17" font-size="2.6" fill="#9a9da1" font-family="var(--font)">schranktrocken</text><rect x="144" y="18.5" width="17" height=".6" fill="#e33"/>'+
+    '<text x="144" y="32" font-size="2.6" fill="#9a9da1" font-family="var(--font)">Signal · Knitterschutz</text>'+
+    '<text x="207" y="28" font-size="9" font-weight="500" fill="#fff" text-anchor="end" font-family="var(--font)" data-ddisp>1:25</text>'+
+    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="86" fill="url(#drC)" stroke="rgba(0,0,0,.12)"/><circle cx="'+CX+'" cy="'+CY+'" r="77" fill="#d9dbdd"/>'+
+    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="86" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
+    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+3)+'" fill="#55595e"/>'+
+    '<g clip-path="url(#drClip)"><g id="drdrum"><circle cx="'+CX+'" cy="'+CY+'" r="66" fill="url(#drD)"/><g fill="#6f7479" opacity=".55">'+holes+'</g>'+ribs+
+      '<circle cx="'+CX+'" cy="'+CY+'" r="12" fill="url(#drC)" stroke="#8a8e93" stroke-width=".8"/><circle cx="'+CX+'" cy="'+CY+'" r="4.5" fill="#6d7176"/></g>'+
+      '<rect class="warm" id="drwarm" x="'+(CX-RG)+'" y="'+(CY-RG)+'" width="'+2*RG+'" height="'+2*RG+'" fill="url(#drW)" style="--c:#ff9a4a"/>'+
+      '<g id="drlaundry">'+laundry+'</g><g class="steam" id="drsteam">'+steam+'</g>'+
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="url(#drG)"/><circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="rgba(70,74,80,.18)"/>'+
+      '<path d="M'+(CX-50)+','+(CY-30)+' A60,60 0 0 1 '+(CX+10)+','+(CY-60)+'" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>'+
+      '<line x1="'+(CX-40)+'" y1="'+(CY+30)+'" x2="'+(CX+40)+'" y2="'+(CY+30)+'" stroke="#fff" stroke-opacity=".5" stroke-width=".7"/>'+
+      '<text x="'+CX+'" y="'+(CY+43)+'" font-size="9.5" fill="#fff" fill-opacity=".92" text-anchor="middle" font-family="var(--font)">AutoClean</text></g></g>'+
+    '<g fill="#c4c6c9">'+(()=>{let g='';for(let x=-16;x<=16;x+=3.2)for(let y=-16;y<=16;y+=3.2)if(x*x+y*y<16*16)g+='<circle cx="'+(188+x).toFixed(1)+'" cy="'+(275+y).toFixed(1)+'" r=".9"/>';return g})()+'</g>'+
+    '<circle cx="188" cy="275" r="18" fill="none" stroke="rgba(0,0,0,.07)"/>';
+  $('[data-dphases]').innerHTML=PH.map(([n,m],i)=>'<div class="ph" style="flex:'+m+'"><i></i><span>'+n+'</span></div>').join('')+'<div class="ph" style="flex:28"><i></i><span>Knitterschutz</span></div>';
+  const drum=$('#drdrum'),warm=$('#drwarm'),steamG=$('#drsteam'),items=[...$('#drlaundry').children];
+  const fmt=s=>Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');
+  let mode='dry';
+  function ui(){
+    const m=el/60,rest=Math.max(0,TOTAL*60-el),pi=state==='run'?(m<125?0:1):2;
+    const f=[Math.min(1,m/125),Math.max(0,Math.min(1,(m-125)/20)),state==='done'?Math.min(1,crease/60):state==='run'?0:1];
+    mode=state==='run'?(pi===0?'dry':'cool'):state==='done'?'crease':'still';
+    $$('.ph',box).forEach((x,i)=>{x.classList.toggle('cur',i===pi&&(state==='run'||state==='done'));x.classList.toggle('done',i<pi);x.style.setProperty('--f',(i<pi?100:f[i]*100)+'%')});
+    $('[data-drest]').textContent=state==='run'?fmt(rest):'0:00';
+    $('[data-drunit]').textContent=state==='run'?'h verbleibend':state==='done'?'fertig':'Tür offen';
+    $('[data-ddisp]').textContent=state==='run'?fmt(rest):'Ende';
+    $('[data-tdot]').style.left=(Math.min(1,m/125)*60)+'%';
+    const pill=$('[data-dpill]');pill.className='pill '+(state==='run'?'info live':state==='done'?'ok live':'idle');
+    pill.textContent=state==='run'?PH[pi][0]:state==='done'?'Fertig · Knitterschutz':'Bereit';
+    $('[data-dsub]').textContent=state==='run'?'Fertig um '+new Date(Date.now()+rest*1000).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'Bosch · Home Connect';
+    $('[data-ddoor]').hidden=state!=='done';
+    const prog=Math.round(Math.min(1,m/TOTAL)*100),water=Math.min(1,m/125)*3.4;
+    $('[data-dpct]').textContent=prog+' %';$('[data-dwater]').textContent=de(water,1)+' l';$('[data-dtank]').style.setProperty('--f',(water/4.5*100).toFixed(0)+'%');
+    $('[data-ddoorst]').textContent=state==='open'||state==='idle'?'offen':'geschlossen';
+    const s=D[nowIdx()];
+    $('[data-dsun]').innerHTML=state!=='run'?'Wärmepumpe · etwa 1,1 kWh für diese Trocknung':s.pv>.8?'Die Wärmepumpe läuft gerade mit <b>Sonnenstrom</b>.':'Wärmepumpe · etwa 1,1 kWh für diese Trocknung';
+    box.dataset.state=state==='idle'?'open':state;
+  }
+  function tick(){
+    if(state==='run'){el+=1;if(el>=TOTAL*60){el=TOTAL*60;state='done';crease=0;stopPlay();toast('Ansage auf Echo Küche: „Der Trockner ist fertig.“')}}
+    else if(state==='done')crease=Math.min(60,crease+1/60);
+    ui();
+  }
+  /* Trommel: langsam, Richtungswechsel; Wäsche wird hochgetragen und fällt */
+  let a=0,v=0,t0=performance.now(),last=t0,warmO=0,steamO=0;
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000;
+    const dir=Math.sin(t*.16)>=0?1:-1;
+    let vt=0;if(mode==='dry'||mode==='cool')vt=62*dir;else if(mode==='crease')vt=(t%7<1.2)?55:0;
+    if(RM)vt=0;
+    v+=(vt-v)*Math.min(1,dt*1.5);a=(a+v*dt)%360;
+    drum.setAttribute('transform','rotate('+a.toFixed(1)+' '+CX+' '+CY+')');
+    const moving=Math.min(1,Math.abs(v)/40),sg=v>=0?1:-1;
+    items.forEach((it,i)=>{const off=i/items.length;
+      const cyc=((t*.42*moving+off)%1+1)%1;let x,y;
+      if(cyc<.68){const th=Math.PI/2-sg*(cyc/.68)*1.9*moving;x=CX+52*Math.cos(th);y=CY+52*Math.sin(th)}
+      else{const k=(cyc-.68)/.32,th=Math.PI/2-sg*1.9*moving,x0=CX+52*Math.cos(th),y0=CY+52*Math.sin(th),x1=CX+(off-.5)*34,y1=CY+40;
+        x=x0+(x1-x0)*k;y=y0+(y1-y0)*k*k}
+      if(moving<.05){x=CX+(off-.5)*70;y=CY+42-Math.abs(off-.5)*16}
+      it.setAttribute('transform','translate('+x.toFixed(1)+' '+y.toFixed(1)+') rotate('+((t*45+i*60)*moving%360).toFixed(0)+')')});
+    const m=el/60,wt=mode==='dry'?.9:mode==='cool'?.55:0;warmO+=(wt-warmO)*Math.min(1,dt);
+    warm.style.opacity=warmO.toFixed(2);warm.style.setProperty('--c',mode==='cool'?'#7fb8ff':'#ff9a4a');
+    const st=mode==='dry'?Math.max(.1,1-m/125):0;steamO+=(st-steamO)*Math.min(1,dt);steamG.style.opacity=steamO.toFixed(2);
+    requestAnimationFrame(frame);
+  }
+  let pt=0;const playBtn=$('[data-dplay]');
+  function stopPlay(){clearInterval(pt);pt=0;playBtn.querySelector('span').textContent='Zeitraffer';playBtn.querySelector('use').setAttribute('href','#i-play')}
+  playBtn.addEventListener('click',()=>{if(pt){stopPlay();return}
+    if(state!=='run'){state='run';el=0}
+    $('#drknob').style.transform='rotate('+(Math.random()*120-60).toFixed(0)+'deg)';
+    playBtn.querySelector('span').textContent='Stopp';playBtn.querySelector('use').setAttribute('href','#i-pause');
+    pt=setInterval(()=>{el=Math.min(TOTAL*60-1,el+14);ui()},50)});
+  $('[data-ddoor]').addEventListener('click',()=>{state='open';ui();toast('Tür offen · Trockner meldet „Bereit“');setTimeout(()=>{state='idle';ui()},3500)});
+  ui();setInterval(tick,1000);requestAnimationFrame(frame);
+})();
+
+/* Spülmaschine: Siemens SN87YX, Demo-Programm Eco 50 °C · 195 min */
+const SP=(function(){
+  const box=$('#sp'),svg=$('#spsvg'),X0=20,X1=200;
+  const PH=[['Vorspülen',15],['Reinigen',70],['Zwischenspülen',25],['Klarspülen',35],['Trocknen',50]],TOTAL=195;
+  let el=62*60,state="run";
+  /* Geschirr */
+  let plates='';for(let i=0;i<9;i++){const x=34+i*17,tl=(i%2?-4:3);plates+='<ellipse cx="'+x+'" cy="190" rx="4.2" ry="'+(i%3===1?22:26)+'" fill="#fbfbfa" stroke="#c9ccd0" stroke-width=".8" transform="rotate('+tl+' '+x+' 210)"/>'}
+  plates+='<path d="M150,206 h34 a3,3 0 0 1 3,3 v10 h-40 v-10 a3,3 0 0 1 3,-3z" fill="#6f7a86"/><rect x="146" y="200" width="42" height="7" rx="2" fill="#808b97"/>';
+  let glasses='';for(let i=0;i<5;i++){const x=34+i*22;glasses+='<path d="M'+(x-7)+',78 h14 l-2,32 h-10 z" fill="rgba(210,230,245,.55)" stroke="#aebfcc" stroke-width=".8"/><ellipse cx="'+x+'" cy="110" rx="5" ry="1.4" fill="rgba(180,205,225,.6)"/>'}
+  for(let i=0;i<3;i++){const x=148+i*18;glasses+='<rect x="'+(x-7)+'" y="92" width="14" height="18" rx="2.5" fill="'+['#d9cdb8','#9fb4c9','#e5e2dc'][i]+'"/><path d="M'+(x+7)+',98 q6,0 6,5 q0,5 -6,5" fill="none" stroke="#b8b1a5" stroke-width="1.6"/>'}
+  let cutlery='';for(let i=0;i<16;i++){const x=30+i*10.5;cutlery+='<line x1="'+x+'" y1="28" x2="'+(x+6)+'" y2="36" stroke="#a7abb0" stroke-width="1.6" stroke-linecap="round"/>'}
+  const rack=(y0,y1)=>{let g='<rect x="26" y="'+y0+'" width="168" height="'+(y1-y0)+'" rx="3" fill="none" stroke="#8d9298" stroke-width="1.4"/>';for(let x=34;x<194;x+=8)g+='<line x1="'+x+'" y1="'+(y1-12)+'" x2="'+x+'" y2="'+y1+'" stroke="#9aa0a6" stroke-width=".8"/>';return g};
+  let drops='';for(let i=0;i<26;i++)drops+='<circle cx="'+(32+(i*37)%156)+'" cy="'+(84+(i*53)%140)+'" r="'+(.9+(i%3)*.4)+'" fill="#fff" opacity=".85"/>';
+  let steam='';for(let i=0;i<10;i++)steam+='<circle cx="'+(40+i*15)+'" cy="'+(150-(i%3)*30)+'" r="'+(2.5+(i%3))+'" fill="#fff" style="animation-delay:'+(i*.31).toFixed(2)+'s"/>';
+  let jets='';for(let i=0;i<70;i++)jets+='<circle r="1.1" fill="#bfe0ff" opacity="0"/>';
+  svg.innerHTML='<defs><linearGradient id="spT" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--sp-tub2)"/><stop offset=".25" stop-color="var(--sp-tub1)"/><stop offset=".75" stop-color="var(--sp-tub1)"/><stop offset="1" stop-color="var(--sp-tub2)"/></linearGradient>'+
+    '<radialGradient id="spH" cx=".5" cy=".6" r=".7"><stop offset="0" stop-color="var(--c,#ffb36b)" stop-opacity=".45"/><stop offset="1" stop-color="var(--c,#ffb36b)" stop-opacity="0"/></radialGradient>'+
+    '<filter id="spB"><feGaussianBlur stdDeviation="2.2"/></filter><clipPath id="spC"><rect x="'+X0+'" y="16" width="'+(X1-X0)+'" height="226" rx="4"/></clipPath></defs>'+
+    '<rect x="0" y="0" width="220" height="10" rx="2" fill="var(--sp-wood)"/><rect x="0" y="9" width="220" height="2" fill="rgba(0,0,0,.12)"/>'+
+    '<rect x="'+(X0-6)+'" y="12" width="'+(X1-X0+12)+'" height="236" rx="3" fill="#d4d6d9"/>'+
+    '<g clip-path="url(#spC)"><rect x="'+X0+'" y="16" width="'+(X1-X0)+'" height="226" fill="url(#spT)"/>'+
+      '<rect class="heat" id="spheat" x="'+X0+'" y="16" width="'+(X1-X0)+'" height="226" fill="url(#spH)" style="opacity:0"/>'+
+      '<g class="dishes"><rect x="26" y="24" width="168" height="15" rx="2" fill="none" stroke="#8d9298" stroke-width="1.2"/>'+cutlery+
+        rack(70,116)+glasses+rack(150,226)+plates+'<g class="drops" id="spdrops">'+drops+'</g></g>'+
+      '<g id="sparm1"><rect x="40" y="124" width="140" height="4" rx="2" fill="#7f868d"/></g>'+
+      '<g id="sparm2"><rect x="30" y="230" width="160" height="5" rx="2.5" fill="#7f868d"/></g>'+
+      '<circle cx="110" cy="126" r="4" fill="#5f666d"/><circle cx="110" cy="232.5" r="5" fill="#5f666d"/>'+
+      '<g id="spjets">'+jets+'</g><g class="steam" id="spsteam" style="opacity:0">'+steam+'</g>'+
+      '<path id="spsump" d="M20,240 q10,-2 20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 V244 H20Z" fill="rgba(120,175,225,.45)"/>'+
+    '</g>'+
+    '<rect class="front" x="'+(X0-6)+'" y="12" width="'+(X1-X0+12)+'" height="236" rx="3" fill="var(--sp-front)" stroke="rgba(0,0,0,.12)"/>'+
+    '<rect x="'+(X0-6)+'" y="248" width="'+(X1-X0+12)+'" height="14" fill="var(--sp-plinth)"/>'+
+    '<rect x="0" y="262" width="220" height="38" fill="rgba(0,0,0,.05)"/>'+
+    '<g class="tl" id="sptl"><ellipse class="tlglow" cx="110" cy="281" rx="52" ry="10" fill="var(--c,#7fb6ff)" opacity=".35" filter="url(#spB)"/>'+
+      '<g transform="translate(110 288) scale(1 .55)"><text text-anchor="middle" font-size="30" font-weight="500" fill="var(--c,#cfe4ff)" font-family="var(--font)" data-stl>0:48</text></g></g>';
+  $('[data-sphases]').innerHTML=PH.map(([n,m])=>'<div class="ph" style="flex:'+m+'"><i></i><span>'+n+'</span></div>').join('');
+  const arm1=$('#sparm1'),arm2=$('#sparm2'),jetEls=[...$('#spjets').children],heat=$('#spheat'),steamG=$('#spsteam'),dropsG=$('#spdrops'),tl=$('#sptl');
+  const phaseAt=m=>{let acc=0;for(let i=0;i<PH.length;i++){if(m<acc+PH[i][1])return{i,f:(m-acc)/PH[i][1]};acc+=PH[i][1]}return{i:5,f:1}};
+  const fmt=s=>Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0');
+  let mode='still';
+  function ui(){
+    const m=el/60,p=phaseAt(m),rest=Math.max(0,TOTAL*60-el);
+    mode=state!=='run'?'still':p.i<4?(p.i===1?'hot':'spray'):'dry';
+    $$('.ph',box).forEach((x,i)=>{x.classList.toggle('cur',i===p.i&&state==='run');x.classList.toggle('done',i<p.i||state!=='run');x.style.setProperty('--f',(i<p.i||state!=='run'?100:i===p.i?p.f*100:0)+'%')});
+    $('[data-srest]').textContent=state==='run'?fmt(rest):'0:00';
+    $('[data-srunit]').textContent=state==='run'?'h verbleibend':state==='done'?'fertig':'ausgeräumt';
+    $('[data-stl]').textContent=state==='run'?fmt(rest):state==='done'?'0:00':'';
+    tl.style.setProperty('--c',state==='done'?'var(--ok)':'#9cc8ff');tl.style.opacity=state==='idle'?0:1;
+    const pill=$('[data-spill]');pill.className='pill '+(state==='run'?'info live':state==='done'?'ok live':'idle');
+    pill.textContent=state==='run'?PH[Math.min(4,p.i)][0]:state==='done'?'Fertig · bitte ausräumen':'Ausgeräumt';
+    $('[data-ssub]').textContent=state==='run'?'Fertig um '+new Date(Date.now()+rest*1000).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'Siemens iQ700 · Home Connect';
+    $('[data-sout]').hidden=state!=='done';
+    $('[data-spct]').textContent=Math.round(Math.min(1,m/TOTAL)*100)+' %';
+    const s=D[nowIdx()];
+    $('[data-ssun]').innerHTML=state!=='run'?'Letzter Spülgang: Eco 50 °C · 3:15 h':mode==='hot'&&s.pv>1?'Heizt gerade mit <b>Sonnenstrom</b> auf 50 °C.':mode==='dry'?'Zeolith trocknet ohne Heizstab: das Mineral gibt beim Wasseraufnehmen Wärme ab.':'Spült mit '+(mode==='hot'?'50 °C':'kaltem bis warmem Wasser')+'.';
+    dropsG.style.opacity=state==='idle'?0:mode==='dry'?Math.max(0,1-p.f*1.4):state==='done'?0:1;
+    box.dataset.state=state;
+  }
+  function tick(){if(state==='run'){el+=1;if(el>=TOTAL*60){el=TOTAL*60;state='done';stopPlay();toast('Ansage auf Echo Küche: „Die Spülmaschine ist fertig.“')}}ui()}
+  /* Sprüharme (von vorn gesehen: Länge schwankt mit der Drehung) und Wasserstrahlen */
+  const P=jetEls.map(()=>({x:0,y:0,vx:0,vy:0,life:0}));
+  let ang=0,last=performance.now(),heatO=0,steamO=0;
+  function frame(now){
+    const dt=Math.min(.05,(now-last)/1000);last=now;
+    const spraying=(mode==='spray'||mode==='hot')&&!RM;
+    if(spraying)ang+=dt*5.5;
+    const k1=Math.abs(Math.cos(ang)),k2=Math.abs(Math.cos(ang*.8+1));
+    arm1.setAttribute('transform','translate(110 0) scale('+(.12+.88*k1).toFixed(3)+' 1) translate(-110 0)');
+    arm2.setAttribute('transform','translate(110 0) scale('+(.12+.88*k2).toFixed(3)+' 1) translate(-110 0)');
+    P.forEach((q,i)=>{
+      if(q.life<=0&&spraying&&Math.random()<.35){const low=i%2===0,L=(low?80:70)*(low?k2:k1);q.x=110+(Math.random()*2-1)*L;q.y=low?229:123;q.vx=(Math.random()-.5)*40;q.vy=-(90+Math.random()*90);q.life=.55+Math.random()*.3;q.top=low?150:72}
+      if(q.life>0){q.life-=dt;q.vy+=260*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;if(q.y<q.top)q.life=0}
+      const e=jetEls[i];e.setAttribute('cx',q.x.toFixed(1));e.setAttribute('cy',q.y.toFixed(1));e.setAttribute('opacity',q.life>0?Math.min(.9,q.life*2).toFixed(2):0)});
+    const ht=mode==='hot'?.9:mode==='dry'?.55:0;heatO+=(ht-heatO)*Math.min(1,dt*.8);heat.style.opacity=heatO.toFixed(2);
+    heat.style.setProperty('--c',mode==='dry'?'#ffd9a8':'#ffb36b');
+    const st=mode==='dry'||mode==='hot'?.8:0;steamO+=(st-steamO)*Math.min(1,dt*.7);steamG.style.opacity=steamO.toFixed(2);
+    requestAnimationFrame(frame);
+  }
+  let pt=0;const playBtn=$('[data-splay]');
+  function stopPlay(){clearInterval(pt);pt=0;playBtn.querySelector('span').textContent='Zeitraffer';playBtn.querySelector('use').setAttribute('href','#i-play')}
+  playBtn.addEventListener('click',()=>{if(pt){stopPlay();return}
+    if(state!=='run'){state='run';el=0}
+    playBtn.querySelector('span').textContent='Stopp';playBtn.querySelector('use').setAttribute('href','#i-pause');
+    pt=setInterval(()=>{el=Math.min(TOTAL*60-1,el+18);ui()},50)});
+  $('[data-sview]').addEventListener('click',e=>{const f=box.dataset.view!=='front';box.dataset.view=f?'front':'inside';e.currentTarget.textContent=f?'Innenansicht':'Front zeigen'});
+  $('[data-sout]').addEventListener('click',()=>{state='idle';ui();toast('Spülmaschine ausgeräumt')});
+  ui();setInterval(tick,1000);requestAnimationFrame(frame);
+})();
+
+/* Echos: Lautstärke-Profil 10:00 → 40, 20:00 → 20 */
+(function(){const h=new Date().getHours(),v=h>=10&&h<20?40:20;
+  $$('.echo').forEach(e=>{const s=e.querySelector('.slider');s.value=v;setP(s);e.querySelector('[data-vv]').textContent=v;s.addEventListener('input',()=>e.querySelector('[data-vv]').textContent=s.value)});
+  $('[data-profile]').innerHTML='Profil: '+(v===40?'<b>10:00 → 40</b> · 20:00 → 20':'10:00 → 40 · <b>20:00 → 20</b>')+' · Ansagen per <code class="code">speak-volume</code>'})();
+$$('[data-test]').forEach(b=>b.addEventListener('click',()=>{const e=b.closest('.echo');e.classList.add('talk');toast('Testansage auf '+e.querySelector('b').firstChild.textContent.trim()+' (Demo)');setTimeout(()=>e.classList.remove('talk'),3200)}));
+
+function lede(){$('[data-lede]').innerHTML=WM.summary()+'. Fertig-Ansagen auf beiden Echos.'}
+lede();setInterval(lede,4000);
+</script>

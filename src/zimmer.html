@@ -1,0 +1,538 @@
+<meta charset="utf-8">
+<title>Glashaus Zimmer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.btn.on{background:var(--fg);color:var(--bg)}
+.picker{display:grid;gap:8px;margin-bottom:6px}
+.pg{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pgl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-2);min-width:96px}
+.pgb{display:flex;gap:8px;flex-wrap:wrap}
+.picker button{display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 5px;border-radius:99px;border:0;cursor:pointer;font-size:14px;font-weight:500;transition:transform .5s var(--spring),background .45s var(--ease),color .45s}
+.picker button .ico{width:30px;height:30px;border-radius:50%}
+.picker button .ico svg{width:16px;height:16px}
+.lrow2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--track)}
+.lrow2:first-of-type{border-top:0}
+.lrow2 b{font-weight:550;font-size:13.5px}
+.lrow2 .wide{grid-column:1/-1}
+.drow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13.5px;border-top:1px solid var(--track)}
+.drow:first-of-type{border-top:0}
+.drow .ico{width:30px;height:30px;border-radius:10px}
+.drow small{color:var(--fg-2)}
+.picker button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.picker button[aria-pressed="true"] .ico{background:var(--c);color:var(--bg)}
+.picker button:active{transform:scale(.95)}
+.room{padding:0;overflow:hidden}
+.room-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 0}
+.room-h h2{font-size:15.5px;font-weight:550;margin:0;display:flex;align-items:center;gap:10px}
+.rwrap{position:relative;height:clamp(420px,66vh,720px);touch-action:pan-y;cursor:grab}
+.rwrap.drag{cursor:grabbing}
+.rwrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rov{position:absolute;inset:0;pointer-events:none}
+.rdev{position:absolute;left:0;top:0;height:30px;margin:-15px 0 0 -15px;padding:0 10px 0 4px;border-radius:99px;border:0;display:flex;align-items:center;gap:6px;cursor:pointer;pointer-events:auto;font-size:12px;font-weight:550;white-space:nowrap;color:var(--fg);background:var(--glass-strong);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px var(--stroke),0 6px 14px -6px var(--shadow);transition:opacity .4s}
+.rdev i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.rdev i svg{width:13px;height:13px}
+.rdev.on i{background:var(--c);color:var(--bg)}
+.rhint{position:absolute;left:20px;bottom:14px;font-size:12px;color:var(--fg-3);pointer-events:none}
+.room-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.room-tools .btn{height:34px;padding:0 13px;font-size:12.5px}
+.room-tools .btn[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.rbar{position:relative;margin:0 16px 16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 24px);padding:6px 6px 6px 14px;border-radius:99px;background:var(--glass-strong);-webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);box-shadow:inset 0 0 0 1px var(--stroke),0 14px 30px -18px var(--shadow);font-size:12.5px}
+.rbar .btn{height:30px;padding:0 12px;font-size:12px}
+.rbar b{font-weight:550}
+.rbar .esize{display:inline-flex;align-items:center;gap:4px;padding:0 6px;font-size:12px}
+.rbar .esize[hidden]{display:none}
+.rbar .esize b{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+.rbar .btn.sz{width:30px;padding:0;justify-content:center;font-size:15px}
+.rbar .esel{-webkit-appearance:none;appearance:none;padding-right:12px;cursor:pointer;font:inherit;font-size:12px;color:inherit}
+.rwrap.editing{cursor:default;touch-action:none}
+.rwrap.editing.over{cursor:grab}
+.rwrap.moving{cursor:grabbing}
+.rwrap.editing .rdev{opacity:.35!important;pointer-events:none}
+.card{padding:4px 0 18px;border-bottom:1px solid var(--track);margin-bottom:16px}
+.card:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.card.flash{animation:cflash 1.2s var(--ease)}
+@keyframes cflash{30%{background:color-mix(in srgb,var(--home) 10%,transparent)}}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-h h3{margin:0;font-size:15px;font-weight:550;display:flex;align-items:center;gap:10px}
+.lrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.lrow .num{font-size:30px}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-moz-range-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow)}
+.slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--fg);border:3px solid var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chips .btn{height:32px;padding:0 13px;font-size:12.5px}
+.swatches{display:flex;gap:7px;align-items:center}
+.swatches button{width:24px;height:24px;border-radius:50%;border:0;padding:0;cursor:pointer;background:var(--s);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:transform .3s var(--spring),box-shadow .3s}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--fg);transform:scale(1.08)}
+.code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all;display:block;margin-top:10px}
+.thermo{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.dial{position:relative;width:150px;height:150px}
+.dial svg{width:100%;height:100%;display:block}
+.dial .trk{fill:none;stroke:var(--track);stroke-width:10;stroke-linecap:round}
+.dial .set{fill:none;stroke:var(--heat);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease)}
+.dial .mk{fill:var(--fg);stroke:var(--bg);stroke-width:3;transition:cx .8s var(--ease),cy .8s var(--ease)}
+.dial b{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-size:30px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.dial b small{display:block;font-size:12px;font-weight:450;color:var(--fg-2);letter-spacing:0;margin-top:6px}
+.tbtns{display:flex;gap:8px;margin-top:10px}
+.tbtns .btn{width:44px;height:40px;padding:0;font-size:20px}
+.pirs{display:grid;gap:8px}
+.pir{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px}
+.pir .dot{width:10px;height:10px;border-radius:50%;background:var(--fg-3);transition:background .3s,box-shadow .3s}
+.pir.hot .dot{background:var(--ok);box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 25%,transparent)}
+.pir small{color:var(--fg-2)}
+@media (max-width:420px){.thermo{grid-template-columns:120px minmax(0,1fr)}.dial{width:120px;height:120px}}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">zimmer</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Zeichnung streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="#" aria-current="page">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow"><span data-eyebrow>Dachgeschoss · Familie</span> · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span data-h1a>Leos</span><span class="it" data-h1b>Zimmer.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-lede>Licht, Heizung und Bewegungsmelder im Blick.</p>
+      <div class="picker" role="group" aria-label="Zimmer wählen">
+        <div class="pg"><span class="pgl">Dachgeschoss</span><div class="pgb">
+          <button class="glass" type="button" data-room="leo" style="--c:var(--home)"><span class="ico"><svg><use href="#i-bulb"/></svg></span>Leo</button>
+          <button class="glass" type="button" data-room="mia" style="--c:var(--heat)"><span class="ico"><svg><use href="#i-bulb"/></svg></span>Mia</button>
+          <button class="glass" type="button" data-room="buero" style="--c:var(--grid)"><span class="ico"><svg><use href="#i-desk"/></svg></span>Büro</button></div></div>
+        <div class="pg"><span class="pgl">Erdgeschoss</span><div class="pgb">
+          <button class="glass" type="button" data-room="kochen_h" style="--c:var(--sun)"><span class="ico"><svg><use href="#i-plate"/></svg></span>Küche</button>
+          <button class="glass" type="button" data-room="wohnen_h" style="--c:var(--cool)"><span class="ico"><svg><use href="#i-home"/></svg></span>Wohnzimmer</button></div></div>
+        <div class="pg"><span class="pgl">Opa</span><div class="pgb">
+          <button class="glass" type="button" data-room="kochen_o" style="--c:var(--sun)"><span class="ico"><svg><use href="#i-plate"/></svg></span>Küche</button>
+          <button class="glass" type="button" data-room="wohnen_o" style="--c:var(--grid)"><span class="ico"><svg><use href="#i-home"/></svg></span>Wohnzimmer</button></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-8 room stretch" id="room" style="--i:0">
+    <div class="room-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-home"/></svg></span><span data-rtitle>Leo</span><span class="small muted" data-rarea></span></h2>
+      <div class="room-tools"><button class="btn" type="button" data-edit aria-pressed="false"><svg><use href="#i-cube"/></svg><span>Einrichten</span></button>
+      <div class="segs" role="group" aria-label="Ansicht"><button type="button" data-cam="iso" aria-pressed="true">Schräg</button><button type="button" data-cam="top">Von oben</button></div></div></div>
+    <div class="rwrap" id="rwrap">
+      <canvas id="rcv" role="img" aria-label="3D-Ansicht des gewählten Zimmers"></canvas>
+      <div class="rov" id="rov"></div>
+      <span class="rhint" data-rhint>Ziehen dreht · Doppelklick setzt zurück</span>
+    </div>
+    <div class="rbar" data-rbar hidden><span data-esel><b>Einrichten:</b> ziehen · an die Wand ziehen stellt an · doppelt tippen dreht</span><span class="esize" data-esize hidden>Breite <button class="btn sz" type="button" data-sz="W-" aria-label="schmaler">−</button><b data-szw>–</b><button class="btn sz" type="button" data-sz="W+" aria-label="breiter">+</button> Tiefe <button class="btn sz" type="button" data-sz="D-" aria-label="weniger tief">−</button><b data-szd>–</b><button class="btn sz" type="button" data-sz="D+" aria-label="tiefer">+</button></span><select class="btn esel" data-eaddf aria-label="Möbel hinzufügen"><option value="">+ Möbel</option><option value="bed">Bett</option><option value="desk">Schreibtisch</option><option value="table">Tisch</option><option value="sofa">Sofa</option><option value="sessel">Sessel</option><option value="coffee">Couchtisch</option><option value="tv">TV-Möbel</option><option value="schrank">Schrank</option><option value="regal">Regal</option><option value="kommode">Kommode</option><option value="counter">Küchenzeile</option></select><button class="btn" type="button" data-eadd="win">+ Fenster</button><button class="btn" type="button" data-eadd="door">+ Tür</button><button class="btn" type="button" data-edel disabled>Entfernen</button><button class="btn" type="button" data-ereset>Zurücksetzen</button><button class="btn" type="button" data-ecopy>Für Hausmodell kopieren</button><button class="btn" type="button" data-edone>Fertig</button></div>
+  </article>
+
+  <article class="glass tile s-4 stretch" id="side" style="--i:1"></article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Datenpunkte je Zimmer</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div><h3>Gerät → Datenpunkt</h3><div class="tbl"><table id="vistbl"><tr><th>Zimmer</th><th>Gerät</th><th>Datenpunkt</th></tr></table></div></div>
+      <div><h3>Hinweise</h3>
+        <p>Die Thermostate sind FRITZ!DECT-Geräte: Ist-Temperatur aus <code>.tist</code>, Sollwert in <code>.tsoll</code> schreiben (0,5-°C-Schritte), Batterie aus <code>.battery</code>.</p>
+        <p>Die Bewegungsmelder melden <code>occupancy</code> (true/false). In den Kinderzimmern schalten sie über die Würfel-Scripte das Licht.</p>
+        <p>Zimmer lassen sich direkt verlinken, z. B. mit <code>#mia</code> am Ende der Adresse.</p></div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Zimmer des Beispielhauses · alle Werte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('zimmer');
+const setP=el=>el.style.setProperty('--p',(el.value-el.min)/(el.max-el.min)*100+'%');
+document.addEventListener('input',e=>{if(e.target.classList.contains('slider'))setP(e.target)});
+
+/*ROOMS_JS*/
+const SW={plane:[['#ffd59a','Warmweiß'],['#5aa9ff','Himmelblau'],['#53d48a','Grün'],['#b48bff','Lila'],['#ff7a59','Sonnenuntergang']],
+  pendant:[['#ffd59a','Warmweiß'],['#ff9fc0','Rosa'],['#c2a0ff','Lila'],['#7fe0c4','Mint'],['#ffe066','Sonnengelb']],
+  huecol:[['#ffcf8a','Warmweiß'],['#ffb45e','Kerzenlicht'],['#ff9fc0','Rosa',[330,180]],['#8fb8ff','Blau',[220,200]],['#b48bff','Lila',[270,200]]]};
+const LIC={spots:'i-bulb',plane:'i-strip',pendant:'i-bulb',ceiling:'i-bulb',strip:'i-strip',floorlamp:'i-bulb'};
+const DIC={dish:'i-dish',echo:'i-speaker',fan:'i-fan',none:'i-power',shutter:'i-garage',cube:'i-cube',contact:'i-window'};
+let cur=(location.hash||'').replace('#','');if(!ZC[cur])cur='leo';
+const briOf=p=>Math.max(1,Math.round(p*p/100*2.54));
+
+/* ================= 3D-Zimmer ================= */
+const ROOM3=(function(){
+  const wrap=$('#rwrap'),cv=$('#rcv'),ctx=cv.getContext('2d'),ov=$('#rov');
+  let W=0,H=0,dpr=1,C={};
+  const hex=(s)=>{s=s.trim();let m=/^#([0-9a-f]{6})$/i.exec(s);if(m){const n=parseInt(m[1],16);return[n>>16&255,n>>8&255,n&255]}m=/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/.exec(s);return m?[+m[1],+m[2],+m[3]]:[128,128,128]};
+  const col=(k,a)=>{if(k.startsWith('hsl'))return k.replace('hsl','hsla').replace(')',','+a.toFixed(3)+')');const c=k[0]==='#'?hex(k):(C[k]||(C[k]=hex(cssv(k))));return'rgba('+c[0]+','+c[1]+','+c[2]+','+Math.max(0,Math.min(1,a)).toFixed(3)+')'};
+  new MutationObserver(()=>{C={}}).observe(root,{attributes:true,attributeFilter:['data-theme']});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>setTimeout(()=>{C={}},30));
+  let yaw=-.6,elev=.62,yawT=-.6,elevT=.62,scale=60,ox=0,oy=0,lastUser=-1e9,R=null,cx=0,cy=0,t0=performance.now(),fade=1,hOf=()=>2.5;
+  const P=(x,y,z)=>{const dx=x-cx,dy=y-cy,cs=Math.cos(yaw),sn=Math.sin(yaw),se=Math.sin(elev),ce=Math.cos(elev);
+    const xr=dx*cs-dy*sn,yr=dx*sn+dy*cs;return[ox+xr*scale,oy+(yr*se-(z-1.2)*ce)*scale,yr*ce+z*se]};
+  function size(){const r=wrap.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr}
+  function poly(pts,fill,stroke,lw,dash){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.setLineDash(dash||[]);ctx.lineWidth=lw||1;ctx.strokeStyle=stroke;ctx.stroke();ctx.setLineDash([])}}
+  function line(a,b,c,w){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=c;ctx.lineWidth=w||1;ctx.stroke()}
+  let devEls=[];
+  let edit=false,HND=[],sel=null,mv=null,hover=null;
+  const SPOTS=[[.18,.2],[.82,.2],[.18,.8],[.82,.8]];
+  const spotPos=l=>l.pos||SPOTS;
+  const lightXY=l=>l.u!=null?UV(l.u,l.v):[cx,cy];
+  /* LED-Streifen: an einer Wand (Höhe z) oder frei an der Decke (u,v, Richtung axis) */
+  const stripEnds=l=>{if(l.free){const[mx,my]=UV(l.u??.5,l.v??.5),ay=l.axis==='y',len=(l.to-l.from)*(ay?R.y1-R.y0:R.x1-R.x0)/2,a=ay?[mx,my-len]:[mx-len,my],b=ay?[mx,my+len]:[mx+len,my];
+      return{a,b,ix:0,iy:0,za:hOf(a[1])-.03,zb:hOf(b[1])-.03}}
+    const a=wallPt(l.wall,l.from),b=wallPt(l.wall,l.to),[ix,iy]=inward(l.wall),sz=Math.min(l.z,hOf(a[1])-.08,hOf(b[1])-.08);return{a,b,ix,iy,za:sz,zb:sz}};
+  const FN={bed:'Bett',desk:'Schreibtisch',counter:'Küchenzeile',table:'Tisch',sofa:'Sofa',sessel:'Sessel',coffee:'Couchtisch',tv:'TV-Möbel',schrank:'Schrank',regal:'Regal',kommode:'Kommode'};
+  const LN={spots:'Spot',plane:'Flugzeug',pendant:'Pendelleuchte',ceiling:'Deckenleuchte',strip:'LED-Streifen',floorlamp:'Stehlampe'};
+  /* Bildschirmpunkt → Punkt auf der Ebene in Höhe z */
+  const unP=(sx,sy,z)=>{const cs=Math.cos(yaw),sn=Math.sin(yaw),se=Math.max(.2,Math.sin(elev)),ce=Math.cos(elev);const xr=(sx-ox)/scale,yr=((sy-oy)/scale+(z-1.2)*ce)/se;return[cx+cs*xr+sn*yr,cy-sn*xr+cs*yr]};
+  function load(id){
+    const cfg=ZC[id],r=ROOMS[id],xs=r.p.map(q=>q[0]),ys=r.p.map(q=>q[1]);
+    R={id,cfg,poly:r.p,f:r.f,x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)};
+    cx=r.c[0];cy=r.c[1];fade=0;
+    hOf=r.f===2?(y=>Math.min(2.5,1.0+Math.min(y,D0-y)*T38)):(()=>2.5);
+    ov.innerHTML='';devEls=[];
+    const add=(key,ic,c,label,target)=>{const b=document.createElement('button');b.type='button';b.className='rdev';b.style.setProperty('--c','var('+c+')');
+      b.innerHTML='<i><svg><use href="#'+ic+'"/></svg></i>'+label;b.addEventListener('click',()=>focusCard(target));ov.appendChild(b);devEls.push({key,el:b})};
+    cfg.lights.forEach(l=>add('l_'+l.id,LIC[l.type],'--sun',l.n,'light'));
+    (cfg.devs||[]).filter(d=>d.type!=='none'&&d.type!=='cube'&&d.type!=='contact').forEach(d=>add('d_'+d.id,DIC[d.type],d.off?'--fg':'--home',d.n,'devs'));
+    add('thermo','i-thermo','--heat','—','heat');
+    cfg.P.forEach((p,i)=>add('pir'+i,'i-motion','--ok',p.n,'motion'));
+  }
+  /* Positionen über das umschließende Rechteck */
+  const UV=(u,v)=>[R.x0+(R.x1-R.x0)*u,R.y0+(R.y1-R.y0)*v];
+  const wallPt=(wall,t)=>wall==='w'?[R.x0,R.y0+(R.y1-R.y0)*t]:wall==='e'?[R.x1,R.y0+(R.y1-R.y0)*t]:wall==='n'?[R.x0+(R.x1-R.x0)*t,R.y0]:[R.x0+(R.x1-R.x0)*t,R.y1];
+  const along=(wall)=>wall==='w'||wall==='e'?[0,1]:[1,0];
+  const inward=(wall)=>({w:[1,0],e:[-1,0],n:[0,1],s:[0,-1]})[wall];
+  const wallRect=(wall,from,to,d)=>{const a=wallPt(wall,from),b=wallPt(wall,to),[ix,iy]=inward(wall);const xs=[a[0],b[0],a[0]+ix*d,b[0]+ix*d],ys=[a[1],b[1],a[1]+iy*d,b[1]+iy*d];return[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]};
+  function box(x0,y0,x1,y1,z0,z1,top,side,edge){
+    const pts=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],faces=[];
+    for(let j=0;j<4;j++){const a=pts[j],b=pts[(j+1)%4];const q=[P(a[0],a[1],z0),P(b[0],b[1],z0),P(b[0],b[1],z1),P(a[0],a[1],z1)];faces.push({d:(q[0][2]+q[1][2])/2,q})}
+    faces.sort((a,b)=>a.d-b.d).slice(2).forEach(f=>poly(f.q,side,edge||col('--fg',.25),.8));
+    poly(pts.map(p=>P(p[0],p[1],z1)),top,edge||col('--fg',.3),.8);
+  }
+  const floorGlow=(x,y,c,a,r)=>{const f=P(x,y,0),g=ctx.createRadialGradient(f[0],f[1],0,f[0],f[1],scale*r);g.addColorStop(0,col(c,a));g.addColorStop(1,col(c,0));
+    ctx.save();ctx.translate(f[0],f[1]);ctx.scale(1,Math.max(.25,Math.sin(elev)));ctx.translate(-f[0],-f[1]);ctx.fillStyle=g;ctx.beginPath();ctx.arc(f[0],f[1],scale*r,0,7);ctx.fill();ctx.restore()};
+  const cone=(sx,sy,z,r1,c,a)=>{const s0=P(sx,sy,z),f=P(sx,sy,0),pts=[];for(let s=0;s<=12;s++){const an=s/12*Math.PI*2;pts.push(P(sx+Math.cos(an)*r1,sy+Math.sin(an)*r1,0))}
+    const gr=ctx.createLinearGradient(s0[0],s0[1],f[0],f[1]);gr.addColorStop(0,col(c,a));gr.addColorStop(1,col(c,0));ctx.beginPath();ctx.moveTo(s0[0],s0[1]);pts.forEach(q=>ctx.lineTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=gr;ctx.fill()};
+  const PLANE=[[0,-.86],[.05,-.8],[.06,-.62],[.06,-.18],[.82,.12],[.82,.2],[.06,.02],[.06,.5],[.27,.64],[.27,.7],[.03,.66],[.02,.8],[-.02,.8],[-.03,.66],[-.27,.7],[-.27,.64],[-.06,.5],[-.06,.02],[-.82,.2],[-.82,.12],[-.06,-.18],[-.06,-.62],[-.05,-.8]];
+  const inPoly=(x,y,pts)=>{let ins=false;for(let a=0,b=pts.length-1;a<pts.length;b=a++){const[xa,ya]=pts[a],[xb,yb]=pts[b];if((ya>y)!==(yb>y)&&x<(xb-xa)*(y-ya)/(yb-ya)+xa)ins=!ins}return ins};
+  function draw(t){
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);if(!R)return;
+    ctx.globalAlpha=fade;
+    const cfg=R.cfg,S=STATE[R.id],pg=R.poly;
+    /* Boden mit Dielen, ggf. Fußbodenheizung */
+    const fp=pg.map(p=>P(p[0],p[1],0));poly(fp,col('--bg',.92),col('--fg',.35),1.2);
+    ctx.save();ctx.beginPath();fp.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.clip();
+    for(let x=R.x0+.18;x<R.x1;x+=.18)line(P(x,R.y0,0),P(x,R.y1,0),col('--fg',.05),1);
+    if(S.T.kind==='alpha2'){const on=S.T.actor,a=on?.28+.14*Math.sin(t*1.6):.07;ctx.beginPath();let first=true;
+      for(let i=0,y=R.y0+.25;y<R.y1-.2;y+=.3,i++){const xa=i%2?R.x1-.25:R.x0+.25,xb=i%2?R.x0+.25:R.x1-.25;const A=P(xa,y,.01),B=P(xb,y,.01);if(first){ctx.moveTo(A[0],A[1]);first=false}else ctx.lineTo(A[0],A[1]);ctx.lineTo(B[0],B[1])}
+      ctx.strokeStyle=col('--heat',a);ctx.lineWidth=2;ctx.stroke()}
+    ctx.restore();
+    /* Wände (Polygonkanten): hinten voll, vorne als Kante */
+    const cd=P(cx,cy,0)[2];
+    const edges=pg.map((a,i)=>{const b=pg[(i+1)%pg.length],mid=P((a[0]+b[0])/2,(a[1]+b[1])/2,0);return{a,b,back:mid[2]<cd}});
+    const wallPoly=(a,b,zf)=>{const n=8,top=[],bot=[];for(let i=0;i<=n;i++){const x=a[0]+(b[0]-a[0])*i/n,y=a[1]+(b[1]-a[1])*i/n;bot.push(P(x,y,0));top.push(P(x,y,zf(y)))}return bot.concat(top.reverse())};
+    edges.filter(w=>w.back).forEach(w=>poly(wallPoly(w.a,w.b,hOf),col('--fg',.05),col('--fg',.22),1));
+    const isBack=o=>{const[px,py]=wallPt(o.wall,o.t);return P(px,py,0)[2]<cd};
+    const win=(wl,back,first)=>{const[px,py]=wallPt(wl.wall,wl.t),[ax,ay]=along(wl.wall),hw=wl.door?.45:.6,z1=Math.min(2.1,hOf(py)-.15),z0=wl.door?0:Math.max(.1,Math.min(.9,z1-.6));
+      const q=[P(px-ax*hw,py-ay*hw,z0),P(px+ax*hw,py+ay*hw,z0),P(px+ax*hw,py+ay*hw,z1),P(px-ax*hw,py-ay*hw,z1)];
+      poly(q,back?col('--cool',.18):null,col('--fg',back?.5:.2),1.4,back?null:[4,4]);if(back)line(P(px,py,z0),P(px,py,z1),col('--fg',.35),1);
+      const sd=first&&(cfg.devs||[]).find(d=>d.type==='shutter');if(sd){const sh=S.sh[sd.id];sh.pos+=(sh.tgt-sh.pos)*.04;if(Math.abs(sh.tgt-sh.pos)<.3)sh.pos=sh.tgt;
+        const zc=z1-(z1-z0)*(1-sh.pos/100);if(zc<z1-.01){poly([P(px-ax*hw,py-ay*hw,zc),P(px+ax*hw,py+ay*hw,zc),P(px+ax*hw,py+ay*hw,z1),P(px-ax*hw,py-ay*hw,z1)],col('--fg',.55),col('--fg',.7),1);
+          for(let zz=zc+.06;zz<z1;zz+=.06)line(P(px-ax*hw,py-ay*hw,zz),P(px+ax*hw,py+ay*hw,zz),col('--bg',.35),1)}
+        const bx=P(px-ax*(hw+.04),py-ay*(hw+.04),z1),bx2=P(px+ax*(hw+.04),py+ay*(hw+.04),z1+.15);place('d_'+sd.id,P(px,py,z1+.4),sh.pos<100);}};
+    /* Zimmertür: Öffnung, Türblatt 70° ins Zimmer, Schwenkbereich am Boden */
+    const door=(d,back)=>{const[px,py]=wallPt(d.wall,d.t),[ax,ay]=along(d.wall),[ix,iy]=inward(d.wall),hw=.45,w=.9,z1=Math.min(2.0,hOf(py)-.1);
+      const A=[px-ax*hw,py-ay*hw],B=[px+ax*hw,py+ay*hw];
+      poly([P(A[0],A[1],0),P(B[0],B[1],0),P(B[0],B[1],z1),P(A[0],A[1],z1)],col('--bg',back?.85:.2),col('--fg',back?.55:.25),1.4,back?null:[4,4]);
+      const hg=d.flip?B:A,sg=d.flip?-1:1,an=1.22,at=a=>[hg[0]+(ax*Math.cos(a)*sg+ix*Math.sin(a))*w,hg[1]+(ay*Math.cos(a)*sg+iy*Math.sin(a))*w],tip=at(an);
+      ctx.beginPath();for(let k=0;k<=12;k++){const q=P(...at(an*k/12),.01);k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.setLineDash([3,4]);ctx.strokeStyle=col('--fg',.25);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+      poly([P(hg[0],hg[1],0),P(tip[0],tip[1],0),P(tip[0],tip[1],z1-.02),P(hg[0],hg[1],z1-.02)],col('--bg',.92),col('--fg',.4),1);
+      const hd=P(hg[0]+(tip[0]-hg[0])*.88,hg[1]+(tip[1]-hg[1])*.88,1.0);ctx.beginPath();ctx.arc(hd[0],hd[1],2.6,0,7);ctx.fillStyle=col('--fg',.6);ctx.fill()};
+    cfg.wins.forEach((w,i)=>{if(isBack(w))win(w,true,i===0)});cfg.doors.forEach(d=>{if(isBack(d))door(d,true)});
+    if(R.f===2){const yy=[];for(let i=0;i<=16;i++)yy.push(R.y0+(R.y1-R.y0)*i/16);
+      if(yy.some(y=>hOf(y)<2.49)){const top=yy.map(y=>P(R.x0,y,hOf(y))),top2=yy.map(y=>P(R.x1,y,hOf(y))).reverse();poly(top.concat(top2),col('--fg',.04),col('--fg',.12),.8)}}
+    /* Möbel und Geräte am Boden, nach Tiefe sortiert */
+    const items=[],push=(x,y,f,dz=0)=>items.push({d:P(x,y,0)[2]+dz,f});
+    (cfg.furn||[]).forEach(fu=>{const[fx,fy]=UV(fu.u,fu.v),q=fu.q||0,W=fu.W,D=fu.D,w=W/2,d=D/2,T=fu.type;
+      const tr=(lx,ly)=>q===0?[fx+lx,fy+ly]:q===1?[fx-ly,fy+lx]:q===2?[fx-lx,fy-ly]:[fx+ly,fy-lx];
+      const rb=(lx0,ly0,lx1,ly1,z0,z1,top,side,edge)=>{const a=tr(lx0,ly0),b=tr(lx1,ly1);box(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[0],b[0]),Math.max(a[1],b[1]),z0,z1,top,side,edge)};
+      const pu=(lx,ly,f,dz=0)=>{const pp=tr(lx,ly);push(pp[0],pp[1],f,dz)};
+      const leg=(lx,ly,h)=>{const pp=tr(lx,ly);line(P(pp[0],pp[1],0),P(pp[0],pp[1],h),col('--fg',.35),2)};
+      if(T==='bed')pu(0,0,()=>{rb(-w,-d,w,d,0,.32,col('--fg',.10),col('--fg',.14));rb(-w+.05,-d+.05,w-.05,d-.05,.32,.48,col('--bg',.95),col('--fg',.08));rb(-w+.12,-d+.1,w-.12,-d+.5,.48,.58,col('--bg',1),col('--fg',.06));rb(-w,-d,w,-d+.06,0,.9,col('--fg',.16),col('--fg',.18))});
+      if(T==='desk'){pu(0,0,()=>{[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>leg(a*(w-.04),b*(d-.04),.7));rb(-w,-d,w,d,.7,.76,col('--fg',.14),col('--fg',.18))});pu(0,d+.3,()=>rb(-.22,d+.08,.22,d+.52,0,.45,col('--fg',.1),col('--fg',.12)))}
+      if(T==='counter')pu(0,0,()=>{rb(-w,-d,w,d,0,.88,col('--fg',.16),col('--bg',.9));rb(-w,-d,w,d,.88,.92,col('--fg',.22),col('--fg',.2));if(fu.upper)rb(-w,-d,w,-d+.35,1.5,2.2,col('--bg',.9),col('--bg',.85))},-.05);
+      if(T==='table'){const n=fu.chairs||0,lg=W>=D;for(let k=0;k<n;k++){const side=k%2?1:-1,kk=Math.floor(k/2),cnt=Math.ceil(n/2),off=(kk+.5)/cnt-.5,[lx,ly]=lg?[off*W*.8,side*(d+.28)]:[side*(w+.28),off*D*.8];pu(lx,ly,()=>rb(lx-.2,ly-.2,lx+.2,ly+.2,0,.46,col('--fg',.12),col('--fg',.1)))}
+        pu(0,0,()=>{[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b])=>leg(a*(w-.08),b*(d-.08),.72));rb(-w,-d,w,d,.72,.77,col('--fg',.14),col('--fg',.18))})}
+      if(T==='sofa'){pu(0,-d+.45,()=>{rb(-w,-d,w,-d+.9,0,.42,col('--fg',.16),col('--fg',.14));rb(-w,-d,w,-d+.22,.42,.85,col('--fg',.2),col('--fg',.16))});
+        if(D>1.2)pu(-w+.45,.45,()=>{rb(-w,-d+.9,-w+.9,d,0,.42,col('--fg',.16),col('--fg',.14));rb(-w,-d+.9,-w+.22,d,.42,.85,col('--fg',.2),col('--fg',.16))})}
+      if(T==='sessel')pu(0,0,()=>{rb(-w,-d,w,d,0,.42,col('--fg',.16),col('--fg',.14));rb(-w,-d,w,-d+.2,.42,.85,col('--fg',.2),col('--fg',.16));rb(-w,-d,-w+.15,d,.42,.6,col('--fg',.2),col('--fg',.16));rb(w-.15,-d,w,d,.42,.6,col('--fg',.2),col('--fg',.16))});
+      if(T==='coffee')pu(0,0,()=>rb(-w,-d,w,d,0,.4,col('--fg',.12),col('--fg',.1)));
+      if(T==='tv')pu(0,0,()=>{rb(-w,-d,w,d,0,.45,col('--fg',.14),col('--bg',.9));rb(-w+.05,-d,w-.05,-d+.06,.95,1.6,col('--fg',.75),col('--fg',.6),col('--fg',.8))},-.04);
+      if(T==='schrank')pu(0,0,()=>{rb(-w,-d,w,d,0,Math.min(2.0,hOf(fy)-.05),col('--bg',.92),col('--bg',.85));const m=tr(0,d);line(P(m[0],m[1],.05),P(m[0],m[1],Math.min(1.95,hOf(fy)-.1)),col('--fg',.25),1)},-.03);
+      if(T==='regal')pu(0,0,()=>{const hh=Math.min(1.8,hOf(fy)-.05);rb(-w,-d,w,d,0,hh,col('--fg',.06),col('--fg',.05));for(let z=.4;z<hh;z+=.45)rb(-w,-d,w,d,z,z+.03,col('--fg',.2),col('--fg',.15))},-.03);
+      if(T==='kommode')pu(0,0,()=>{rb(-w,-d,w,d,0,.85,col('--bg',.92),col('--bg',.85));const m=tr(0,d);line(P(m[0],m[1],.42),P(m[0],m[1],.44),col('--fg',.4),3)},-.02);
+    });
+    /* Heizkörper (FRITZ!DECT) */
+    if(S.T.kind==='fritz'){const T0=cfg.T,[px,py]=wallPt(T0.wall,T0.t),[ax,ay]=along(T0.wall),[ix,iy]=inward(T0.wall),hw=.5;
+      push(px+ix*.1,py+iy*.1,()=>{const T=S.T,heat=T.ist<T.soll-.15;
+        box(Math.min(px-ax*hw,px+ax*hw+ix*.08),Math.min(py-ay*hw,py+ay*hw+iy*.08),Math.max(px-ax*hw,px+ax*hw+ix*.08),Math.max(py-ay*hw,py+ay*hw+iy*.08),.15,.72,col('--bg',.95),col(heat?'--heat':'--fg',heat?.35:.14));
+        for(let k=1;k<10;k++){const fx=px-ax*hw+ax*2*hw*k/10+ix*.085,fy=py-ay*hw+ay*2*hw*k/10+iy*.085;line(P(fx,fy,.2),P(fx,fy,.68),col('--fg',.18),1)}
+        const tp=P(px+ax*(hw+.06)+ix*.06,py+ay*(hw+.06)+iy*.06,.6);ctx.beginPath();ctx.arc(tp[0],tp[1],4.5,0,7);ctx.fillStyle=col(heat?'--heat':'--fg',.85);ctx.fill();
+        if(heat&&!RM)for(let k=0;k<3;k++){const ph=(t*.5+k/3)%1,z=.75+ph*.9,a=.5*(1-ph);ctx.beginPath();for(let s=0;s<=12;s++){const u=-hw+2*hw*s/12,q=P(px+ax*u+ix*(.15+ph*.25),py+ay*u+iy*(.15+ph*.25),z+.05*Math.sin(s*1.3+t*3));s?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.strokeStyle=col('--heat',a);ctx.lineWidth=1.6;ctx.stroke()}
+        place('thermo',P(px+ix*.25,py+iy*.25,.95),heat)},.01)}
+    else{const T=S.T;place('thermo',P(cx,cy,.25),T.actor);if(T.actor&&!RM)for(let k=0;k<3;k++){const ph=(t*.35+k/3)%1,z=.1+ph*1.2;ctx.beginPath();for(let s=0;s<=14;s++){const u=-1+2*s/14,q=P(cx+u*1.2,cy+.3*Math.sin(s+k),z+.06*Math.sin(s*1.1+t*2));s?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}ctx.strokeStyle=col('--heat',.35*(1-ph));ctx.lineWidth=1.4;ctx.stroke()}}
+    /* Geräte */
+    (cfg.devs||[]).forEach(d=>{if(!d.wall||!['dish','echo','fan'].includes(d.type))return;const[px,py]=wallPt(d.wall,d.t),[ix,iy]=inward(d.wall),[ax,ay]=along(d.wall);
+      if(d.type==='dish'){const fx=px+ix*.62,fy=py+iy*.62;push(fx,fy,()=>{const q=[P(fx-ax*.3,fy-ay*.3,.08),P(fx+ax*.3,fy+ay*.3,.08),P(fx+ax*.3,fy+ay*.3,.82),P(fx-ax*.3,fy-ay*.3,.82)];poly(q,col('--fg',.12),col('--fg',.4),1);
+        const run=S.dev[d.id];if(run){floorGlow(fx+ix*.35,fy+iy*.35,'#7fb6ff',.5,.35)}place('d_'+d.id,P(fx+ix*.1,fy+iy*.1,1.05),run)},.02)}
+      if(d.type==='echo'){const ex=px+ix*.35,ey=py+iy*.35,z=.92;push(ex,ey,()=>{box(ex-.06,ey-.06,ex+.06,ey+.06,z,z+.15,col('--fg',.5),col('--fg',.35));const top=P(ex,ey,z+.15);
+        if(S.dev[d.id]){ctx.beginPath();ctx.ellipse(top[0],top[1],8,8*Math.sin(elev),0,0,7);ctx.strokeStyle=col('--home',.6+.4*Math.sin(t*6));ctx.lineWidth=2.5;ctx.stroke()}place('d_'+d.id,P(ex,ey,z+.45),S.dev[d.id])},.03)}
+      if(d.type==='fan'){const fx=px+ix*.02,fy=py+iy*.02,z=d.z||2;push(fx,fy,()=>{const ring=[];for(let s=0;s<=20;s++){const an=s/20*Math.PI*2;ring.push(P(fx+ax*Math.cos(an)*.16,fy+ay*Math.cos(an)*.16,z+Math.sin(an)*.16))}poly(ring,col('--bg',.95),col('--fg',.4),1.2);
+        const on=S.dev[d.id],rot=on&&!RM?t*6:0;for(let k=0;k<3;k++){const an=rot+k*2.09;line(P(fx,fy,z),P(fx+ax*Math.cos(an)*.13,fy+ay*Math.cos(an)*.13,z+Math.sin(an)*.13),col('--cool',on?.9:.4),2)}
+        place('d_'+d.id,P(fx+ix*.2,fy+iy*.2,z+.35),on)},.04)}
+    });
+    items.sort((a,b)=>a.d-b.d).forEach(i=>i.f());
+    /* Licht */
+    cfg.lights.forEach(l=>{const L=S.L[l.id],o=L.on?(l.dim?.25+L.bri/100*.75:1):0;
+      if(l.type==='spots'){const sp=spotPos(l).map(([u,v])=>UV(u,v));
+        sp.forEach(([sx,sy],k)=>{const z=hOf(sy)-.02,dk=S.disco&&((t*2+k)%2<1),oo=S.disco?(dk?.9:.1):(L.each&&!L.each[k]?0:o);
+          if(oo>.02){floorGlow(sx,sy,L.col,.55*oo,.9);cone(sx,sy,z,.75,L.col,.35*oo)}
+          const s0=P(sx,sy,z);ctx.beginPath();ctx.ellipse(s0[0],s0[1],7,7*Math.sin(elev),0,0,7);ctx.fillStyle=oo>.02?col(L.col,1):col('--fg',.35);ctx.fill()});
+        place('l_'+l.id,P(sp[1][0],sp[1][1],hOf(sp[1][1])+.2),L.on)}
+      if(l.type==='plane'){const[lx,ly]=lightXY(l),rr=l.rot||0,rc=Math.cos(rr),rs=Math.sin(rr),z=hOf(ly)-.06,on=L.on||S.disco,c=S.disco?'hsl('+((t*90)%360|0)+',80%,65%)':L.col;const pts=PLANE.map(([u,v])=>P(lx+u*rc-v*rs,ly+u*rs+v*rc,z));
+        if(on){ctx.save();ctx.shadowColor=c;ctx.shadowBlur=28;poly(pts,c,null);ctx.restore()}poly(pts,col('--bg',.97),col('--fg',.35),1);place('l_'+l.id,P(lx,ly-.9,z+.2),on)}
+      if(l.type==='pendant'){const[lx,ly]=lightXY(l),zc=hOf(ly),z1=1.75,on=L.on;line(P(lx,ly,zc),P(lx,ly,z1+.25),col('--fg',.45),1.2);
+        const ring=(r,z)=>{const a=[];for(let s=0;s<=20;s++){const an=s/20*Math.PI*2;a.push(P(lx+Math.cos(an)*r,ly+Math.sin(an)*r,z))}return a};
+        if(on)floorGlow(lx,ly,L.col,.5,1.4);const top=ring(.1,z1+.25),bot=ring(.3,z1);poly(bot,on?col(L.col,.85):col('--fg',.12),col('--fg',.4),1);
+        poly([...top.slice(0,11),...bot.slice(0,11).reverse()],col('--bg',.96),col('--fg',.35),1);poly(top,col('--bg',.9),col('--fg',.35),1);place('l_'+l.id,P(lx+.45,ly,z1+.3),on)}
+      if(l.type==='ceiling'){const[lx,ly]=UV(l.u,l.v),z=hOf(ly)-.04;if(o>.02){floorGlow(lx,ly,L.col,.5*o,1.8);cone(lx,ly,z,1.5,L.col,.22*o)}
+        const r=[];for(let s=0;s<=20;s++){const an=s/20*Math.PI*2;r.push(P(lx+Math.cos(an)*.28,ly+Math.sin(an)*.28,z))}poly(r,o>.02?col(L.col,.95):col('--bg',.95),col('--fg',.35),1);place('l_'+l.id,P(lx,ly,z+.25),L.on)}
+      if(l.type==='strip'){const{a,b,ix,iy,za,zb}=stripEnds(l),sz=Math.max(za,zb),A=P(a[0]+ix*.05,a[1]+iy*.05,za),B=P(b[0]+ix*.05,b[1]+iy*.05,zb);
+        if(o>.02){ctx.save();ctx.shadowColor=col(L.col,1);ctx.shadowBlur=18;line(A,B,col(L.col,.9),4);ctx.restore();const m=[(a[0]+b[0])/2+ix*.6,(a[1]+b[1])/2+iy*.6];floorGlow(m[0],m[1],L.col,.25*o,1.4)}else line(A,B,col('--fg',.3),2);
+        place('l_'+l.id,P((a[0]+b[0])/2+ix*.1,(a[1]+b[1])/2+iy*.1,sz+.3),L.on)}
+      if(l.type==='floorlamp'){const[lx,ly]=UV(l.u,l.v);line(P(lx,ly,0),P(lx,ly,1.55),col('--fg',.55),2);
+        const ring=(r,z)=>{const a=[];for(let s=0;s<=20;s++){const an=s/20*Math.PI*2;a.push(P(lx+Math.cos(an)*r,ly+Math.sin(an)*r,z))}return a};
+        if(o>.02){floorGlow(lx,ly,L.col,.45*o,1.3);const top=P(lx,ly,1.9),g=ctx.createRadialGradient(top[0],top[1],0,top[0],top[1],scale*.8);g.addColorStop(0,col(L.col,.4*o));g.addColorStop(1,col(L.col,0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(top[0],top[1],scale*.8,0,7);ctx.fill()}
+        const top=ring(.13,1.85),bot=ring(.22,1.55);poly([...top.slice(0,11),...bot.slice(0,11).reverse()],o>.02?col(L.col,.75):col('--bg',.95),col('--fg',.35),1);poly(top,col('--bg',.9),col('--fg',.3),1);
+        place('l_'+l.id,P(lx+.3,ly,2.0),L.on)}
+    });
+    /* Bewegungsmelder */
+    cfg.P.forEach((p,i)=>{const[sx,sy]=UV(p.at[0],p.at[1]),z=hOf(sy)-.1,hot=performance.now()-S.pir[i]<4000;
+      const s0=P(sx,sy,z),tgt=[];for(let s=0;s<=8;s++){const a=Math.atan2(cy-sy,cx-sx)-.6+1.2*s/8;tgt.push(P(sx+Math.cos(a)*2.4,sy+Math.sin(a)*2.4,0))}
+      ctx.beginPath();ctx.moveTo(s0[0],s0[1]);tgt.forEach(q=>ctx.lineTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=col('--ok',hot?.14+.08*Math.sin(t*8):.035);ctx.fill();
+      if(hot){const ph=(t*1.2)%1;ctx.beginPath();for(let s=0;s<=8;s++){const a=Math.atan2(cy-sy,cx-sx)-.6+1.2*s/8,qq=P(sx+Math.cos(a)*2.4*ph,sy+Math.sin(a)*2.4*ph,0);s?ctx.lineTo(qq[0],qq[1]):ctx.moveTo(qq[0],qq[1])}ctx.strokeStyle=col('--ok',.6*(1-ph));ctx.lineWidth=2;ctx.stroke()}
+      ctx.beginPath();ctx.arc(s0[0],s0[1],5,0,7);ctx.fillStyle=col(hot?'--ok':'--fg',hot?1:.5);ctx.fill();place('pir'+i,P(sx,sy,z+.25),hot)});
+    /* Vordere Wände als Kante */
+    edges.filter(w=>!w.back).forEach(w=>{const n=8,top=[];for(let i=0;i<=n;i++){const x=w.a[0]+(w.b[0]-w.a[0])*i/n,y=w.a[1]+(w.b[1]-w.a[1])*i/n;top.push(P(x,y,hOf(y)))}
+      ctx.beginPath();top.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.setLineDash([3,6]);ctx.strokeStyle=col('--fg',.25);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+      [w.a,w.b].forEach(pt=>line(P(pt[0],pt[1],0),P(pt[0],pt[1],hOf(pt[1])),col('--fg',.2),1));poly(wallPoly(w.a,w.b,()=>.12),col('--fg',.1),col('--fg',.35),1)});
+    cfg.wins.forEach((w,i)=>{if(!isBack(w))win(w,false,i===0)});cfg.doors.forEach(d=>{if(!isBack(d))door(d,false)});
+    if(edit)drawHandles();
+    ctx.globalAlpha=1;
+  }
+  /* ---------- Einrichten: Griffpunkte, Ziehen, Drehen ---------- */
+  function handles(){const cfg=R.cfg,h=[];
+    (cfg.furn||[]).forEach((fu,i)=>{const[x,y]=UV(fu.u,fu.v);h.push({k:'f'+i,kind:'furn',fu,W:fu,list:cfg.furn,x,y,z:.5,label:FN[fu.type]||fu.type,rot:true})});
+    cfg.wins.forEach((w,i)=>{const[wx,wy]=wallPt(w.wall,w.t),[ix,iy]=inward(w.wall);h.push({k:'win'+i,kind:'win',W:w,list:cfg.wins,x:wx+ix*.05,y:wy+iy*.05,z:w.door?1.1:1.5,label:w.door?'Fenstertür':'Fenster'})});
+    cfg.doors.forEach((d,i)=>{const[wx,wy]=wallPt(d.wall,d.t),[ix,iy]=inward(d.wall);h.push({k:'door'+i,kind:'door',W:d,list:cfg.doors,x:wx+ix*.05,y:wy+iy*.05,z:1.0,label:'Zimmertür'})});
+    cfg.P.forEach((q,i)=>{const[x,y]=UV(q.at[0],q.at[1]);h.push({k:'p'+i,kind:'pir',q,x,y,z:hOf(y)-.1,label:'Bewegungsmelder '+q.n})});
+    if(cfg.T.kind==='fritz'){const[px,py]=wallPt(cfg.T.wall,cfg.T.t),[ix,iy]=inward(cfg.T.wall);h.push({k:'rad',kind:'rad',T:cfg.T,x:px+ix*.1,y:py+iy*.1,z:.45,label:cfg.T.n})}
+    cfg.lights.forEach(l=>{const zc=y=>hOf(y)-.05;
+      if(l.type==='spots')spotPos(l).forEach(([u,v],k)=>{const[x,y]=UV(u,v);h.push({k:'s'+l.id+k,kind:'spot',l,idx:k,x,y,z:zc(y),label:(l.each&&l.each[k])||LN.spots})});
+      else if(l.type==='plane'||l.type==='pendant'){const[x,y]=lightXY(l);h.push({k:'l'+l.id,kind:'light',l,x,y,z:l.type==='pendant'?1.85:zc(y),label:l.n,rot:l.type==='plane'});
+        if(l.type==='plane'){const r=l.rot||0;h.push({k:'r'+l.id,kind:'rotp',l,cx:x,cy:y,x:x+1.12*Math.sin(r),y:y-1.12*Math.cos(r),z:zc(y),label:'Flugzeug drehen'})}}
+      else if(l.type==='ceiling'||l.type==='floorlamp'){const[x,y]=UV(l.u,l.v);h.push({k:'l'+l.id,kind:'light',l,x,y,z:l.type==='floorlamp'?1.7:zc(y),label:l.n})}
+      else if(l.type==='strip'){const e=stripEnds(l);h.push({k:'l'+l.id,kind:'strip',l,x:(e.a[0]+e.b[0])/2,y:(e.a[1]+e.b[1])/2,z:(e.za+e.zb)/2,label:l.n,rot:true})}});
+    return h}
+  function drawHandles(){HND=handles();
+    const sf=HND.find(x=>x.k===sel&&x.kind==='furn');
+    if(sf){const fu=sf.fu,[fx,fy]=UV(fu.u,fu.v),q=fu.q||0,w=fu.W/2,d=fu.D/2,tr=(lx,ly)=>q===0?[fx+lx,fy+ly]:q===1?[fx-ly,fy+lx]:q===2?[fx-lx,fy-ly]:[fx+ly,fy-lx],fp=(a,b)=>{const pp=tr(a,b);return P(pp[0],pp[1],.01)};
+      poly([fp(-w,-d),fp(w,-d),fp(w,d),fp(-w,d)],col('--home',.1),col('--home',.9),1.5,[5,4]);line(fp(-w,-d),fp(w,-d),col('--home',1),3)}
+    HND.forEach(h=>{const s=P(h.x,h.y,h.z),f=P(h.x,h.y,0),on=h.k===sel,hv=h.k===hover;
+      if(h.kind!=='furn'&&h.kind!=='rad'&&h.kind!=='win'&&h.kind!=='door'&&h.kind!=='rotp'){ctx.setLineDash([3,4]);line(s,f,col('--fg',.3),1);ctx.setLineDash([]);ctx.beginPath();ctx.ellipse(f[0],f[1],5,5*Math.sin(elev),0,0,7);ctx.fillStyle=col('--fg',.25);ctx.fill()}
+      if(h.kind==='rotp'){const c0=P(h.cx,h.cy,h.z);ctx.setLineDash([2,4]);line(c0,s,col('--sun',.6),1.2);ctx.setLineDash([]);ctx.beginPath();ctx.arc(s[0],s[1],13,-.6,2.6);ctx.strokeStyle=col('--sun',1);ctx.lineWidth=2;ctx.stroke()}
+      ctx.beginPath();ctx.arc(s[0],s[1],on||hv?11:8,0,7);ctx.fillStyle=on?col('--fg',1):col('--bg',.95);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=col(h.kind==='furn'?'--home':h.kind==='pir'?'--ok':h.kind==='rad'?'--heat':h.kind==='win'?'--grid':h.kind==='door'?'--fg':'--sun',1);ctx.stroke();
+      if(on||hv){ctx.font='600 12px '+cssv('--font');ctx.textAlign='left';const tw=ctx.measureText(h.label).width;ctx.fillStyle=col('--bg',.92);ctx.fillRect(s[0]+14,s[1]-10,tw+12,20);ctx.fillStyle=col('--fg',1);ctx.fillText(h.label,s[0]+20,s[1]+4)}})}
+  function hit(px,py){let best=null,bd=24;for(const h of HND){const s=P(h.x,h.y,h.z),d=Math.hypot(s[0]-px,s[1]-py);if(d<bd){bd=d;best=h}}return best}
+  const clamp01=(v,m)=>Math.max(m,Math.min(1-m,v));
+  const toU=x=>(x-R.x0)/(R.x1-R.x0),toV=y=>(y-R.y0)/(R.y1-R.y0);
+  function nearWall(x,y){const d={w:x-R.x0,e:R.x1-x,n:y-R.y0,s:R.y1-y};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0]}
+  function moveTo(h,x,y){const fu=h.fu,l=h.l;
+    if(h.kind==='furn'){const Lx=R.x1-R.x0,Ly=R.y1-R.y0,free=fu.type==='table'||fu.type==='coffee';
+      let q=fu.q||0,px=x,py=y;
+      if(!free){const dist={n:y-R.y0,s:R.y1-y,w:x-R.x0,e:R.x1-x},wl=Object.keys(dist).sort((a,b)=>dist[a]-dist[b])[0];
+        if(dist[wl]<fu.D/2+.4){q=QW[wl];const hd=fu.D/2+.01;if(wl==='n')py=R.y0+hd;if(wl==='s')py=R.y1-hd;if(wl==='w')px=R.x0+hd;if(wl==='e')px=R.x1-hd}}
+      fu.q=q;const ex=(q%2?fu.D:fu.W)/2,ey=(q%2?fu.W:fu.D)/2;
+      fu.u=Math.min(Math.max(toU(px),Math.min(.5,ex/Lx)),Math.max(.5,1-ex/Lx));fu.v=Math.min(Math.max(toV(py),Math.min(.5,ey/Ly)),Math.max(.5,1-ey/Ly))}
+    else if(h.kind==='win'||h.kind==='door'){const w=nearWall(x,y);h.W.wall=w;h.W.t=clamp01(w==='n'||w==='s'?toU(x):toV(y),.12)}
+    else if(h.kind==='rotp'){const st=Math.PI/12;h.l.rot=((Math.round(Math.atan2(x-h.cx,h.cy-y)/st)*st)+Math.PI*2)%(Math.PI*2)}
+    else if(h.kind==='pir'){h.q.at=[clamp01(toU(x),.03),clamp01(toV(y),.03)]}
+    else if(h.kind==='rad'){const w=nearWall(x,y);h.T.wall=w;h.T.t=clamp01(w==='n'||w==='s'?toU(x):toV(y),.12);const st=STATE[R.id].T;st.wall=h.T.wall;st.t=h.T.t}
+    else if(h.kind==='spot'){if(!l.pos)l.pos=SPOTS.map(q=>q.slice());l.pos[h.idx]=[clamp01(toU(x),.04),clamp01(toV(y),.04)]}
+    else if(h.kind==='light'){l.u=clamp01(toU(x),.06);l.v=clamp01(toV(y),.06)}
+    else if(h.kind==='strip'&&l.free){l.u=clamp01(toU(x),.05);l.v=clamp01(toV(y),.05)}
+    else if(h.kind==='strip'){const w=nearWall(x,y);l.wall=w;const t=w==='n'||w==='s'?toU(x):toV(y),L=Math.min(1,l.to-l.from);l.from=Math.max(0,Math.min(1-L,t-L/2));l.to=l.from+L}}
+  const SH=[[.08,'Sockel'],[.78,'Tischkante'],[1.6,'Regal'],[9,'Decke']];
+  function rotate(h){if(h.kind==='strip'){const l=h.l;
+      if(l.free){if(l.axis!=='y'){l.axis='y';toast(l.n+': Decke, quer')}else{l.free=0;l.axis='x';l.z=SH[0][0];l.wall=l.wall||'n';toast(l.n+': an der Wand · Sockel')}}
+      else{const i=SH.findIndex(q=>Math.abs(Math.min(q[0],2.42)-Math.min(l.z,2.42))<.05);if(i===SH.length-1){l.free=1;l.axis='x';l.u=.5;l.v=.5;toast(l.n+': Decke Mitte – frei verschieben')}else{const n=SH[i+1];l.z=n[0];toast(l.n+': '+n[1])}}
+      saveLayout(R.id);return}
+    if(h.kind==='door'){h.W.flip=h.W.flip?0:1;saveLayout(R.id);toast('Tür angeschlagen '+(h.W.flip?'rechts':'links'));return}
+    if(h.kind==='rotp'){h.kind='light'}
+    if(h.kind==='win'){h.W.door=h.W.door?0:1;saveLayout(R.id);toast(h.W.door?'Jetzt Fenstertür (bis zum Boden)':'Jetzt Fenster');return}if(h.kind==='furn'){h.fu.q=((h.fu.q||0)+1)%4;clampFurn(h.fu)}else if(h.l&&h.l.type==='plane'){h.l.rot=((h.l.rot||0)+Math.PI/4)%(Math.PI*2)}else{toast(h.label+' lässt sich nur verschieben');return}
+    saveLayout(R.id);toast(h.label+' gedreht')}
+  const rbar=$('[data-rbar]'),ebtn=$('[data-edit]');
+  function setEdit(on){edit=on;sel=null;delBtn.disabled=true;hover=null;wrap.classList.toggle('editing',on);rbar.hidden=!on;$('[data-rhint]').hidden=on;ebtn.setAttribute('aria-pressed',on);
+    if(on){HND=handles();lastUser=performance.now()}}
+  ebtn.addEventListener('click',()=>setEdit(!edit));
+  const delBtn=$('[data-edel]');
+  function updDel(){const h=HND.find(x=>x.k===sel);const ok=h&&(h.kind==='win'||h.kind==='door'||h.kind==='furn');delBtn.disabled=!ok;delBtn.textContent=ok?h.label+' entfernen':'Entfernen';updSize()}
+  const szBox=$('[data-esize]');
+  function clampFurn(fu){const Lx=R.x1-R.x0,Ly=R.y1-R.y0,q=fu.q||0,ex=(q%2?fu.D:fu.W)/2,ey=(q%2?fu.W:fu.D)/2;
+    fu.u=Math.min(Math.max(fu.u,Math.min(.5,ex/Lx)),Math.max(.5,1-ex/Lx));fu.v=Math.min(Math.max(fu.v,Math.min(.5,ey/Ly)),Math.max(.5,1-ey/Ly))}
+  function updSize(){const h=HND.find(x=>x.k===sel),ok=!!(h&&h.kind==='furn');szBox.hidden=!ok;if(ok){$('[data-szw]').textContent=de(h.fu.W,2)+' m';$('[data-szd]').textContent=de(h.fu.D,2)+' m'}}
+  szBox.addEventListener('click',e=>{const b=e.target.closest('[data-sz]'),h=HND.find(x=>x.k===sel);if(!b||!h||h.kind!=='furn')return;
+    const fu=h.fu,dir=b.dataset.sz[1]==='+'?1:-1,r2=v=>Math.round(v*100)/100;
+    if(b.dataset.sz[0]==='W')fu.W=Math.max(.3,Math.min(6,r2(fu.W+dir*.1)));
+    else{const nd=Math.max(.3,Math.min(3,r2(fu.D+dir*.1))),dd=(nd-fu.D)/2,fw=[[0,1],[-1,0],[0,-1],[1,0]][fu.q||0];fu.D=nd;fu.u+=fw[0]*dd/(R.x1-R.x0);fu.v+=fw[1]*dd/(R.y1-R.y0)}
+    clampFurn(fu);saveLayout(R.id);HND=handles();updDel()});
+  $('[data-eaddf]').addEventListener('change',e=>{const T=e.target.value;e.target.value='';if(!T)return;const dd=FDEF[T],f={type:T,u:.5,v:.5,W:dd[0],D:dd[1],q:0};if(T==='table')f.chairs=4;if(T==='counter')f.upper=1;
+    R.cfg.furn.push(f);saveLayout(R.id);HND=handles();sel='f'+(R.cfg.furn.length-1);updDel();toast(FN[T]+' hinzugefügt – an die Wand ziehen stellt es an, doppelt tippen dreht')});
+  $$('[data-eadd]').forEach(b=>b.addEventListener('click',()=>{const cfg=R.cfg,isW=b.dataset.eadd==='win',list=isW?cfg.wins:cfg.doors;
+    const used=['n','e','s','w'].map(w=>[w,cfg.wins.concat(cfg.doors).filter(o=>o.wall===w).length]).sort((a,b)=>a[1]-b[1])[0][0];
+    list.push(isW?{wall:used,t:.5}:{wall:used,t:.5,flip:0});saveLayout(R.id);HND=handles();sel=(isW?'win':'door')+(list.length-1);updDel();toast((isW?'Fenster':'Tür')+' hinzugefügt – jetzt an die richtige Stelle ziehen')}));
+  delBtn.addEventListener('click',()=>{const h=HND.find(x=>x.k===sel);if(!h||!h.list)return;h.list.splice(h.list.indexOf(h.W),1);saveLayout(R.id);sel=null;HND=handles();updDel();toast(h.label+' entfernt')});
+  $('[data-edone]').addEventListener('click',()=>{setEdit(false);toast('Einrichtung gespeichert (in diesem Browser)')});
+  $('[data-ereset]').addEventListener('click',()=>{resetLayout(R.id);sel=null;toast('Zimmer '+R.cfg.n+' zurückgesetzt')});
+  $('[data-ecopy]').addEventListener('click',()=>{const j=JSON.stringify(Object.fromEntries(Object.keys(ZC).map(id=>[id,layoutOf(id)])));(navigator.clipboard?navigator.clipboard.writeText(j):Promise.reject()).then(()=>toast('Einrichtung aller Zimmer kopiert – auf der Seite Haus einfügen'),()=>toast('Kopieren nicht erlaubt'))});
+  function local(e){const r=wrap.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+  function place(key,p,on){const d=devEls.find(x=>x.key===key);if(!d)return;d.el.style.transform='translate('+p[0].toFixed(1)+'px,'+p[1].toFixed(1)+'px)';d.el.classList.toggle('on',!!on);d.el.style.opacity=fade;
+    if(key==='thermo'){const T=STATE[R.id].T;d.el.lastChild.textContent=de(T.ist,1)+' → '+de(T.soll,1)+' °C'}}
+  function fit(){if(!R)return;let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;const sv=scale,o0=[ox,oy];scale=1;ox=0;oy=0;
+    for(const[x,y]of R.poly)for(const z of[0,2.6]){const p=P(x,y,z);mnx=Math.min(mnx,p[0]);mxx=Math.max(mxx,p[0]);mny=Math.min(mny,p[1]);mxy=Math.max(mxy,p[1])}
+    scale=sv;ox=o0[0];oy=o0[1];const s=Math.min((W-90)/(mxx-mnx),(H-90)/(mxy-mny));return{s,tx:W/2-(mnx+mxx)/2*s,ty:H/2-(mny+mxy)/2*s+10}}
+  function frame(now){const dt=Math.min(.05,(now-(frame.l||now))/1000);frame.l=now;const t=(now-t0)/1000;
+    const idle=now-lastUser>6000&&!RM&&elevT<1.4&&!edit,yy=yawT+(idle?.14*Math.sin(t*.13):0);
+    yaw+=(yy-yaw)*Math.min(1,dt*(idle?.8:8));elev+=(elevT-elev)*Math.min(1,dt*5);fade=Math.min(1,fade+dt*1.6);
+    const F=fit();if(F){scale+=(F.s-scale)*Math.min(1,dt*5);ox+=(F.tx-ox)*Math.min(1,dt*5);oy+=(F.ty-oy)*Math.min(1,dt*5)}
+    draw(t);requestAnimationFrame(frame)}
+  let drag=null;
+  wrap.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;
+    if(edit){const[px,py]=local(e),h=hit(px,py);if(h){const f=unP(px,py,h.z);mv={h,id:e.pointerId,off:h.kind==='rotp'?[0,0]:[h.x-f[0],h.y-f[1]]};sel=h.k;updDel();lastUser=performance.now();
+      try{wrap.setPointerCapture(e.pointerId)}catch(_){}wrap.classList.add('moving');e.preventDefault();return}}
+    drag={x:e.clientX,y:e.clientY,yaw:yawT,elev:elevT,id:e.pointerId,m:false}});
+  wrap.addEventListener('pointermove',e=>{if(!edit||mv||drag)return;const[px,py]=local(e),h=hit(px,py);hover=h?h.k:null;wrap.classList.toggle('over',!!h)});
+  addEventListener('pointermove',e=>{if(mv&&e.pointerId===mv.id){const[px,py]=local(e),f=unP(px,py,mv.h.z);moveTo(mv.h,f[0]+mv.off[0],f[1]+mv.off[1]);
+      const nh=handles().find(x=>x.k===mv.h.k);if(nh){mv.h=Object.assign(nh,{});}lastUser=performance.now();return}
+    if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.m&&Math.hypot(dx,dy)<5)return;
+    if(!drag.m){drag.m=true;try{wrap.setPointerCapture(e.pointerId)}catch(_){}}wrap.classList.add('drag');yawT=drag.yaw+dx*.007;if(e.pointerType==='mouse')elevT=Math.max(.3,Math.min(1.5,drag.elev+dy*.004));lastUser=performance.now()});
+  addEventListener('pointerup',e=>{if(mv&&e.pointerId===mv.id){mv=null;wrap.classList.remove('moving');saveLayout(R.id)}
+    if(drag&&e.pointerId===drag.id){drag=null;wrap.classList.remove('drag')}});
+  const camBtns=v=>$$('[data-cam]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cam===v));
+  wrap.addEventListener('dblclick',e=>{if(edit){const[px,py]=local(e),h=hit(px,py);if(h){rotate(h);return}}yawT=-.6;elevT=.62;lastUser=-1e9;camBtns('iso')});
+  $$('[data-cam]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.cam;camBtns(v);if(v==='top'){elevT=1.5;yawT=0}else{elevT=.62;yawT=-.6};lastUser=performance.now()}));
+  new ResizeObserver(size).observe(wrap);size();requestAnimationFrame(frame);
+  return{load,setEdit};
+})();
+
+/* ================= Zustand und Bedienung ================= */
+const STATE={};
+for(const[k,c]of Object.entries(ZC))STATE[k]={L:Object.fromEntries(c.lights.map(l=>[l.id,{on:l.on,bri:l.bri||100,col:l.col,each:l.each?l.each.map(()=>true):null}])),T:{...c.T},
+  sh:Object.fromEntries((c.devs||[]).filter(d=>d.type==='shutter').map(d=>[d.id,{pos:d.pos,tgt:d.pos}])),
+  dev:Object.fromEntries((c.devs||[]).map(d=>[d.id,!!d.on])),pir:c.P.map(p=>performance.now()-p.last*60000),disco:false};
+function focusCard(k){const el=$('[data-card="'+k+'"]');if(!el)return;el.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'});el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
+const ago=ms=>{const m=Math.round(ms/60000);return m<1?'gerade eben':m<60?'vor '+m+' min':'vor '+Math.round(m/60)+' h'};
+const lcmd=(l,L,disco)=>{const on=L.on||(disco&&l.type==='plane');
+  if(l.cmd==='switch')return l.dp+(l.dp.endsWith('.Switch')?'':'.Relay0.Switch')+' = '+on;
+  if(l.cmd==='yeelight')return l.dp+'.control.'+(on?'rgb = '+L.col:'power = false');
+  if(l.cmd==='hueLevel')return l.dp+'.command = '+JSON.stringify(on?{on:true,level:70}:{on:false});
+  const hs=l.sw==='huecol'&&(SW.huecol.find(s=>s[0]===L.col)||[])[2];
+  return l.dp+'.command = '+JSON.stringify(on?(hs?{on:true,bri:briOf(L.bri),hue:hs[0],sat:hs[1]}:{on:true,bri:briOf(L.bri),ct:L.col==='#ffb45e'?2200:2700}):{on:false})};
+function side(){
+  const cfg=ZC[cur],S=STATE[cur],el=$('#side');let h='';
+  if(cfg.lights.length){h+='<div class="card" data-card="light"><div class="card-h"><h3><span class="ico" style="--c:var(--sun)"><svg><use href="#i-bulb"/></svg></span>Licht</h3>'+(cfg.scenes?'<div class="chips" style="margin:0"><button class="btn" type="button" data-scene="100,#ffe2b8">Hell</button><button class="btn" type="button" data-scene="8,#ffb45e">Nacht</button>'+(cfg.disco?'<button class="btn'+(S.disco?' on':'')+'" type="button" data-disco>Disco</button>':'')+'</div>':'')+'</div>';
+    cfg.lights.forEach(l=>{const L=S.L[l.id];h+='<div class="lrow2"><b>'+l.n+'</b><button class="btn'+(L.on?' on':'')+'" type="button" data-lt="'+l.id+'">'+(L.on?'An':'Aus')+'</button>'+
+      (l.dim?'<div class="wide lrow"><div class="num" style="font-size:22px"><span data-lp="'+l.id+'">'+(L.on?L.bri:0)+'</span><span class="unit">%</span></div><input class="slider" type="range" min="1" max="100" value="'+L.bri+'" aria-label="Helligkeit '+l.n+'" data-lb="'+l.id+'"></div>':'')+
+      (l.each?'<div class="wide chips" style="margin-top:2px">'+l.each.map((n,k)=>'<button class="btn'+(L.each[k]?' on':'')+'" type="button" data-le="'+l.id+','+k+'">'+n+'</button>').join('')+'</div>':'')+
+      (l.sw?'<div class="wide swatches">'+SW[l.sw].map(([c,n])=>'<button type="button" data-lc="'+l.id+'" data-c="'+c+'" style="--s:'+c+'" aria-label="'+n+'" aria-pressed="'+(L.col===c)+'"></button>').join('')+'</div>':'')+
+      (l.note?'<small class="wide muted">'+l.note+'</small>':'')+'<code class="code wide" data-lcmd="'+l.id+'"></code></div>'});
+    h+='</div>'}
+  if((cfg.devs||[]).length){h+='<div class="card" data-card="devs"><div class="card-h"><h3><span class="ico" style="--c:var(--home)"><svg><use href="#i-cube"/></svg></span>Geräte</h3></div>'+
+    cfg.devs.map(d=>d.type==='shutter'?'<div class="drow"><span class="ico" style="--c:var(--home)"><svg><use href="#i-garage"/></svg></span><div><b>'+d.n+'</b><br><small>'+(S.sh[d.id].tgt>=100?'offen':S.sh[d.id].tgt<=0?'zu':Math.round(S.sh[d.id].tgt)+' % offen')+'</small></div><div class="chips" style="margin:0"><button class="btn" type="button" data-sh="'+d.id+',100">Auf</button><button class="btn" type="button" data-sh="'+d.id+',s">Stopp</button><button class="btn" type="button" data-sh="'+d.id+',0">Ab</button></div></div>':
+      '<div class="drow"><span class="ico" style="--c:var('+(d.off?'--fg':'--home')+')"><svg><use href="#'+DIC[d.type]+'"/></svg></span><div><b>'+d.n+'</b><br><small>'+d.st+'</small></div>'+(d.off?'<span class="pill warn">offline</span>':'<span class="pill '+(S.dev[d.id]?'ok live':'idle')+'">'+(S.dev[d.id]?'aktiv':'bereit')+'</span>')+'</div>').join('')+'</div>'}
+  const T=S.T,heat=T.kind==='fritz'?T.ist<T.soll-.15:T.actor;
+  h+='<div class="card" data-card="heat"><div class="card-h"><h3><span class="ico" style="--c:var(--heat)"><svg><use href="#i-thermo"/></svg></span>'+(T.kind==='fritz'?'Heizung':'Fußbodenheizung')+'</h3><span class="pill '+(heat?'warn live':'ok')+'" data-t-pill>'+(heat?'heizt':'hält Temperatur')+'</span></div>'+
+    '<div class="thermo"><div class="dial" data-dial></div><div><div class="small muted">'+(T.kind==='fritz'?T.n:'Alpha2 · Heizzone '+T.zone)+'</div><div class="tbtns"><button class="btn" type="button" data-t="-">−</button><button class="btn" type="button" data-t="+">+</button></div>'+
+    '<div class="chips">'+(T.kind==='fritz'?'<span class="pill '+(T.batt<=20?'warn':'idle')+'">Batterie '+T.batt+' %</span>':'<span class="pill '+(T.actor?'warn':'idle')+'">Stellantrieb '+(T.actor?'offen':'zu')+'</span>')+'</div></div></div>'+
+    (T.bug?'<p class="small" style="margin:12px 0 0;color:var(--crit)">'+T.bug+'</p>':'')+'<code class="code" data-t-cmd></code></div>';
+  if(cfg.P.length)h+='<div class="card" data-card="motion"><div class="card-h"><h3><span class="ico" style="--c:var(--ok)"><svg><use href="#i-motion"/></svg></span>Bewegung</h3><button class="btn" type="button" data-pir-sim>Bewegung simulieren</button></div>'+
+    '<div class="pirs">'+cfg.P.map((p,i)=>'<div class="pir" data-pir="'+i+'"><span class="dot"></span><div><b>'+p.n+'</b><br><small data-pir-ago></small></div><code class="code" style="margin:0">…'+p.dp.slice(-8)+'</code></div>').join('')+'</div>'+
+    '<p class="small muted" style="margin:12px 0 0">'+cfg.note+'</p></div>';
+  el.innerHTML=h;
+  $$('[data-lb]',el).forEach(s=>{setP(s);s.addEventListener('input',()=>{const L=S.L[s.dataset.lb];L.bri=+s.value;L.on=true;S.disco=false;$('[data-lp="'+s.dataset.lb+'"]',el).textContent=L.bri;const b=$('[data-lt="'+s.dataset.lb+'"]',el);b.classList.add('on');b.textContent='An';cmds()})});
+  $$('[data-lt]',el).forEach(b=>b.addEventListener('click',()=>{const L=S.L[b.dataset.lt];L.on=!L.on;if(!L.on)S.disco=false;side()}));
+  $$('[data-lc]',el).forEach(b=>b.addEventListener('click',()=>{const L=S.L[b.dataset.lc];L.col=b.dataset.c;L.on=true;side()}));
+  $$('[data-le]',el).forEach(b=>b.addEventListener('click',()=>{const[id,k]=b.dataset.le.split(','),L=S.L[id];L.each[+k]=!L.each[+k];if(L.each[+k])L.on=true;side()}));
+  $$('[data-sh]',el).forEach(b=>b.addEventListener('click',()=>{const[id,v]=b.dataset.sh.split(','),sh=S.sh[id];sh.tgt=v==='s'?Math.round(sh.pos):+v;side()}));
+  $$('[data-scene]',el).forEach(b=>b.addEventListener('click',()=>{const[p,c]=b.dataset.scene.split(','),L=S.L.spots;L.bri=+p;L.col=c;L.on=true;S.disco=false;side()}));
+  $('[data-disco]',el)?.addEventListener('click',()=>{S.disco=!S.disco;if(S.disco){S.L.spots.on=true;S.L.spots.bri=100}side();toast(S.disco?'Disco bei Leo (Demo)':'Disco aus')});
+  $$('[data-t]',el).forEach(b=>b.addEventListener('click',()=>{T.soll=Math.max(8,Math.min(28,T.soll+(b.dataset.t==='+'?.5:-.5)));if(T.kind==='alpha2')T.actor=T.ist<T.soll-.1;side()}));
+  $('[data-pir-sim]',el)?.addEventListener('click',()=>{const i=Math.floor(Math.random()*cfg.P.length);S.pir[i]=performance.now();
+    const sp=S.L.spots;if(sp&&!sp.on){const hh=new Date().getHours(),night=hh>=19||hh<7;sp.on=true;sp.bri=night?8:60;sp.col=night?'#ffb45e':'#ffe2b8'}side();toast('Bewegung: '+cfg.P[i].n+(sp?' · Licht an':''))});
+  dial();cmds();pirs();hero();
+}
+function dial(){const T=STATE[cur].T,el=$('[data-dial]');if(!el)return;const a0=135,span=270,mn=8,mx=28,r=60,c=75;
+  const pt=v=>{const a=(a0+span*(v-mn)/(mx-mn))*Math.PI/180;return[c+r*Math.cos(a),c+r*Math.sin(a)]};
+  const arc=(v)=>{const[x0,y0]=pt(mn),[x1,y1]=pt(v),large=span*(v-mn)/(mx-mn)>180?1:0;return'M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 '+large+' 1 '+x1.toFixed(1)+' '+y1.toFixed(1)};
+  const[ix,iy]=pt(T.ist);
+  el.innerHTML='<svg viewBox="0 0 150 150"><path class="trk" d="'+arc(mx)+'"/><path class="set" d="'+arc(T.soll)+'"/><circle class="mk" cx="'+ix.toFixed(1)+'" cy="'+iy.toFixed(1)+'" r="7"/></svg><b>'+de(T.ist,1)+'°<small>Soll '+de(T.soll,1)+' °C</small></b>'}
+function cmds(){const cfg=ZC[cur],S=STATE[cur];cfg.lights.forEach(l=>{const e=$('[data-lcmd="'+l.id+'"]');if(e)e.textContent=lcmd(l,S.L[l.id],S.disco)});
+  const T=S.T,e=$('[data-t-cmd]');if(e)e.textContent=T.kind==='fritz'?T.dp+'.tsoll = '+String(T.soll):T.dp+'.T_TARGET = '+String(T.soll)}
+function pirs(){const S=STATE[cur];$$('[data-pir]').forEach((el,i)=>{const d=performance.now()-S.pir[i];el.classList.toggle('hot',d<4000);el.querySelector('[data-pir-ago]').textContent=d<4000?'Bewegung erkannt':'zuletzt '+ago(d)})}
+function hero(){const cfg=ZC[cur],S=STATE[cur],T=S.T;
+  $('[data-h1a]').textContent=cfg.h[0];$('[data-h1b]').textContent=cfg.h[1];$('[data-eyebrow]').textContent=cfg.eb;
+  $('[data-rtitle]').textContent=cfg.n+(cfg.eb.includes('Opa')?' · Opa':'');$('[data-rarea]').textContent='· '+de(ROOMS[cur].a,2)+' m²';
+  const on=cfg.lights.filter(l=>S.L[l.id].on).map(l=>l.n);
+  const light=cfg.lights.length?(on.length?'an: <b>'+on.join(', ')+'</b>':'Licht <b>aus</b>'):'kein Licht eingebunden';
+  let mot='';if(cfg.P.length){const lastP=Math.min(...S.pir.map(p=>performance.now()-p));mot=' Bewegung <b>'+(lastP<4000?'gerade eben':ago(lastP))+'</b>.'}
+  $('[data-lede]').innerHTML=de(T.ist,1)+' °C bei Soll <b>'+de(T.soll,1)+' °C</b>, '+light+'.'+mot;
+  $$('[data-room]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.room===cur))}
+function pick(id){if(!ZC[id])return;cur=id;try{history.replaceState(null,'','#'+id)}catch(e){}ROOM3.load(id);side()}
+$$('[data-room]').forEach(b=>b.addEventListener('click',()=>pick(b.dataset.room)));
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(ZC[h]&&h!==cur)pick(h)});
+/* Regelung nachgebildet (Demo) */
+setInterval(()=>{for(const S of Object.values(STATE)){const T=S.T;if(T.ist<T.soll-.05)T.ist=Math.min(T.soll,T.ist+(T.kind==='fritz'?.1:.03));else if(T.ist>T.soll+.05)T.ist=Math.max(T.soll,T.ist-.03);if(T.kind==='alpha2')T.actor=T.ist<T.soll-.05}
+  dial();pirs();hero();const T=STATE[cur].T,heat=T.kind==='fritz'?T.ist<T.soll-.15:T.actor,p=$('[data-t-pill]');if(p){p.className='pill '+(heat?'warn live':'ok');p.textContent=heat?'heizt':'hält Temperatur'}},2000);
+setInterval(pirs,1000);
+pick(cur);
+$('#vistbl').insertAdjacentHTML('beforeend',Object.entries(ZC).flatMap(([k,c])=>{const nm=c.n+(c.eb.includes('Opa')?' (Opa)':'');return[
+  ...c.lights.map(l=>[nm,l.n,l.dp]),...(c.devs||[]).map(d=>[nm,d.n,d.dp]),[nm,c.T.n,c.T.dp+(c.T.kind==='fritz'?'.tist / .tsoll':'.T_ACTUAL / .T_TARGET')],...c.P.map(p=>[nm,'Bewegungsmelder '+p.n,p.dp+'.occupancy'])]}).map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td><code>'+r[2]+'</code></td></tr>').join(''));
+</script>

@@ -1,0 +1,509 @@
+<meta charset="utf-8">
+<title>Glashaus Hausmodell</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.model{padding:0;overflow:hidden}
+.model-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 0}
+.model-h h2{font-size:15.5px;font-weight:550;margin:0;display:flex;align-items:center;gap:10px}
+.hwrap{position:relative;height:clamp(440px,74vh,860px);touch-action:pan-y;cursor:grab}
+.hwrap.drag{cursor:grabbing}
+.hwrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hov{position:absolute;inset:0;pointer-events:none}
+.hdev{position:absolute;left:0;top:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;cursor:pointer;pointer-events:auto;color:var(--c);background:var(--glass-strong);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px var(--stroke),0 6px 14px -6px var(--shadow);transition:opacity .4s,box-shadow .3s,background .3s,color .3s}
+.hdev svg{width:16px;height:16px}
+.hdev.on{background:var(--c);color:var(--bg);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 25%,transparent),0 6px 18px -4px var(--c)}
+.hdev.sel{box-shadow:0 0 0 2px var(--fg)}
+.hdev.spin.on svg{animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hlab{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;font-size:11.5px;font-weight:550;color:var(--fg);text-shadow:0 1px 0 var(--bg),0 0 8px var(--bg);pointer-events:none;transition:opacity .4s;text-align:center;line-height:1.15}
+.hlab small{display:block;font-weight:400;color:var(--fg-2);font-size:10.5px}
+.htip{position:absolute;left:0;top:0;transform:translate(-50%,calc(-100% - 12px));padding:7px 10px;border-radius:9px;font-size:12px;background:var(--fg);color:var(--bg);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.hhint{position:absolute;left:20px;bottom:14px;font-size:12px;color:var(--fg-3);pointer-events:none}
+.hfloors{position:absolute;right:16px;bottom:14px;display:flex;flex-direction:column;gap:6px}
+.hfloors button{min-width:44px;padding:0 8px;border:0;background:var(--glass-strong);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px var(--stroke);height:34px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--fg-2);transition:background .3s,color .3s}
+.hfloors button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.insp h3{font-size:26px;font-weight:500;letter-spacing:-.03em;margin:4px 0 2px;line-height:1.05}
+.insp .area{font-size:15px;color:var(--fg-2);margin-bottom:16px;font-variant-numeric:tabular-nums}
+.drow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.drow:last-child{border-bottom:0}
+.drow .ico{width:32px;height:32px;border-radius:10px}
+.drow b{display:block;font-weight:550}
+.drow small{color:var(--fg-2);font-size:12.5px}
+.drow .btn{height:32px;padding:0 12px;font-size:12.5px}
+.btn.on{background:var(--fg);color:var(--bg)}
+.units{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:6px 0 16px}
+@media (max-width:900px){.units{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.units{grid-template-columns:minmax(0,1fr)}}
+.insp .devlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+@media (max-width:900px){.insp .devlist{grid-template-columns:minmax(0,1fr)}}
+.insp .rhead{display:flex;align-items:flex-end;gap:16px 28px;flex-wrap:wrap;margin-bottom:8px}
+.insp .rhead .area{margin:0 0 4px}
+.unit{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px;padding:10px 12px;border-radius:12px;background:var(--track);cursor:pointer;border:0;text-align:left;width:100%}
+.unit i{width:12px;height:12px;border-radius:4px;background:var(--c)}
+.unit b{font-weight:550}
+.unit span{color:var(--fg-2);font-variant-numeric:tabular-nums}
+.gsum{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.inv td,.inv th{white-space:nowrap}
+.inv td:first-child b{font-weight:550}
+.inv small{display:block;color:var(--fg-3);font-size:11.5px;font-family:var(--mono)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.facts div{padding:14px 16px;border-radius:var(--r-m);background:var(--track)}
+.facts b{display:block;font-size:24px;font-weight:600;letter-spacing:-.03em}
+.facts span{font-size:12px;color:var(--fg-2)}
+@media (max-width:760px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.einr{padding:0 22px 22px}
+.einr p{font-size:13.5px;color:var(--fg-2);max-width:760px}
+.einr textarea{width:100%;box-sizing:border-box;border:0;border-radius:14px;padding:12px 14px;background:var(--track);color:var(--fg);font:12px/1.5 var(--mono);resize:vertical;margin:6px 0 10px}
+.einr .btns{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">haus</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="#" aria-current="page">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">3 Geschosse · 12,00 × 10,40 m · Beispielhaus · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span>Euer Haus,</span><span class="it">in Glas.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede">Alle drei Geschosse eines erfundenen Beispielhauses, mit jedem Gerät an seinem Platz. Ziehen dreht das Haus, Antippen eines Raums zeigt, was darin läuft.</p>
+      <div class="ctas">
+        <button class="ink" type="button" data-hero="alle">Geschosse auffächern <svg><use href="#i-arrow"/></svg></button>
+        <a class="uline" href="#modell">Zum Modell <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass s-12 model tile" id="modell" style="--i:0">
+    <div class="model-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-home"/></svg></span>Hausmodell</h2>
+      <div class="segs" role="group" aria-label="Ansicht"><button type="button" data-mode="haus">Haus</button><button type="button" data-mode="alle">Aufgefächert</button></div></div>
+    <div class="hwrap" id="hwrap">
+      <canvas id="hcv" role="img" aria-label="3D-Modell des Hauses mit Untergeschoss, Erdgeschoss und Dachgeschoss"></canvas>
+      <div class="hov" id="hov"></div>
+      <div class="htip" id="htip"></div>
+      <div class="hfloors" role="group" aria-label="Geschoss"><button type="button" data-floor="3">Bühne</button><button type="button" data-floor="2">DG</button><button type="button" data-floor="1">EG</button><button type="button" data-floor="0">UG</button></div>
+      <span class="hhint">Ziehen dreht · Doppelklick setzt zurück</span>
+    </div>
+  </article>
+
+  <article class="glass tile s-12 insp" id="insp" style="--i:1"></article>
+
+  <article class="glass tile s-12" style="--i:2">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--grid)"><svg><use href="#i-cube"/></svg></span>Das Beispielhaus</h2><span class="small muted">erfunden · Maßstab 1:100</span></div>
+    <div class="facts" id="facts"></div>
+  </article>
+
+  <article class="glass tile s-12" id="inv" style="--i:3">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-wifi"/></svg></span>Alle Shelly, Zigbee und WLED</h2><span class="small muted">Stand aus ioBroker · 21.10.</span></div>
+    <div class="gsum" data-invsum></div>
+    <div class="tbl"><table class="inv"><thead><tr><th>Gerät</th><th>Art</th><th>Ort</th><th>Status</th><th>Im Glashaus</th></tr></thead><tbody data-inv></tbody></table></div>
+    <p class="small muted" style="margin:12px 0 0">„Ort fehlt“: in ioBroker ohne Raum und ohne sprechenden Namen. Von den vier Kontakten ohne Namen sitzen drei im Wohnzimmer; welcher nicht, zeigt sich, sobald ein Wohnzimmerfenster einmal geöffnet wird.</p>
+  </article>
+
+  <details class="glass vis s-12" id="einr">
+    <summary><span>Einrichtung aus der Seite Zimmer übernehmen <small>· Fenster, Türen, Lampen, Melder, Heizkörper</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="einr">
+      <p>Das Hausmodell zeigt die Zimmer so, wie sie auf der Seite Zimmer eingerichtet sind, ohne Möbel. Jede Seite speichert eigene Änderungen nur in ihrem Browser. Deshalb dort im Modus „Einrichten“ auf <b>„Für Hausmodell kopieren“</b> tippen und den Text hier einfügen.</p>
+      <textarea data-lpaste rows="3" spellcheck="false" placeholder="{&quot;leo&quot;:{…}}" aria-label="Einrichtung als Text"></textarea>
+      <div class="btns"><button class="btn" type="button" data-lapply>Übernehmen</button><button class="btn" type="button" data-lreset>Ausgangszustand</button></div>
+    </div>
+  </details>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Räume und Geräte</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Raum → Geräte</h3>
+        <div class="tbl"><table id="vistbl"><tr><th>Raum</th><th>Gerät</th><th>Datenpunkt</th></tr></table></div>
+      </div>
+      <div>
+        <h3>Hinweise</h3>
+        <p>Das Modell ist ein Canvas-Skript und läuft in VIS 2 in einem HTML-Widget. Die Raumumrisse stehen als Tabelle im Skript (Meter; hier ein erfundenes Beispielhaus, eigene Grundrisse lassen sich genauso eintragen) und lassen sich dort anpassen.</p>
+        <p>Für ioBroker lohnt es sich, die Räume auch als <b>Aufzählungen</b> (enum.rooms) anzulegen. Dann kann jedes Script Geräte nach Raum finden, z. B. „alle Lichter im DG aus“.</p>
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Hausmodell eines erfundenen Beispielhauses · Gerätewerte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+/*ROOMS_JS*/
+
+initSculpture('haus');
+
+/* ================= Geräte ================= */
+const LIGHT={kochen_h:true,leo:true,mia:false};
+const G={door:0,target:0};window.GH_GARAGE='zu';
+const AW={pos:0,tgt:0};LIGHT.terr_m=false;
+const pumpRun=()=>{const n=new Date(),m=n.getHours()*60+n.getMinutes();return m>=360&&m<1320&&m%30<9};
+const DEV=[
+ {id:'tor',r:'garage',uv:[0.5,0.95],ic:'i-garage',c:'--ok',n:'Garagentor',dp:'javascript.0.CurrentDoorState',st:()=>G.target?'offen (Simulation)':'zu',act:'Fahrt simulieren'},
+ {id:'byd',r:'garage',uv:[0.12,0.2],ic:'i-byd',c:'--batt',n:'BYD Battery-Box HVS',dp:'bydhvs.0.State.*',st:()=>'Ladestand '+Math.round(D[nowIdx()].soc)+' %'},
+ {id:'sma',r:'garage',uv:[0.3,0.15],ic:'i-inv',c:'--fg',n:'SMA Sunny Tripower Smart Energy',dp:'modbus.0.inputRegisters.3.*',st:()=>'307 Ok · '+de(D[nowIdx()].pv,1)+' kW PV'},
+ {id:'wb_c',r:'carport',uv:[0.5,0.3],ic:'i-plug',c:'--ok',n:'Wallbox Carport · Pulsar Plus',dp:'mywallbox.0.597213',st:()=>'Adapter aus · zuletzt Feb. 2024'},
+ {id:'wb_g',r:'garage',uv:[0.85,0.3],ic:'i-plug',c:'--ok',n:'Wallbox Garage · Pulsar Plus',dp:'mywallbox.0.840021',st:()=>'Adapter aus · zuletzt Feb. 2024'},
+ {id:'wledc',r:'carport',uv:[0.2,0.5],ic:'i-strip',c:'--home',n:'WLED Carport',dp:'wled.0.6fe7eba7af9e',st:()=>'Preset 1 · aus'},
+ {id:'cam',r:'carport',uv:[0.5,0.95],ic:'i-cam',c:'--fg',n:'Kamera Carport',dp:'hikvision-alarmserver.0.*',st:()=>'Einfahrt-Erkennung aktiv'},
+ {id:'therme',r:'buehne',at:[4.6,5.0],ic:'i-flame',c:'--heat',n:'Gasbrenner',dp:'mqtt.0.BSB-LAN.*',st:()=>'aus · lädt bei ≤ 41 °C'},
+ {id:'speicher',r:'buehne',at:[6.2,5.9],ic:'i-drop',c:'--heat',n:'Warmwasserspeicher',dp:'alias.0.Heizung.*',st:()=>'52,4 °C oben'},
+ {id:'pumpe',r:'buehne',at:[7.8,5.0],ic:'i-pump',c:'--heat',n:'Zirkulationspumpe',dp:'shelly.0.SHPLG-S#068CC2#1',st:()=>pumpRun()?'läuft · 20 W':'wartet',on:pumpRun,spin:1},
+ {id:'wm',r:'waschen',uv:[0.3,0.3],ic:'i-washer',c:'--home',n:'Waschmaschine',dp:'0_userdata.0.connectlife.waschmaschine.*',st:()=>'Baumwolle 40 °C · läuft',on:()=>true},
+ {id:'trockner',r:'waschen',uv:[0.7,0.3],ic:'i-dryer',c:'--heat',n:'Trockner',dp:'homeconnect.0.BOSCH-WTX87M-73F602A6D0BE',st:()=>'Baumwolle schranktrocken · läuft',on:()=>true},
+ {id:'licht_k',r:'kochen_h',uv:[0.5,0.5],ic:'i-bulb',c:'--sun',n:'Küche Licht',dp:'shelly.0.SHSW-25#421DC5EC0DB4#1.Relay0.Switch',light:'kochen_h'},
+ {id:'wled_k',r:'kochen_h',uv:[0.1,0.5],ic:'i-strip',c:'--grid',n:'WLED Küche',dp:'wled.0.a8c77c901dbd',st:()=>'aus · Strom über Shelly Küche Licht, Kanal 1'},
+ {id:'dt_k',r:'kochen_h',uv:[.12,.12],ic:'i-power',c:'--fg',n:'Doppeltaster Küche (Shelly 2.5)',dp:'shelly.0.SHSW-25#3455031A6AA4#1',st:()=>'offline seit ca. 6 Monaten · zuletzt 79 °C'},
+ {id:'roll_k',r:'kochen_h',uv:[.35,.92],ic:'i-garage',c:'--fg',n:'Rollladen Küche',dp:'shelly.0.SHSW-25#4EA6A1774B08#1.Shutter.Position',st:()=>'offline · zuletzt 86 °C'},
+ {id:'flur_l',r:'diele_h',uv:[.5,.3],ic:'i-bulb',c:'--sun',n:'Flur Lichter',dp:'shelly.0.SHSW-25#D8EAD3AA4082#1',st:()=>'aus · langer Druck schaltet das Wohnzimmer (Script Wohnzimmer)'},
+ {id:'pir_f',r:'diele_h',uv:[.5,.72],ic:'i-motion',c:'--ok',n:'Bewegungsmelder Flur',dp:'zigbee.0.00158d462f1784eb',st:()=>'ruhig · schaltet noch nichts'},
+ {id:'wm_plug',r:'waschen',uv:[0.5,0.7],ic:'i-plug',c:'--home',n:'Steckdose Waschmaschine (Shelly Plug S)',dp:'shelly.0.SHPLG-S#C5E37F#1',st:()=>'misst den Strom der Waschmaschine'},
+ {id:'hpumpe',r:'buehne',at:[9.4,5.0],ic:'i-pump',c:'--heat',n:'Heizungspumpe (Shelly 1PM)',dp:'shelly.0.SHSW-PM#00F15E1E4506#1',st:()=>'läuft · pumpt Heizkreis oder Speicher',on:()=>true,spin:1},
+ {id:'dfk',r:'buero',uv:[.07,.5],ic:'i-window',c:'--cool',n:'Dachfenster-Kontakt',dp:'zigbee.0.00158db1c0a5ee92.contact',st:()=>'zu'},
+ {id:'fk_w',r:'wohnen_h',uv:[.78,.07],ic:'i-window',c:'--cool',n:'Fensterkontakte Wohnzimmer (3)',dp:'zigbee.0.00158d30f1c32d9d · …2768e2f · …c2acb3e · …157b16b (3 davon)',st:()=>'alle zu'},
+ {id:'cube_a',r:'leo',uv:[.3,.55],ic:'i-cube',c:'--grid',n:'Würfel Leo',dp:'zigbee.0.00158d4eecb7e3c7',st:()=>'steuert das Licht (Script Leo_Wuerfel)'},
+ {id:'cube_e',r:'mia',uv:[.3,.55],ic:'i-cube',c:'--grid',n:'Würfel Mia',dp:'zigbee.0.00158d94986e2a2b',st:()=>'steuert das Licht (Script Mia_Wuerfel)'},
+ {id:'spuel',r:'kochen_h',uv:[0.8,0.85],ic:'i-dish',c:'--cool',n:'Spülmaschine',dp:'homeconnect.0.012009383294292389',st:()=>'Eco 50 · läuft',on:()=>true},
+ {id:'echo_k',r:'kochen_h',uv:[0.15,0.85],ic:'i-speaker',c:'--home',n:'Echo Küche',dp:'alexa2.0.Echo-Devices.G0RJ59EB7RV83LRC',st:()=>'Lautstärke 40'},
+ {id:'lueft',r:'wohnen_h',uv:[0.5,0.08],ic:'i-fan',c:'--cool',n:'Lüfter Wohnzimmer',dp:'suedwind-ambientika.0.BDB8947CAB05',st:()=>'Stufe 2 · 52 % rF',on:()=>true,spin:1},
+ {id:'echo_o',r:'wohnen_o',uv:[0.85,0.5],ic:'i-speaker',c:'--grid',n:'Echo Opa',dp:'alexa2.1.Echo-Devices.G0N9KPF7GM177HYX',st:()=>'Lautstärke 40'},
+ {id:'spuel_o',r:'kochen_o',uv:[0.85,0.5],ic:'i-dish',c:'--fg',n:'Spülmaschine Opa',dp:'homeconnect.0.012036216308552518',st:()=>'nicht mit Home Connect verbunden'},
+ {id:'hue_a',r:'leo',uv:[0.5,0.5],ic:'i-bulb',c:'--sun',n:'Hue Leo',dp:'hue.0.Leo.command',light:'leo'},
+ {id:'flug',r:'leo',uv:[0.3,0.3],ic:'i-strip',c:'--home',n:'Flugzeug-Streifen',dp:'hue.0.Leo_Flugzeug',st:()=>'aus'},
+ {id:'hue_e',r:'mia',uv:[0.5,0.5],ic:'i-bulb',c:'--sun',n:'Hue Mia',dp:'hue.0.Mia.command',light:'mia'},
+ {id:'pend',r:'mia',uv:[0.6,0.6],ic:'i-bulb',c:'--heat',n:'Pendelleuchte (Yeelight)',dp:'yeelight-2.0.color4-0x2221ea97d40a0bd4',st:()=>'an · Rosa'},
+ {id:'th_a',r:'leo',uv:[0.1,0.5],ic:'i-thermo',c:'--heat',n:'Heizkörper Leo',dp:'fritzdect.0.DECT_881674352572',st:()=>'22,5 °C · Soll 23 °C'},
+ {id:'th_e',r:'mia',uv:[0.1,0.5],ic:'i-thermo',c:'--heat',n:'Heizkörper Mia',dp:'fritzdect.0.DECT_876808579017',st:()=>'23 °C · Soll 23 °C'},
+ {id:'th_b',r:'buero',uv:[0.5,0.1],ic:'i-thermo',c:'--heat',n:'FRITZ!Smart Büro',dp:'fritzdect.0.DECT_078253581902',st:()=>'23 °C · Batterie 20 %'},
+ {id:'pir_a',r:'leo',uv:[0.9,0.1],ic:'i-motion',c:'--ok',n:'Bewegungsmelder Leo 1 + 2',dp:'zigbee.0.00158dbfa93d3f2e · …41a3948',st:()=>'ruhig'},
+ {id:'pir_e',r:'mia',uv:[0.9,0.1],ic:'i-motion',c:'--ok',n:'Bewegungsmelder Mia 1 + 2',dp:'zigbee.0.00158dfc94f7de82 · …5d4244a',st:()=>'ruhig'},
+ {id:'pir_b',r:'buero',uv:[0.9,0.9],ic:'i-motion',c:'--ok',n:'Bewegungsmelder Büro',dp:'zigbee.0.00158d302f4ed7c0',st:()=>'ruhig'},
+ {id:'solar',roof:1,rp:[5.2,6.15],ic:'i-drop',c:'--heat',n:'Solarthermie (3 Kollektoren)',dp:'alias.0.Heizung.* (Solar-VL/RL)',st:()=>D[nowIdx()].pv>1?'lädt den Speicher':'ruht',on:()=>D[nowIdx()].pv>1},
+ {id:'markise',r:'terr_m',uv:[0.5,0.4],ic:'i-awning',c:'--heat',n:'Markise',dp:'shelly.0.SHSW-25#B3E8CBA3CFCA#1.Shutter.Position',st:()=>AW.tgt>0?(AW.pos>=99?'ausgefahren':'fährt aus …'):(AW.pos<=1?'eingefahren':'fährt ein …'),act:()=>AW.tgt>0?'Einfahren':'Ausfahren'},
+ {id:'tlicht',r:'terr_m',uv:[0.7,0.8],ic:'i-bulb',c:'--sun',n:'Licht unter der Markise',dp:'zigbee.0.00158dd4a6fb570e.state_l1',light:'terr_m'},
+ {id:'taster',r:'terr_m',uv:[0.3,0.8],ic:'i-power',c:'--fg',n:'Aqara-Taster Terrassenlicht',dp:'zigbee.0.00158dc05e77e20e',st:()=>'offline · Batterie prüfen · 1× umschalten, halten an, 2× aus'},
+ {id:'aussen',r:'terr_m',uv:[0.15,0.4],ic:'i-plug',c:'--fg',n:'Außensteckdose „PlugS Schwarze“',dp:'shelly.1.shellyplugsg3#c65bcd23ff3a#1',st:()=>'offline seit 03.10. · Sommer Pumpe, Winter Tannenbaum'},
+ {id:'taster2',r:'terr_m',uv:[0.15,0.8],ic:'i-power',c:'--fg',n:'Aqara-Taster Außensteckdose',dp:'zigbee.0.00158dd742d07c1f',st:()=>'1× umschalten · halten an · 2× aus'},
+ {id:'tvorne',r:'terr_h',uv:[.5,.5],ic:'i-plug',c:'--sun',n:'Steckdose Terrasse vorne (Shelly Plus 1PM)',dp:'shelly.1.shellyplus1pm#ae9ba43058dd#1',st:()=>'Weihnachtslicht · nur in der Adventszeit automatisch'},
+ {id:'pv',roof:1,rp:[1.9,9.2],ic:'i-sun',c:'--sun',n:'Photovoltaik',dp:'modbus.0.inputRegisters.3.30775_…',st:()=>de(D[nowIdx()].pv,1)+' kW',on:()=>D[nowIdx()].pv>.05}];
+DEV.forEach(d=>{if(d.roof)return;const r=ROOMS[d.r];d.f=r.f;
+  if(d.uv){const xs=r.p.map(q=>q[0]),ys=r.p.map(q=>q[1]),x0=Math.min(...xs),y0=Math.min(...ys);d.p=[x0+(Math.max(...xs)-x0)*d.uv[0],y0+(Math.max(...ys)-y0)*d.uv[1]]}else d.p=PLAN[r.f].m(d.at)});
+/* Positionen aus der Zimmer-Einrichtung (gleiche Daten wie die Seite Zimmer) */
+(function(){const bb=id=>{const p=ROOMS[id].p,xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);return[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]};
+  const at=(id,u,v)=>{const[x0,y0,x1,y1]=bb(id);return[x0+(x1-x0)*u,y0+(y1-y0)*v]};
+  const wallAt=(id,w,t,i)=>{const[x0,y0,x1,y1]=bb(id),p=w==='w'?[x0,y0+(y1-y0)*t]:w==='e'?[x1,y0+(y1-y0)*t]:w==='n'?[x0+(x1-x0)*t,y0]:[x0+(x1-x0)*t,y1],n={w:[1,0],e:[-1,0],n:[0,1],s:[0,-1]}[w];return[p[0]+n[0]*i,p[1]+n[1]*i]};
+  const set=(id,p)=>{const d=DEV.find(x=>x.id===id);if(d&&p)d.p=p};
+  [['leo','th_a'],['mia','th_e'],['buero','th_b']].forEach(([r,id])=>{const c=ZC[r];if(c&&c.T.kind==='fritz')set(id,wallAt(r,c.T.wall,c.T.t,.3))});
+  [['leo','pir_a'],['mia','pir_e'],['buero','pir_b']].forEach(([r,id])=>{const q=ZC[r]&&ZC[r].P[0];if(q)set(id,at(r,q.at[0],q.at[1]))});
+  [['mia','pend','pend'],['leo','plane','flug']].forEach(([r,lid,id])=>{const l=ZC[r]&&ZC[r].lights.find(x=>x.id===lid);if(l)set(id,l.u!=null?at(r,l.u,l.v):ROOMS[r].c)})})();
+
+/* ================= Engine ================= */
+const HM=(function(){
+  const wrap=$('#hwrap'),cv=$('#hcv'),ctx=cv.getContext('2d'),ov=$('#hov'),tip=$('#htip');
+  let W=0,H=0,dpr=1,C={};
+  const hex=(s)=>{s=s.trim();let m=/^#([0-9a-f]{6})$/i.exec(s);if(m){const n=parseInt(m[1],16);return[n>>16&255,n>>8&255,n&255]}m=/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/.exec(s);return m?[+m[1],+m[2],+m[3]]:[128,128,128]};
+  const col=(k,a)=>{const c=C[k]||(C[k]=hex(cssv(k)));return'rgba('+c[0]+','+c[1]+','+c[2]+','+Math.max(0,Math.min(1,a)).toFixed(3)+')'};
+  const recolor=()=>{C={}};
+  new MutationObserver(recolor).observe(root,{attributes:true,attributeFilter:['data-theme']});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>setTimeout(recolor,30));
+  /* Zustand (weich nachgeführt) */
+  const S={e:1,roof:0,ground:0,wall:1.1,fa:[1,1,1,1],yaw:-.5,elev:.66,scale:30,ox:0,oy:0};
+  const T={e:1,roof:0,ground:0,wall:1.1,fa:[1,1,1,1]};
+  let mode='alle',focus=-1,baseYaw=-.5,baseElev=.66,lastUser=-1e9,hover=null,sel=null,t0=performance.now();
+  const GAP=3.4;
+  const zF=i=>PLAN[i].z+S.e*GAP*i;
+  let cam={};
+  const P=(x,y,z)=>{const dx=x-W0/2,dy=y-D0/2,c=cam;const xr=dx*c.cs-dy*c.sn,yr=dx*c.sn+dy*c.cs;return[xr,yr*c.se-(z-c.zc)*c.ce,yr*c.ce+z*c.se]};
+  const S2=(p)=>[S.ox+p[0]*S.scale,S.oy+p[1]*S.scale];
+  const proj=(x,y,z)=>{const p=P(x,y,z);const s=S2(p);return[s[0],s[1],p[2]]};
+  function setMode(m,f){mode=m;focus=f??-1;
+    if(m==='haus'){Object.assign(T,{e:0,roof:1,ground:1,wall:2.5});T.fa=[1,1,1,1];focus=-1}
+    else{Object.assign(T,{e:1,roof:0,ground:0,wall:1.1});T.fa=[0,1,2,3].map(i=>focus<0||i===focus?1:.07)}
+    $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m&&focus<0));
+    $$('[data-floor]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.floor===focus));
+    labels();
+  }
+  function size(){const r=wrap.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr}
+  /* Overlay: Geräte und Raumnamen */
+  DEV.forEach(d=>{const b=document.createElement('button');b.type='button';b.className='hdev'+(d.spin?' spin':'');b.style.setProperty('--c','var('+d.c+')');
+    b.innerHTML='<svg><use href="#'+d.ic+'"/></svg>';b.setAttribute('aria-label',d.n);b.title=d.n;
+    b.addEventListener('click',e=>{e.stopPropagation();select(d.roof?null:ROOMS[d.r],d);if(d.light)toggleLight(d.light)});
+    ov.appendChild(b);d.el=b});
+  const LABS=[];PLAN.forEach(f=>f.rooms.forEach(r=>{if(r.stair)return;const l=document.createElement('div');l.className='hlab';l.innerHTML=r.n+(r.a?'<small>'+de(r.a,2)+' m²</small>':'');ov.appendChild(l);LABS.push({r,el:l})}));
+  function labels(){}
+  /* Zeichnen */
+  function poly(pts,fill,stroke,lw,dash){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+    if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.setLineDash(dash||[]);ctx.lineWidth=lw||1;ctx.strokeStyle=stroke;ctx.stroke();ctx.setLineDash([])}}
+  const roofZ=()=>({k:zF(2)+1.0,r:zF(2)+1.0+D0/2*T38});
+  function fit(){
+    let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;
+    const add=(x,y,z)=>{const p=P(x,y,z);mnx=Math.min(mnx,p[0]);mxx=Math.max(mxx,p[0]);mny=Math.min(mny,p[1]);mxy=Math.max(mxy,p[1])};
+    PLAN.forEach((f,i)=>{if(S.fa[i]<.5)return;const z=zF(i);for(const[x,y]of[[-1.2,-.8],[W0+.3,-.8],[W0+.3,D0+1.2],[-1.2,D0+1.2]]){add(x,y,z);add(x,y,z+S.wall)}});
+    if(S.roof>.3)add(W0/2,D0/2,roofZ().r);
+    const pad=40,s=Math.min((W-pad*2)/(mxx-mnx),(H-pad*2-30)/(mxy-mny));
+    const tx=W/2-(mnx+mxx)/2*s,ty=(H-20)/2-(mny+mxy)/2*s;
+    return{s,tx,ty};
+  }
+  function frame(now){
+    const dt=Math.min(.05,(now-(frame.l||now))/1000);frame.l=now;const t=(now-t0)/1000;
+    const k=1-Math.exp(-dt*3.2);
+    S.e+=(T.e-S.e)*k;S.roof+=(T.roof-S.roof)*k;S.ground+=(T.ground-S.ground)*k;S.wall+=(T.wall-S.wall)*k;
+    S.fa=S.fa.map((v,i)=>v+(T.fa[i]-v)*k);
+    G.door+=(G.target-G.door)*Math.min(1,dt*.7);AW.pos+=(AW.tgt-AW.pos)*Math.min(1,dt*.6);
+    const idle=now-lastUser>6000&&!RM;
+    const yawT=baseYaw+(idle?.16*Math.sin(t*.11):0);
+    S.yaw+=(yawT-S.yaw)*Math.min(1,dt*(idle?.8:10));S.elev+=(baseElev-S.elev)*Math.min(1,dt*10);
+    cam={cs:Math.cos(S.yaw),sn:Math.sin(S.yaw),se:Math.sin(S.elev),ce:Math.cos(S.elev),zc:4};
+    const F=fit();S.scale+=(F.s-S.scale)*Math.min(1,dt*4);S.ox+=(F.tx-S.ox)*Math.min(1,dt*4);S.oy+=(F.ty-S.oy)*Math.min(1,dt*4);
+    draw(t);
+    place();
+    requestAnimationFrame(frame);
+  }
+  function draw(t){
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const s=D[nowIdx()];
+    /* Gelände: steigt von der Straße (Süden, UG) zum Garten (Norden, EG) */
+    if(S.ground>.02){const ga=S.ground;const gz=y=>Math.max(0,2.6*(D0-y)/(D0+3));
+      for(let y=-3;y<D0+4;y+=1.5){const a=proj(-4,y,gz(y)),b=proj(W0+4,y,gz(y));ctx.strokeStyle=col('--ok',.12*ga);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
+      poly([proj(-4,-3,gz(-3)),proj(W0+4,-3,gz(-3)),proj(W0+4,D0+4,0),proj(-4,D0+4,0)],col('--ok',.07*ga))}
+    PLAN.forEach((f,i)=>{const a=S.fa[i];if(a<.01)return;const z=zF(i),wh=f.attic?Math.min(S.wall,.9):S.wall;
+      ctx.globalAlpha=a;
+      /* Bodenplatte */
+      const top=f.foot.map(q=>proj(q[0],q[1],z)),bot=f.foot.map(q=>proj(q[0],q[1],z-.22));
+      const sides=[];for(let j=0;j<f.foot.length;j++){const k=(j+1)%f.foot.length;sides.push({d:(top[j][2]+top[k][2])/2,q:[top[j],top[k],bot[k],bot[j]]})}
+      sides.sort((x,y)=>x.d-y.d).forEach(q=>poly(q.q,col('--fg',.10),col('--fg',.18),1));
+      poly(top,col('--bg',.62),col('--fg',.3),1.2);
+      /* Räume */
+      f.rooms.forEach(r=>{const pts=r.p.map(q=>proj(q[0],q[1],z+.02)),lit=LIGHT[r.id];
+        let fill=r.u==='X'?col('--ok',.07):col(UNIT[r.u].c,r.u==='S'?.05:.11);
+        if(lit){fill=col('--sun',.34+.06*Math.sin(t*2));ctx.shadowColor=col('--sun',.8);ctx.shadowBlur=24}
+        if(r===hover||r===sel)fill=col(UNIT[r.u].c==='--fg'?'--home':UNIT[r.u].c,.26);
+        poly(pts,fill,r.u==='X'?col('--fg',.35):null,1,r.u==='X'?[4,4]:null);ctx.shadowBlur=0;
+        if(r.stair){const[a0,a1,a2,a3]=r.p;for(let n=1;n<12;n++){const u=n/12,p0=[a0[0]+(a3[0]-a0[0])*u,a0[1]+(a3[1]-a0[1])*u],p1=[a1[0]+(a2[0]-a1[0])*u,a1[1]+(a2[1]-a1[1])*u];
+          const A=proj(p0[0],p0[1],z+.03),B=proj(p1[0],p1[1],z+.03);ctx.strokeStyle=col('--fg',.25);ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke()}}});
+      /* Wände: Raumkanten als Glas, Außenwand kräftiger */
+      const walls=[];
+      f.rooms.forEach(r=>{if(r.u==='X')return;const h=r.stair?wh*.4:wh;for(let j=0;j<r.p.length;j++){const p=r.p[j],q=r.p[(j+1)%r.p.length];
+        const a1=proj(p[0],p[1],z),b1=proj(q[0],q[1],z),a2=proj(p[0],p[1],z+h),b2=proj(q[0],q[1],z+h);
+        walls.push({d:(a1[2]+b1[2])/2,q:[a1,b1,b2,a2],o:0})}});
+      /* Außenwände nur in der geschlossenen Hausansicht; beim Auffächern blenden sie aus */
+      if(S.e<.97)for(let j=0;j<f.foot.length;j++){const p=f.foot[j],q=f.foot[(j+1)%f.foot.length],h=wh+.15;
+        const a1=proj(p[0],p[1],z),b1=proj(q[0],q[1],z),a2=proj(p[0],p[1],z+h),b2=proj(q[0],q[1],z+h);walls.push({d:(a1[2]+b1[2])/2+.01,q:[a1,b1,b2,a2],o:1})}
+      /* Garagentor als eigenes Wandstück */
+      if(i===0){const y=D0,x0=.6*W0/13,x1=5.4*W0/13,h=Math.min(2.2,wh)*(1-G.door);
+        if(h>.02){const a1=proj(x0,y+.05,z+Math.min(2.2,wh)-h),b1=proj(x1,y+.05,z+Math.min(2.2,wh)-h),a2=proj(x0,y+.05,z+Math.min(2.2,wh)),b2=proj(x1,y+.05,z+Math.min(2.2,wh));walls.push({d:(a1[2]+b1[2])/2+.02,q:[a1,b1,b2,a2],o:2})}}
+      walls.sort((x,y)=>x.d-y.d).forEach(w=>{const ga=ctx.globalAlpha;if(w.o===1)ctx.globalAlpha=ga*(1-S.e);
+        if(w.o===2)poly(w.q,col('--fg',.42),col('--fg',.6),1);
+        else poly(w.q,col('--fg',w.o?.07:.035),col('--fg',w.o?.32:.14),w.o?1.2:.8);
+        if(w.o===1){ctx.strokeStyle=col('--fg',.5);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(w.q[3][0],w.q[3][1]);ctx.lineTo(w.q[2][0],w.q[2][1]);ctx.stroke()}
+        ctx.globalAlpha=ga});
+      /* Zimmer-Einrichtung ohne Möbel */
+      if(a>.3)f.rooms.forEach(r=>{if(ZC[r.id])roomKit(r,ZC[r.id],z,wh,t)});
+      /* Markise hinten (Nord, Mitte) über der Terrasse */
+      if(i===1){const x0=4.6,x1=8.4,zt=z+Math.min(2.3,wh+.6),ext=Math.max(.06,AW.pos/100),zb=zt-(zt-(z+Math.min(1.85,wh+.2)))*ext,yo=-2.6*ext,n=10;
+        if(LIGHT.terr_m){const lp=proj(6.5,-.05,zt-.25);ctx.beginPath();ctx.arc(lp[0],lp[1],5,0,7);ctx.fillStyle=col('--sun',1);ctx.shadowColor=col('--sun',1);ctx.shadowBlur=16;ctx.fill();ctx.shadowBlur=0}
+        for(let k=0;k<n;k++){const xa=x0+(x1-x0)*k/n,xb=x0+(x1-x0)*(k+1)/n;
+          poly([proj(xa,0,zt),proj(xb,0,zt),proj(xb,yo,zb),proj(xa,yo,zb)],k%2?col('--bg',.75):col('--heat',.6),col('--fg',.25),.6)}
+        poly([proj(x0,yo,zb),proj(x1,yo,zb),proj(x1,yo,zb-.25),proj(x0,yo,zb-.25)],col('--heat',.7),col('--fg',.3),.8)}
+      /* Dachboden: Dachquerschnitt als Linie (Giebel West/Ost, First) */
+      if(f.attic&&S.roof<.5){const zr=z+2.7,yA=2.1,yB=D0-2.1,g=[[.3,yA,z],[.3,D0/2,zr],[.3,yB,z]],g2=g.map(q=>[W0-.3,q[1],q[2]]);
+        ctx.strokeStyle=col('--fg',.35);ctx.lineWidth=1.2;ctx.setLineDash([5,5]);
+        for(const L of[g,g2,[[.3,D0/2,zr],[W0-.3,D0/2,zr]]]){ctx.beginPath();L.forEach((q,n)=>{const P2=proj(q[0],q[1],q[2]);n?ctx.lineTo(P2[0],P2[1]):ctx.moveTo(P2[0],P2[1])});ctx.stroke()}
+        ctx.setLineDash([])}
+      ctx.globalAlpha=1});
+    /* Energiefluss: PV-Dach → Batterie in der Garage → Haus */
+    const byd=DEV.find(d=>d.id==='byd').p,bz=zF(0)+.8,flow=(pts,c,on,dir)=>{if(!on)return;ctx.save();ctx.setLineDash([3,9]);ctx.lineDashOffset=-t*26*dir;ctx.lineWidth=2.4;ctx.lineCap='round';
+      ctx.strokeStyle=col(c,.9);ctx.shadowColor=col(c,.9);ctx.shadowBlur=8;ctx.beginPath();pts.forEach((p,i)=>{const q=proj(p[0],p[1],p[2]);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])});ctx.stroke();ctx.restore()};
+    /* Dach mit Zwerchgiebel nach Süden, PV auf der Südseite */
+    if(S.roof>.02){ctx.globalAlpha=S.roof;const{k,r}=roofZ(),ov=.5,ze=k-ov*T38,x0=-.4,x1=W0+.4;
+      const planes=[];
+      planes.push({q:[[x0,-ov,ze],[x1,-ov,ze],[x1,D0/2,r],[x0,D0/2,r]]});
+      planes.push({q:[[x0,D0+ov,ze],[x1,D0+ov,ze],[x1,D0/2,r],[x0,D0/2,r]],south:1});
+      planes.push({q:[[0,0,k],[0,D0,k],[0,D0/2,r]],g:1});planes.push({q:[[W0,0,k],[W0,D0,k],[W0,D0/2,r]],g:1});
+      const gx0=3.86,gx1=9.51,gm=(gx0+gx1)/2,gk=k+1.2,gr=gk+(gx1-gx0)/2*T38;
+      planes.push({q:[[gx0-.3,D0+ov,gk-.3*T38],[gm,D0+ov,gr],[gm,D0/2+1.27,gr],[gx0-.3,D0/2+1.27,gk-.3*T38]]});
+      planes.push({q:[[gx1+.3,D0+ov,gk-.3*T38],[gm,D0+ov,gr],[gm,D0/2+1.27,gr],[gx1+.3,D0/2+1.27,gk-.3*T38]]});
+      planes.push({q:[[gx0,D0,k],[gx1,D0,k],[gx1,D0,gk],[gm,D0,gr],[gx0,D0,gk]],g:1});
+      planes.map(p=>({...p,P:p.q.map(v=>proj(v[0],v[1],v[2]))})).map(p=>({...p,d:p.P.reduce((s,v)=>s+v[2],0)/p.P.length})).sort((a,b)=>a.d-b.d).forEach(p=>{
+        poly(p.P,col('--fg',p.g?.07:.11),col('--fg',.35),1.1);
+        if(p.south){const zy=y=>r-(y-D0/2)*T38;
+          for(const[a,b]of[[.5,3.3],[9.8,12.6]])for(let cx=a;cx<b-.1;cx+=.7)for(let cy=6.15;cy<D0-.2;cy+=1.05){
+            const q=[[cx,cy,zy(cy)+.02],[cx+.62,cy,zy(cy)+.02],[cx+.62,cy+.95,zy(cy+.95)+.02],[cx,cy+.95,zy(cy+.95)+.02]].map(v=>proj(v[0],v[1],v[2]));
+            const sh=s.pv>.05?.12+.1*Math.max(0,Math.sin(t*1.4+cx*.6-cy*.5)):0;
+            poly(q,'rgba(28,46,82,'+(.82).toFixed(2)+')','rgba(140,170,220,'+(.35+sh).toFixed(2)+')',.8)}
+          /* Solarthermie: 3 Kollektoren oben links unter dem First */
+          const hot=s.pv>1;
+          for(let n=0;n<3;n++){const cx=3.2+n*1.34,y0=5.72,y1=6.58,w=1.24;
+            const q=[[cx,y0],[cx+w,y0],[cx+w,y1],[cx,y1]].map(v=>proj(v[0],v[1],zy(v[1])+.04));
+            poly(q,'rgba(22,24,28,.94)',hot?col('--heat',.55+.35*Math.sin(t*2.4+n)):'rgba(190,175,150,.55)',hot?1.4:.8);
+            for(let k=1;k<9;k++){const x=cx+k*w/9,A=proj(x,y0+.04,zy(y0+.04)+.05),B=proj(x,y1-.04,zy(y1-.04)+.05);
+              ctx.strokeStyle=hot?col('--heat',.22+.14*Math.sin(t*3+k*.7+n)):'rgba(255,255,255,.12)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke()}}}});
+      ctx.globalAlpha=1;
+      const{r:rr}=roofZ(),zy=y=>rr-(y-D0/2)*T38;
+      flow([[2,9.3,zy(9.3)+.1],[2,D0+.45,zy(D0+.45)],[2,D0+.45,1.4],[byd[0],byd[1],bz]],'--sun',s.pv>.1,1);
+      const sp=DEV.find(d=>d.id==='speicher').p;flow([[5.2,6.1,zy(6.1)+.08],[5.2,6.1,zF(3)+1.6],[sp[0],sp[1],zF(3)+.6]],'--heat',s.pv>1,1)}
+    flow([[byd[0],byd[1],bz],[byd[0],byd[1],zF(1)+.4],[3.2,8,zF(1)+.4]],'--batt',S.fa[1]>.5&&s.home>.05,s.batt<0?1:-1);
+  }
+  /* Fenster, Türen, Lampen, Melder, Heizkörper und Fußbodenheizung aus ZC (rooms.js), Höhen auf die Wandhöhe des Modells skaliert */
+  function roomKit(r,c,z,wh,t){const xs=r.p.map(q=>q[0]),ys=r.p.map(q=>q[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),k=Math.min(wh,2.5)/2.5;
+    const UV=(u,v)=>[x0+(x1-x0)*u,y0+(y1-y0)*v],wp=(w,tt)=>w==='w'?[x0,y0+(y1-y0)*tt]:w==='e'?[x1,y0+(y1-y0)*tt]:w==='n'?[x0+(x1-x0)*tt,y0]:[x0+(x1-x0)*tt,y1];
+    const al=w=>w==='w'||w==='e'?[0,1]:[1,0],inw=w=>({w:[1,0],e:[-1,0],n:[0,1],s:[0,-1]})[w],pr=(x,y,h)=>proj(x,y,z+Math.min(h,2.5)*k);
+    const room=LIGHT[r.id],isOn=l=>room!==undefined?room:!!l.on;
+    const dot=(x,y,h,c2,rad,on)=>{const p=pr(x,y,h);ctx.beginPath();ctx.arc(p[0],p[1],rad,0,7);ctx.fillStyle=col(c2,on?1:.45);if(on){ctx.shadowColor=col(c2,1);ctx.shadowBlur=10}ctx.fill();ctx.shadowBlur=0};
+    const glow=(x,y,rad,a)=>{const f=pr(x,y,0),g=ctx.createRadialGradient(f[0],f[1],0,f[0],f[1],S.scale*rad);g.addColorStop(0,col('--sun',a));g.addColorStop(1,col('--sun',0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(f[0],f[1],S.scale*rad,0,7);ctx.fill()};
+    ctx.save();ctx.beginPath();r.p.forEach((q,n)=>{const p=proj(q[0],q[1],z);n?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])});ctx.closePath();ctx.clip();
+    if(c.T&&c.T.kind==='alpha2'){ctx.strokeStyle=col('--heat',c.T.actor?.3+.08*Math.sin(t*1.6):.1);ctx.lineWidth=1;ctx.beginPath();let first=true;
+      for(let n=0,yy=y0+.3;yy<y1-.2;yy+=.45,n++){const A=proj(n%2?x1-.3:x0+.3,yy,z+.03),B=proj(n%2?x0+.3:x1-.3,yy,z+.03);if(first){ctx.moveTo(A[0],A[1]);first=false}else ctx.lineTo(A[0],A[1]);ctx.lineTo(B[0],B[1])}ctx.stroke()}
+    c.lights.forEach(l=>{if(!isOn(l))return;if(l.type==='spots')(l.pos||[[.18,.2],[.82,.2],[.18,.8],[.82,.8]]).forEach(([u,v])=>{const[x,y]=UV(u,v);glow(x,y,.8,.3)});
+      else if(l.type==='strip'&&!l.free){const a=wp(l.wall,l.from),b=wp(l.wall,l.to),[ix,iy]=inw(l.wall);glow((a[0]+b[0])/2+ix*.5,(a[1]+b[1])/2+iy*.5,1.1,.22)}
+      else{const[x,y]=l.u!=null?UV(l.u,l.v):r.c;glow(x,y,1.2,.25)}});
+    ctx.restore();
+    (c.wins||[]).forEach(w=>{const[px,py]=wp(w.wall,w.t),[ax,ay]=al(w.wall),hw=w.door?.45:.6,z0=w.door?0:.9;
+      poly([pr(px-ax*hw,py-ay*hw,z0),pr(px+ax*hw,py+ay*hw,z0),pr(px+ax*hw,py+ay*hw,2.1),pr(px-ax*hw,py-ay*hw,2.1)],col('--cool',.3),col('--cool',.85),1.2)});
+    (c.doors||[]).forEach(d=>{const[px,py]=wp(d.wall,d.t),[ax,ay]=al(d.wall),[ix,iy]=inw(d.wall),A=[px-ax*.45,py-ay*.45],B=[px+ax*.45,py+ay*.45];
+      poly([pr(A[0],A[1],0),pr(B[0],B[1],0),pr(B[0],B[1],2),pr(A[0],A[1],2)],col('--fg',.06),col('--fg',.5),1);
+      const hg=d.flip?B:A,sg=d.flip?-1:1,an=1.22,tip=[hg[0]+(ax*Math.cos(an)*sg+ix*Math.sin(an))*.9,hg[1]+(ay*Math.cos(an)*sg+iy*Math.sin(an))*.9];
+      poly([pr(hg[0],hg[1],0),pr(tip[0],tip[1],0),pr(tip[0],tip[1],1.98),pr(hg[0],hg[1],1.98)],col('--fg',.16),col('--fg',.55),.9)});
+    if(c.T&&c.T.kind==='fritz'){const[px,py]=wp(c.T.wall,c.T.t),[ax,ay]=al(c.T.wall),[ix,iy]=inw(c.T.wall),q=[px+ix*.05,py+iy*.05],heat=c.T.ist<c.T.soll-.15;
+      poly([pr(q[0]-ax*.5,q[1]-ay*.5,.15),pr(q[0]+ax*.5,q[1]+ay*.5,.15),pr(q[0]+ax*.5,q[1]+ay*.5,.72),pr(q[0]-ax*.5,q[1]-ay*.5,.72)],col('--bg',.92),col(heat?'--heat':'--fg',heat?.8:.45),1)}
+    c.lights.forEach(l=>{const on=isOn(l),lc=on?'--sun':'--fg';
+      if(l.type==='spots')(l.pos||[[.18,.2],[.82,.2],[.18,.8],[.82,.8]]).forEach(([u,v])=>{const[x,y]=UV(u,v);dot(x,y,2.45,lc,2.6,on)});
+      else if(l.type==='plane'){const[x,y]=l.u!=null?UV(l.u,l.v):r.c,rr=l.rot||0,rc=Math.cos(rr),rs=Math.sin(rr);const pts=RPLANE.map(([u,v])=>pr(x+u*rc-v*rs,y+u*rs+v*rc,2.4));
+        if(on){ctx.save();ctx.shadowColor=col('--sun',1);ctx.shadowBlur=14;poly(pts,col('--sun',.7));ctx.restore()}poly(pts,col('--bg',.95),col('--fg',.45),.8)}
+      else if(l.type==='pendant'){const[x,y]=l.u!=null?UV(l.u,l.v):r.c,a=pr(x,y,2.5),b=pr(x,y,1.8);ctx.strokeStyle=col('--fg',.45);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();dot(x,y,1.75,on?'--sun':'--fg',5,on)}
+      else if(l.type==='ceiling'){const[x,y]=UV(l.u,l.v);dot(x,y,2.45,lc,5,on)}
+      else if(l.type==='floorlamp'){const[x,y]=UV(l.u,l.v),a=pr(x,y,0),b=pr(x,y,1.55);ctx.strokeStyle=col('--fg',.5);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();dot(x,y,1.65,lc,5,on)}
+      else if(l.type==='strip'){let a,b,za,zb;if(l.free){const[mx,my]=UV(l.u??.5,l.v??.5),ay=l.axis==='y',len=(l.to-l.from)*(ay?y1-y0:x1-x0)/2;a=ay?[mx,my-len]:[mx-len,my];b=ay?[mx,my+len]:[mx+len,my];za=zb=2.45}
+        else{const[ix,iy]=inw(l.wall),p=wp(l.wall,l.from),q=wp(l.wall,l.to);a=[p[0]+ix*.05,p[1]+iy*.05];b=[q[0]+ix*.05,q[1]+iy*.05];za=zb=Math.min(l.z,2.4)}
+        const A=pr(a[0],a[1],za),B=pr(b[0],b[1],zb);ctx.save();if(on){ctx.shadowColor=col('--sun',1);ctx.shadowBlur=10}ctx.strokeStyle=col(lc,on?.95:.35);ctx.lineWidth=on?3:1.6;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();ctx.restore()}});
+    (c.P||[]).forEach(q=>{const[x,y]=UV(q.at[0],q.at[1]);dot(x,y,2.4,'--ok',2.6,false)});
+  }
+  /* Overlay-Positionen */
+  function place(){
+    const{r}=roofZ(),zy=y=>r-(y-D0/2)*T38;
+    DEV.forEach(d=>{let p,a;
+      if(d.roof){p=proj(d.rp[0],d.rp[1],zy(d.rp[1])+.3);a=S.roof;if(S.roof<.3){d.el.style.opacity=0;d.el.style.pointerEvents='none';return}}else{p=proj(d.p[0],d.p[1],zF(d.f)+.35);a=S.fa[d.f]}
+      d.el.style.transform='translate('+p[0].toFixed(1)+'px,'+p[1].toFixed(1)+'px)';
+      const vis=mode==='haus'?(d.roof||['tor','cam','wledc','markise','tlicht'].includes(d.id)):(!d.roof&&a>.4);d.el.style.opacity=vis?1:0;d.el.style.pointerEvents=vis?'auto':'none';
+      const on=d.light?LIGHT[d.light]:d.on?d.on():false;d.el.classList.toggle('on',!!on);d.el.classList.toggle('sel',sel&&sel.dev===d)});
+    LABS.forEach(({r,el})=>{const show=(focus===r.f&&S.fa[r.f]>.6)||r===hover;const p=proj(r.c[0],r.c[1],zF(r.f)+.02);
+      el.style.transform='translate('+p[0].toFixed(1)+'px,'+(p[1]+14).toFixed(1)+'px) translate(-50%,-50%)';el.style.opacity=show?1:0});
+  }
+  /* Treffer: oberste sichtbare Etage zuerst */
+  function hit(x,y){for(let i=3;i>=0;i--){if(S.fa[i]<.5)continue;const z=zF(i);for(const r of PLAN[i].rooms){if(r.stair)continue;
+    const pts=r.p.map(q=>proj(q[0],q[1],z));let ins=false;for(let a=0,b=pts.length-1;a<pts.length;b=a++){const[xa,ya]=pts[a],[xb,yb]=pts[b];if((ya>y)!==(yb>y)&&x<(xb-xa)*(y-ya)/(yb-ya)+xa)ins=!ins}
+    if(ins)return r}}return null}
+  let drag=null;
+  wrap.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,yaw:baseYaw,elev:baseElev,m:false,id:e.pointerId}});
+  addEventListener('pointermove',e=>{
+    if(drag&&e.pointerId===drag.id){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(drag.m||Math.hypot(dx,dy)>5){if(!drag.m){drag.m=true;try{wrap.setPointerCapture(e.pointerId)}catch(_){}}
+      wrap.classList.add('drag');baseYaw=drag.yaw+dx*.006;if(e.pointerType==='mouse')baseElev=Math.max(.28,Math.min(1.4,drag.elev+dy*.004));lastUser=performance.now();return}}
+    if(e.pointerType!=='mouse')return;const b=wrap.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom){if(hover){hover=null;tip.style.opacity=0}return}
+    const r=hit(e.clientX-b.left,e.clientY-b.top);hover=r;
+    if(r){tip.textContent=r.n+(r.a?' · '+de(r.a,2)+' m²':'')+' · '+PLAN[r.f].k;tip.style.transform='translate('+(e.clientX-b.left)+'px,'+(e.clientY-b.top)+'px) translate(-50%,calc(-100% - 12px))';tip.style.opacity=1}else tip.style.opacity=0});
+  addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const m=drag.m;drag=null;wrap.classList.remove('drag');if(m)return;
+    const b=wrap.getBoundingClientRect(),r=hit(e.clientX-b.left,e.clientY-b.top);select(r)});
+  wrap.addEventListener('dblclick',()=>{baseYaw=-.5;baseElev=.66;lastUser=-1e9});
+  new ResizeObserver(size).observe(wrap);size();
+  $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  $$('[data-floor]').forEach(b=>b.addEventListener('click',()=>{const f=+b.dataset.floor;setMode('alle',focus===f?-1:f)}));
+  $('[data-hero="alle"]').addEventListener('click',()=>{setMode('alle');$('#modell').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})});
+  setMode('alle');requestAnimationFrame(frame);
+  return{setMode,get sel(){return sel},set sel(v){sel=v}};
+})();
+
+/* ================= Raum-Inspektor ================= */
+function toggleLight(id){LIGHT[id]=!LIGHT[id];toast((ROOMS[id].n)+': Licht '+(LIGHT[id]?'an':'aus')+' (Demo)');inspect()}
+function select(r,dev){HM.sel=r?{room:r,dev}:null;if(dev&&dev.id==='tor')garageSim();if(dev&&dev.id==='markise'){AW.tgt=AW.tgt>0?0:100;toast(AW.tgt?'Markise fährt aus (Demo)':'Markise fährt ein (Demo)')}inspect()}
+function garageSim(){G.target=G.target?0:1;window.GH_GARAGE=G.target?'offen':'zu';toast(G.target?'Garagentor öffnet (Simulation, kein Antrieb)':'Garagentor schließt (Simulation)')}
+const AREA=u=>PLAN.flatMap(f=>f.rooms).filter(r=>r.u===u&&r.a).reduce((s,r)=>s+r.a,0);
+function inspect(){
+  const el=$('#insp'),s=HM.sel;
+  if(!s||!s.room){
+    const units=[['H','EG + DG links'],['O','EG + DG rechts'],['S','Untergeschoss, Windfang, Dachboden'],['X','Carport, Terrassen, Balkone']];
+    el.innerHTML='<div class="tile-h"><h2><span class="ico" style="--c:var(--fg)"><svg><use href="#i-home"/></svg></span>Überblick</h2><span class="pill idle">'+DEV.length+' Geräte</span></div>'+
+      '<div class="units">'+units.map(([u,d])=>'<button class="unit" type="button" data-unit="'+u+'" style="--c:var('+UNIT[u].c+')"><i></i><div><b>'+UNIT[u].n+'</b><br><small class="muted">'+d+'</small></div><span>'+de(AREA(u),1)+' m²</span></button>').join('')+'</div>'+
+      '<p class="small muted" style="margin:0">Antippen eines Raums zeigt seine Geräte. Lichter in Küche und Kinderzimmern lassen sich schalten (Demo). Die Linien zeigen den Energiefluss: Sonne aufs Dach, über die Batterie in der Garage ins Haus. Heizung und Warmwasserspeicher stehen oben auf der Bühne, die drei Solarkollektoren heizen ihn vom Dach aus.</p>';
+    $$('[data-unit]',el).forEach(b=>b.addEventListener('click',()=>{const u=b.dataset.unit;HM.setMode('alle',u==='S'?0:u==='X'?-1:u==='H'?2:1)}));
+    return}
+  const r=s.room,devs=DEV.filter(d=>d.r===r.id),f=PLAN[r.f];
+  el.innerHTML='<div class="tile-h"><h2><span class="ico" style="--c:var('+UNIT[r.u].c+')"><svg><use href="#i-home"/></svg></span>'+f.n+'</h2><button class="btn" type="button" data-back>Überblick</button></div>'+
+    '<div class="eyebrow" style="margin:0">'+UNIT[r.u].n+'</div><div class="rhead"><h3>'+r.n+'</h3><div class="area">'+(r.a?de(r.a,2)+' m² laut Plan':'Außenbereich')+'</div></div>'+
+    (['leo','mia','buero','kochen_h','wohnen_h','kochen_o','wohnen_o'].includes(r.id)?'<a class="ink" style="margin:0 0 14px;height:40px" href="__URL_ZIMMER__#'+r.id+'">Zimmer in 3D öffnen <svg><use href="#i-arrow"/></svg></a>':'')+
+    (devs.length?'<div class="devlist">'+devs.map(d=>{const on=d.light?LIGHT[d.light]:d.on?d.on():false;
+      return '<div class="drow"><span class="ico" style="--c:var('+d.c+')"><svg><use href="#'+d.ic+'"/></svg></span><div><b>'+d.n+'</b><small>'+(d.light?(on?'an':'aus'):d.st())+'</small></div>'+
+        (d.light?'<button class="btn'+(on?' on':'')+'" type="button" data-light="'+d.light+'">'+(on?'An':'Aus')+'</button>':d.act?'<button class="btn" type="button" data-act="'+d.id+'">'+(typeof d.act==='function'?d.act():d.act)+'</button>':'<span></span>')+'</div>'}).join('')+'</div>':'<p class="small muted">Hier ist noch kein Gerät eingebunden.</p>');
+  $('[data-back]',el).addEventListener('click',()=>select(null));
+  $$('[data-light]',el).forEach(b=>b.addEventListener('click',()=>toggleLight(b.dataset.light)));
+  $$('[data-act]',el).forEach(b=>b.addEventListener('click',()=>{if(b.dataset.act==='markise'){AW.tgt=AW.tgt>0?0:100;toast(AW.tgt?'Markise fährt aus (Demo)':'Markise fährt ein (Demo)');setTimeout(inspect,50)}else garageSim()}));
+}
+inspect();setInterval(()=>{if(HM.sel)inspect()},5000);
+
+/* Fakten aus den Plänen */
+$('#facts').innerHTML=[[de(AREA('H'),1)+' m²','Wohnfläche Familie'],[de(AREA('O'),1)+' m²','Wohnfläche Opa'],['35°','Dachneigung, First Ost–West'],['8,90 m','Firsthöhe laut Schnitt (ab Bezugshöhe)']].map(([b,s])=>'<div><b>'+b+'</b><span>'+s+'</span></div>').join('');
+/* VIS-Tabelle */
+/* Geräteliste: alle Shelly-, Zigbee- und WLED-Geräte aus ioBroker (Stand 21.10.), m = im Modell (DEV-id oder Zimmer) */
+const INV=[
+ ['Zirkulationspumpe','Shelly Plug S','SHPLG-S#17838A','buehne',1,'pumpe'],['Waschmaschine','Shelly Plug S','SHPLG-S#46BF0E','waschen',1,'wm_plug'],
+ ['Markise','Shelly 2.5','SHSW-25#2A6800E9890A','terr_m',1,'markise'],['Küche Licht + WLED-Strom','Shelly 2.5','SHSW-25#7526CCFF943B','kochen_h',1,'licht_k'],
+ ['Wohnzimmer Licht (TV-Licht, Stehlampe)','Shelly 2.5','SHSW-25#7EBEF798C6D4','wohnen_h',1,'Zimmer'],['Flur Lichter','Shelly 2.5','SHSW-25#A32707C369EA','diele_h',1,'flur_l','Ort angenommen'],
+ ['Licht Esstisch','Shelly 2.5','SHSW-25#75A436CC92AD','wohnen_h',1,'Zimmer'],['Doppeltaster Küche','Shelly 2.5','SHSW-25#14428F88A568','kochen_h',0,'dt_k'],
+ ['Rollladen Küche','Shelly 2.5','SHSW-25#ABEED0A64255','kochen_h',0,'roll_k'],['Heizungspumpe','Shelly 1PM','SHSW-PM#8252254364B6','buehne',1,'hpumpe'],
+ ['PlugS Schwarze (Außensteckdose)','Shelly Plug S Gen3','shellyplugsg3#2693fae4993d','terr_m',0,'aussen'],['Terrasse Steckdose vorne','Shelly Plus 1PM','shellyplus1pm#4ee5a9dde27b','terr_h',1,'tvorne','Ort angenommen'],
+ ['Aqara-Steckdose','Zigbee ZNCZ02LM','00158dc7ac6d4952',null,0],['Würfel Mia','Zigbee MFKZQ01LM','00158d94986e2a2b','mia',1,'cube_e'],
+ ['Doppel-Relais Terrassenlicht','Zigbee LLKZMK11LM','00158dd4a6fb570e','terr_m',1,'tlicht'],['Garage zu','Zigbee MCCGQ11LM','00158da5cd4eb01c','garage',1,'tor'],
+ ['Dachfenster','Zigbee MCCGQ11LM','00158db1c0a5ee92','buero',1,'dfk'],['Bewegung Mia 1','Zigbee RTCGQ11LM','00158dfc94f7de82','mia',1,'pir_e'],
+ ['Bewegung Leo 1','Zigbee RTCGQ11LM','00158dbfa93d3f2e','leo',1,'pir_a'],['Würfel Leo','Zigbee MFKZQ01LM','00158d4eecb7e3c7','leo',1,'cube_a'],
+ ['Bewegung Mia 2','Zigbee RTCGQ11LM','00158d3895d4244a','mia',1,'pir_e'],['Fensterkontakt (ohne Namen)','Zigbee MCCGQ11LM','00158d30f1c32d9d','wohnen_h',1,'fk_w','3 der 4 Kontakte · zuletzt vor 5 Tagen bewegt'],
+ ['Bewegung Leo 2','Zigbee RTCGQ11LM','00158d78c41a3948','leo',1,'pir_a'],['Bewegung Büro','Zigbee RTCGQ11LM','00158d302f4ed7c0','buero',0,'pir_b'],
+ ['Bewegungsmelder (ohne Namen)','Zigbee RTCGQ11LM','00158d298d8631c6',null,0],['Bewegung Flur','Zigbee RTCGQ11LM','00158d462f1784eb','diele_h',1,'pir_f','Ort angenommen'],
+ ['Garage offen','Zigbee MCCGQ11LM','00158d470c5b8a00','garage',1,'tor'],['Fensterkontakt (ohne Namen)','Zigbee MCCGQ11LM','00158dec62768e2f','wohnen_h',1,'fk_w','3 der 4 Kontakte · zuletzt vor 44 Tagen'],
+ ['Fensterkontakt (ohne Namen)','Zigbee MCCGQ11LM','00158da03c2acb3e','wohnen_h',1,'fk_w','3 der 4 Kontakte · zuletzt vor 53 Tagen'],['Fensterkontakt (ohne Namen)','Zigbee MCCGQ11LM','00158d3d0157b16b','wohnen_h',1,'fk_w','3 der 4 Kontakte · zuletzt vor 39 Tagen'],
+ ['Taster Außensteckdose','Zigbee WXKG01LM','00158dd742d07c1f','terr_m',1,'taster2'],['Taster Terrassenlicht','Zigbee WXKG01LM','00158dc05e77e20e','terr_m',0,'taster'],
+ ['6-fach-Taster','Zigbee WXCJKG13LM','04cf8c2c5c1923c8',null,0,null,'Batterie leer · tauschen, dann meldet er sich wieder'],
+ ['WLED Küche','WLED','5e1c09d7b2a4','kochen_h',null,'wled_k'],['WLED Carport','WLED','9b3f60e2c71d','carport',null,'wledc']];
+(function(){const fam=a=>a.startsWith('Shelly')?'Shelly':a.startsWith('Zigbee')?'Zigbee':'WLED';
+  const n=k=>INV.filter(x=>fam(x[1])===k).length,off=INV.filter(x=>x[4]===0).length,lost=INV.filter(x=>!x[3]).length;
+  $('[data-invsum]').innerHTML='<span class="pill info">'+n('Shelly')+' Shelly</span><span class="pill info">'+n('Zigbee')+' Zigbee</span><span class="pill info">'+n('WLED')+' WLED</span><span class="pill warn">'+off+' offline</span><span class="pill idle">'+lost+' ohne Ort</span>';
+  $('[data-inv]').innerHTML=INV.map(([nm,art,id,r,on,m,hint])=>'<tr><td><b>'+nm+'</b><small>'+id+'</small></td><td>'+art.replace(/^Zigbee /,'Aqara ')+'</td><td>'+(r?ROOMS[r].n+' · '+PLAN[ROOMS[r].f].k:'<span class="pill idle">Ort fehlt</span>')+(hint?'<small>'+hint+'</small>':'')+'</td><td>'+(on===1?'<span class="pill ok">online</span>':on===0?'<span class="pill warn">offline</span>':'<span class="pill idle">–</span>')+'</td><td>'+(m?'<span class="pill ok">'+(m==='Zimmer'?'Zimmer + Modell':'im Modell')+'</span>':'<span class="pill idle">noch nicht</span>')+'</td></tr>').join('')})();
+$('#vistbl').insertAdjacentHTML('beforeend',DEV.map(d=>'<tr><td>'+(d.roof?'Dach':ROOMS[d.r].n+' · '+PLAN[ROOMS[d.r].f].k)+'</td><td>'+d.n+'</td><td><code>'+d.dp+'</code></td></tr>').join(''));
+
+/* Einrichtung aus der Seite Zimmer einfügen (gleiches Format wie dort gespeichert) */
+$('[data-lapply]').addEventListener('click',()=>{let o;try{o=JSON.parse($('[data-lpaste]').value)}catch(e){toast('Das ist kein gültiger Einrichtungs-Text');return}
+  const ids=Object.keys(o||{}).filter(id=>ZC[id]);if(!ids.length){toast('Keine Zimmer im Text gefunden');return}
+  try{const all=readLayouts();ids.forEach(id=>{all[id]=o[id]});localStorage.setItem(LKEY,JSON.stringify(all))}catch(e){}
+  toast(ids.length+' Zimmer übernommen');setTimeout(()=>location.reload(),700)});
+$('[data-lreset]').addEventListener('click',()=>{try{localStorage.removeItem(LKEY)}catch(e){}toast('Ausgangszustand der Zimmer');setTimeout(()=>location.reload(),700)});
+</script>

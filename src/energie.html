@@ -1,0 +1,611 @@
+<meta charset="utf-8">
+<title>Glashaus Energie</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+/* Energiefluss */
+.flow{position:relative;width:100%;aspect-ratio:1000/620;max-width:100%}
+.flow canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fnode{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;width:110px;margin-left:-55px;margin-top:-34px;text-align:center;transition:opacity .6s}
+.fnode .disc{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;color:var(--c);transition:transform .6s var(--spring)}
+.fnode .disc svg{width:26px;height:26px}
+.fnode b{font-size:20px;line-height:1.1;margin-top:4px}
+.fnode small{font-size:11.5px;color:var(--fg-2);line-height:1.2}
+.fnode.dim{opacity:.42}
+.fnode.hub .disc{width:76px;height:76px;margin-top:-4px;color:var(--fg)}
+.fnode.hub b{font-size:13px;font-weight:550;letter-spacing:0}
+.sunglow{position:absolute;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,color-mix(in srgb,var(--sun) 42%,transparent),transparent 62%);transform:scale(var(--s,1));opacity:var(--o,1);transition:transform 1s var(--ease),opacity 1s var(--ease);animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{50%{filter:brightness(1.25)}}
+.scrub{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;margin-top:6px}
+.scrub .time{font-family:var(--mono);font-size:26px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums;min-width:4.2ch}
+.scrub .btns{display:flex;gap:8px}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-moz-range-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow);transition:transform .3s var(--spring)}
+.slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow)}
+.slider:active::-webkit-slider-thumb{transform:scale(1.25)}
+.btn.on{background:var(--fg);color:var(--bg)}
+@media (max-width:640px){.flow{aspect-ratio:1/1.08}.fnode{width:92px;margin-left:-46px}.fnode .disc{width:56px;height:56px}.fnode.hub .disc{width:62px;height:62px}.fnode b{font-size:17px}.scrub{grid-template-columns:auto minmax(0,1fr)}.scrub .btns{grid-column:1/-1}}
+
+/* Batterie: BYD HVS als Turm (BMU, 3 Module, Sockel) */
+:root{--dev-white:#f2f2f0;--dev-white-2:#e3e4e2;--dev-side:#d2d3d1;--dev-grey:#5c5f63;--dev-grey-side:#46494c;--dev-grey-top:#86898c;--dev-red:#c8282d}
+.batt{display:grid;grid-template-columns:168px minmax(0,1fr);gap:18px;align-items:center}
+.tower{width:168px;height:auto;display:block;overflow:visible;filter:drop-shadow(0 18px 22px var(--shadow))}
+.tower .mod-g{cursor:pointer;outline:none}
+.tower .front{transition:stroke .3s}
+.tower .mod-g:hover .front,.tower .mod-g:focus-visible .front,.tower .mod-g.hl .front{stroke:var(--batt);stroke-width:2}
+.tower .liq{transition:transform 1.1s var(--ease)}
+.tower .wv{animation:wv 3.2s linear infinite}
+.tower .wv2{animation-duration:5.4s;animation-direction:reverse;opacity:.45}
+@keyframes wv{to{transform:translateX(56px)}}
+.tower .sweep{opacity:0}
+.tower[data-flow="up"] .sweep{opacity:1;animation:sweep-up 2.2s linear infinite}
+.tower[data-flow="down"] .sweep{opacity:1;animation:sweep-down 2.2s linear infinite}
+@keyframes sweep-up{from{transform:translateY(60px)}to{transform:translateY(-60px)}}
+@keyframes sweep-down{from{transform:translateY(-60px)}to{transform:translateY(60px)}}
+.tower .led{stroke:#b9bbb9;stroke-width:2.2;stroke-linecap:round;transition:stroke .4s}
+.tower[data-flow="up"] .led,.tower[data-flow="down"] .led{stroke:var(--batt);filter:drop-shadow(0 0 3px var(--batt));animation:led 1.6s ease-in-out infinite}
+.tower .mod-g:nth-of-type(2) .led{animation-delay:.2s}.tower .mod-g:nth-of-type(3) .led{animation-delay:.4s}
+@keyframes led{50%{opacity:.35}}
+.bside{display:flex;flex-direction:column;gap:10px;min-width:0}
+.bside .big{font-size:52px}
+.mlist{list-style:none;margin:4px 0 0;padding:0}
+.mlist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 10px;margin:0 -10px;border-radius:12px;font-size:13px;cursor:default;transition:background .3s}
+.mlist li.hl{background:var(--track)}
+.mlist b{font-weight:550}
+.mlist span{color:var(--fg-2);grid-column:1}
+.mlist em{font-style:normal;font-variant-numeric:tabular-nums;grid-row:1/3;grid-column:2;align-self:center;font-weight:550}
+.mod.hl>span b{color:var(--batt)}
+.mod.hl .cells i{filter:brightness(1.12)}
+@media (max-width:420px){.batt{grid-template-columns:128px minmax(0,1fr);gap:12px}.tower{width:128px}.bside .big{font-size:40px}}
+
+/* Tagesverlauf */
+.chart{width:100%;height:240px}
+.chart svg{display:block;width:100%;height:100%;overflow:visible}
+.chart text{fill:var(--fg-3);font-size:11px;font-family:var(--font);font-variant-numeric:tabular-nums}
+.chart .gl{stroke:var(--track);stroke-width:1}
+.chart .ar{fill:color-mix(in srgb,var(--sun) 24%,transparent);animation:fade 1.4s var(--ease) both .4s}
+.chart .ln{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2s var(--ease) forwards .2s}
+.chart .pv{stroke:var(--sun)}.chart .hm{stroke:var(--home)}.chart .soc{stroke:var(--batt);stroke-width:1.6;opacity:.9}
+.chart .mk line{stroke:var(--fg);stroke-width:1;stroke-dasharray:3 3}
+.chart .mk circle{stroke:var(--bg);stroke-width:2}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{from{opacity:0}}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--fg-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;background:var(--c)}
+
+/* Bilanz */
+.rings{display:flex;gap:18px;margin-bottom:18px}
+.rings>div{display:flex;align-items:center;gap:12px}
+.rings .ring{--sz:72px}
+.rings small{display:block;font-size:12.5px;color:var(--fg-2);max-width:9ch;line-height:1.25}
+
+/* Zellmonitor */
+.mods{display:grid;gap:14px}
+.mod{display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;align-items:end}
+.mod>span{font-size:12.5px;color:var(--fg-2);line-height:1.25;padding-bottom:2px}
+.mod>span b{display:block;color:var(--fg);font-weight:550}
+.cells{display:grid;grid-template-columns:repeat(32,minmax(0,1fr));gap:3px;height:64px;align-items:end}
+.cells i{display:block;border-radius:3px 3px 1px 1px;background:color-mix(in srgb,var(--batt) 70%,transparent);height:var(--h);transform-origin:bottom;transform:scaleY(0);transition:transform .9s var(--spring),background .5s,height .8s var(--ease);transition-delay:calc(var(--k)*12ms)}
+.cells.in i{transform:none}
+.cells i.lo{background:var(--warn)}
+.cells i.min{background:var(--crit)}
+.cells i.hi{background:color-mix(in srgb,var(--batt) 100%,var(--fg) 20%)}
+.cells i.flash{animation:flash .9s ease}
+@keyframes flash{30%{filter:brightness(1.6)}}
+.cellstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.cellstats div{padding:12px 14px;border-radius:var(--r-m);background:var(--track)}
+.cellstats b{display:block;font-size:20px}
+.cellstats span{font-size:12px;color:var(--fg-2)}
+@media (max-width:640px){.mod{grid-template-columns:minmax(0,1fr)}.cells{gap:2px;height:52px}.cellstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.code{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:6px;background:var(--track);color:var(--fg-2);margin-right:6px}
+/* Wechselrichter · SMA Sunny Tripower Smart Energy */
+:root{--inv-w1:#fbfbfa;--inv-w2:#e6e7e6;--inv-blue:#1f5ba8;--inv-red:#e2061a}
+.inv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;margin-bottom:16px}
+.inv svg{width:150px;height:auto;display:block;overflow:visible;filter:drop-shadow(0 16px 20px var(--shadow))}
+.invleg{display:grid;gap:10px;font-size:13px}
+.invleg span{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;color:var(--fg-2)}
+.invleg i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.invleg b{color:var(--fg);font-weight:550;font-variant-numeric:tabular-nums}
+.inv .led-g{animation:ledg 3s ease-in-out infinite}
+.inv .led-b{animation:ledb2 2.2s steps(1) infinite}
+@keyframes ledg{50%{opacity:.75}}
+@keyframes ledb2{0%,70%{opacity:.25}75%,85%{opacity:1}90%{opacity:.25}95%{opacity:1}}
+@media (max-width:420px){.inv{grid-template-columns:120px minmax(0,1fr)}.inv svg{width:120px}}
+/* Wallboxen · Pulsar Plus */
+.wbs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:900px){.wbs{grid-template-columns:minmax(0,1fr)}}
+.wb{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:center;padding:16px;border-radius:var(--r-l,20px);background:var(--track)}
+@media (max-width:480px){.wb{grid-template-columns:110px minmax(0,1fr);gap:14px}}
+.wb svg{width:100%;height:auto;display:block;overflow:visible}
+.wb .led{fill:none;stroke:var(--lc);stroke-width:4;filter:drop-shadow(0 0 6px var(--lc));transition:stroke .6s}
+.wb[data-s="lädt"] .led{animation:wbp 2.2s ease-in-out infinite}
+@keyframes wbp{50%{opacity:.45}}
+.wb .flow{fill:none;stroke:var(--lc);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:2 10;opacity:0;transition:opacity .5s}
+.wb[data-s="lädt"] .flow{opacity:.95;animation:wbf .9s linear infinite}
+@keyframes wbf{to{stroke-dashoffset:-12}}
+.wb .car{opacity:.18;transition:opacity .6s}
+.wb[data-car="1"] .car{opacity:1}
+.wb h3{margin:0;font-size:15px;font-weight:550;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wb .kw{font-size:34px;font-weight:550;letter-spacing:-.035em;line-height:1;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.wb .kw .unit{font-size:14px}
+.wb .sub{font-size:12.5px;color:var(--fg-2);margin-bottom:10px}
+.wb .kv{margin:0 0 10px}
+.wb .amp{display:grid;grid-template-columns:auto minmax(0,1fr) 4ch;gap:10px;align-items:center;font-size:12.5px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.wb .slider{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;margin:0}
+.wb .slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--bg) var(--p,50%))}
+.wb .slider::-moz-range-track{height:4px;border-radius:4px;background:var(--bg)}
+.wb .slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:var(--fg);border:3px solid var(--bg)}
+.wb .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.wb .btn{height:32px;padding:0 13px;font-size:12.5px}
+.wb .btn.on{background:var(--fg);color:var(--bg)}
+.wbmonth{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:16px;font-size:13px;color:var(--fg-2)}
+.wbmonth b{color:var(--fg);font-weight:550;font-variant-numeric:tabular-nums}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">energie</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="#" aria-current="page">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">SMA STP · BYD HVS 7,7 kWh · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span data-h1a>Die Sonne liefert</span><span class="it" data-h1b>3,2 kW.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-lede>Energiefluss, Batterie und Wechselrichter im Blick.</p>
+      <div class="ctas">
+        <button class="ink" type="button" data-play><span>Tag abspielen</span> <svg data-playicon><use href="#i-play"/></svg></button>
+        <a class="uline" href="#jahr">Das Jahr in Zahlen <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-8 stretch" style="--i:0">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--sun)"><svg><use href="#i-bolt"/></svg></span>Energiefluss</h2><span class="pill ok live" data-mode>235 · Netzparallelbetrieb</span></div>
+    <div class="flow" id="flow">
+      <canvas aria-hidden="true"></canvas>
+      <div class="sunglow" style="left:50%;top:12%"></div>
+      <div class="fnode" data-node="pv" style="--c:var(--sun);left:50%;top:12%"><span class="disc glass"><svg data-pvicon><use href="#i-sun"/></svg></span><b class="num"><span data-f="pv">0</span><span class="unit">kW</span></b><small>Photovoltaik</small></div>
+      <div class="fnode" data-node="grid" style="--c:var(--grid);left:12%;top:47%"><span class="disc glass"><svg><use href="#i-grid"/></svg></span><b class="num"><span data-f="grid">0</span><span class="unit">kW</span></b><small data-fl="grid">Netz</small></div>
+      <div class="fnode hub" data-node="hub" style="left:50%;top:47%"><span class="disc glass"><svg><use href="#i-inv"/></svg></span><b>Tripower SE</b><small>307 · Ok</small></div>
+      <div class="fnode" data-node="home" style="--c:var(--home);left:88%;top:47%"><span class="disc glass"><svg><use href="#i-home"/></svg></span><b class="num"><span data-f="home">0</span><span class="unit">kW</span></b><small>Haus</small></div>
+      <div class="fnode" data-node="batt" style="--c:var(--batt);left:50%;top:80%"><span class="disc glass"><svg><use href="#i-byd"/></svg></span><b class="num"><span data-f="batt">0</span><span class="unit">kW</span></b><small data-fl="batt">Batterie</small></div>
+    </div>
+    <div class="scrub">
+      <span class="time" data-time>07:25</span>
+      <input class="slider" id="t" type="range" min="0" max="287" step="1" value="0" aria-label="Uhrzeit des Demo-Tages">
+      <div class="btns"><button class="btn" type="button" data-live>Jetzt</button><button class="btn" type="button" data-play><svg data-playicon><use href="#i-play"/></svg><span>Abspielen</span></button></div>
+    </div>
+  </article>
+
+  <article class="glass tile s-4 stretch" style="--i:1">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--batt)"><svg><use href="#i-byd"/></svg></span>BYD Battery-Box HVS</h2><span class="pill" data-bpill>–</span></div>
+    <div class="batt">
+      <svg class="tower" id="tower" viewBox="12 12 180 292" role="group" aria-label="BYD Battery-Box HVS: BMU und drei Module"></svg>
+      <div class="bside">
+        <div class="num big"><span data-soc>60</span><span class="unit">%</span></div>
+        <ul class="mlist">
+          <li data-mod="1"><b>Modul 1</b><span>oben · 23,1 °C</span><em data-mv="1">–</em></li>
+          <li data-mod="2"><b>Modul 2</b><span>Mitte · 23,8 °C</span><em data-mv="2">–</em></li>
+          <li data-mod="3"><b>Modul 3</b><span>unten · 24,1 °C</span><em data-mv="3">–</em></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="sep">
+    <dl class="kv">
+      <dt>Leistung</dt><dd data-bkw>–</dd>
+      <dt>Gespeichert</dt><dd data-bkwh>–</dd>
+      <dt>Gesundheit (SOH)</dt><dd>93 %</dd>
+      <dt>BMS</dt><dd>no Error · 3 × 2,56 kWh</dd>
+    </dl>
+  </article>
+
+  <article class="glass tile s-8" style="--i:2">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-sunrise"/></svg></span>Tagesverlauf</h2>
+      <div class="legend"><span style="--c:var(--sun)"><i></i>PV</span><span style="--c:var(--home)"><i></i>Haus</span><span style="--c:var(--batt)"><i></i>Ladestand</span></div></div>
+    <div class="chart" id="chart" role="img" aria-label="Tagesverlauf von PV-Leistung, Hausverbrauch und Batterieladestand (Demo-Tag)"></div>
+  </article>
+
+  <article class="glass tile s-4" style="--i:3">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--ok)"><svg><use href="#i-check"/></svg></span>Bilanz bis <span data-time>07:25</span></h2></div>
+    <div class="rings">
+      <div><div class="ring" id="r-aut" style="--c:var(--ok)"></div><small>Autarkie</small></div>
+      <div><div class="ring" id="r-eig" style="--c:var(--sun)"></div><small>Eigen&shy;verbrauch</small></div>
+    </div>
+    <dl class="kv">
+      <dt>Erzeugt</dt><dd data-k="gen">–</dd>
+      <dt>Verbraucht</dt><dd data-k="use">–</dd>
+      <dt>Eingespeist</dt><dd data-k="exp">–</dd>
+      <dt>Bezogen</dt><dd data-k="imp">–</dd>
+    </dl>
+  </article>
+
+  <article class="glass tile s-8" style="--i:4">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--batt)"><svg><use href="#i-cube"/></svg></span>Zellmonitor</h2><span class="small muted">96 Zellen · Zelldetails alle ≈ 7 min</span></div>
+    <div class="mods" id="mods" role="img" aria-label="Zellspannungen der drei Batteriemodule; schwächste Zelle 69 in Modul 3"></div>
+    <div class="cellstats">
+      <div><b class="num" data-c="mean">–</b><span>Mittelwert</span></div>
+      <div><b class="num" data-c="min">–</b><span>Zelle 69 · M3 Z5</span></div>
+      <div><b class="num" data-c="max">–</b><span>Zelle 22 · M1 Z22</span></div>
+      <div><b class="num" data-c="spread">–</b><span>Spreizung · 3 balancieren</span></div>
+    </div>
+  </article>
+
+  <article class="glass tile s-4" style="--i:5">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--fg)"><svg><use href="#i-inv"/></svg></span>Sunny Tripower Smart Energy</h2><span class="pill ok">Ok</span></div>
+    <div class="inv"><svg id="invsvg" viewBox="0 0 170 250" role="img" aria-label="SMA Sunny Tripower Smart Energy mit Kabeln für PV, Batterie und Netz"></svg>
+      <div class="invleg"><span style="--c:var(--sun)"><i></i>PV <b data-il="pv">–</b></span><span style="--c:var(--batt)"><i></i>Batterie <b data-il="bat">–</b></span><span style="--c:var(--grid)"><i></i>Netz <b data-il="grid">–</b></span></div></div>
+    <dl class="kv">
+      <dt><span class="code">30201</span>Zustand</dt><dd>307 · Ok</dd>
+      <dt><span class="code">30881</span>Netzanbindung</dt><dd>1780 · öffentl. Netz</dd>
+      <dt><span class="code">33003</span>Betrieb</dt><dd>235 · Netzparallel</dd>
+      <dt><span class="code">31447</span>Netzfrequenz</dt><dd><span data-hz>50,00</span> Hz</dd>
+      <dt>Netzspannung</dt><dd><span data-v>231,4</span> V</dd>
+      <dt>Innentemperatur</dt><dd><span data-wrt>–</span> °C</dd>
+      <dt>Isolationswiderstand</dt><dd>3,0 MΩ</dd>
+      <dt>DC-Fehlerstrom</dt><dd>0,021 A</dd>
+    </dl>
+  </article>
+
+  <div class="s-12" id="laden">
+    <div class="sec-h"><h2>Laden mit <span class="it">Sonne.</span></h2><span class="small">2 × Wallbox Pulsar Plus</span></div>
+  </div>
+  <article class="glass tile s-12" style="--i:6">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--ok)"><svg><use href="#i-plug"/></svg></span>Wallboxen</h2><span class="pill warn" title="system.adapter.mywallbox.0 ist deaktiviert">Adapter aus · Werte Demo</span></div>
+    <div class="wbs" id="wbs"></div>
+    <div class="wbmonth"><span>Oktober geladen <b data-wbm="kwh">–</b></span><span>davon Sonne <b data-wbm="sun">–</b></span><span>Kosten Netzstrom <b data-wbm="eur">–</b></span><span>Ladevorgänge <b data-wbm="n">–</b></span></div>
+  </article>
+
+  <div class="s-12" id="jahr">
+    <div class="sec-h"><h2>Das Jahr in <span class="it">Zahlen.</span></h2><span class="small">Tageswerte der letzten 12 Monate</span></div>
+  </div>
+  <article class="glass tile s-12" style="--i:2"><div id="sky"></div></article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· SMA- und BYD-Datenpunkte</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Widget → Datenpunkt</h3>
+        <div class="tbl"><table>
+          <tr><th>Widget</th><th>Datenpunkt</th><th>Hinweis</th></tr>
+          <tr><td>Wallbox Carport</td><td><code>mywallbox.0.597213</code></td><td>Pulsar Plus „Carport PulsarPlus“: <code>charging.charging_power</code>, <code>info.status</code>, <code>control.locked</code>, <code>charging.maxChgCurrent</code></td></tr>
+          <tr><td>Wallbox Garage</td><td><code>mywallbox.0.840021</code></td><td>Pulsar Plus „Garage PulsarPlus“; Adapter <b>mywallbox.0 ist deaktiviert</b>, letzte Daten Feb. 2024</td></tr>
+          <tr><td>PV-Leistung</td><td><code>modbus.0.inputRegisters.3.30775_…</code></td><td>AC-Wirkleistung, Name im Objektbaum prüfen</td></tr>
+          <tr><td>Netzfrequenz</td><td><code>modbus.0.inputRegisters.3.31447_Netzfrequenz</code></td><td>ändert sich ständig, taugt als Lebenszeichen</td></tr>
+          <tr><td>Wechselrichter</td><td>SMA Sunny Tripower Smart Energy</td><td>Hybrid, Modbus <code>modbus.0</code></td></tr>
+          <tr><td>Zustand</td><td><code>…3.30201_…</code></td><td>35 Fehler · 303 Aus · 307 Ok · 455 Warnung</td></tr>
+          <tr><td>Netzanbindung</td><td><code>…3.30881_…</code></td><td>1779 getrennt · 1780 öffentl. Netz · 1781 Inselnetz</td></tr>
+          <tr><td>Betriebsstatus</td><td><code>…3.33003_…</code></td><td>235 Netzparallel · 1463 Backup · 2119 Abregelung</td></tr>
+          <tr><td>Batterie</td><td><code>bydhvs.0.State.Power</code>, <code>State.TempMax</code></td><td>SOC-Name im Objektbaum prüfen</td></tr>
+          <tr><td>BMS-Fehler</td><td><code>bydhvs.0.System.ErrorNum</code></td><td>0 = ok</td></tr>
+          <tr><td>Zellmonitor</td><td><code>bydhvs.0.CellDetails.CellVolt001–096</code></td><td>1–32 = Modul 1 (oben), 65–96 = Modul 3</td></tr>
+          <tr><td>Tagesverlauf, Skyline</td><td>InfluxDB <code>192.168.0.76:8086</code></td><td>Flux, Measurement = State-ID</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <h3>Projekt-CSS</h3>
+        <p>Dasselbe Projekt-CSS wie in der Ansicht Zuhause. Der Energiefluss ist ein Canvas-Skript; für VIS reicht als einfache Variante eine SVG-Linie mit der Klasse <code>gh-flow</code>.</p>
+<pre class="css" id="vis-css">/* Energiefluss-Linie (SVG im HTML-Widget) */
+.gh-flow{
+  stroke-dasharray:2 14;
+  stroke-linecap:round;
+  animation:gh-flow 1.2s linear infinite;
+}
+/* Gegenrichtung, z. B. Netzbezug statt Einspeisung */
+.gh-flow.rev{animation-direction:reverse}
+@keyframes gh-flow{to{stroke-dashoffset:-16}}
+
+/* Batterie als Flüssigkeit: --soc per Binding setzen */
+.gh-liquid{position:relative;overflow:hidden;border-radius:30px}
+.gh-liquid::before{
+  content:"";position:absolute;left:50%;
+  width:420px;height:420px;margin-left:-210px;
+  top:calc(100% - var(--soc,50) * 1% - 8px);
+  border-radius:42%;background:#3a8452;
+  animation:gh-wave 9s linear infinite;
+}
+@keyframes gh-wave{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .gh-flow,.gh-liquid::before{animation:none!important}
+}</pre>
+        <button class="btn" type="button" data-copy="#vis-css"><svg><use href="#i-copy"/></svg><span>CSS kopieren</span></button>
+        <p style="margin-top:10px">Ladestand als Variable, z. B. im Feld Stil: <code>--soc:{bydhvs.0.State.SOC}</code></p>
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Entwurf für ioBroker VIS 2 · Demo-Tag und Demo-Jahr, keine Live-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*SKYLINE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('energie');
+
+let idx=nowIdx(),live=true,playing=false,playT=0;
+const slider=$('#t');
+
+/* Fluss-Canvas: Röhren und Partikel vom Rand zum Wechselrichter */
+const flow=(function(){
+  const el=$('#flow'),cv=el.querySelector('canvas'),ctx=cv.getContext('2d');
+  const P={pv:{c:'--sun'},grid:{c:'--grid'},home:{c:'--home'},batt:{c:'--batt'}};
+  for(const k in P)Object.assign(P[k],{kw:0,dir:1,ph:0,op:0});
+  let W=0,H=0,dpr=1,cols={},raf=0,last=0;
+  const ctr=k=>{const d=el.querySelector('[data-node="'+k+'"] .disc'),r=d.getBoundingClientRect(),b=el.getBoundingClientRect();return{x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,r:r.width/2}};
+  function colors(){cols={track:cssv('--track')};for(const k in P)cols[k]=cssv(P[k].c)}
+  function size(){const r=el.getBoundingClientRect();W=r.width;H=r.height;dpr=Math.min(2,devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;colors();draw(0)}
+  function seg(k){const a=ctr(k),h=ctr('hub'),dx=h.x-a.x,dy=h.y-a.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+    return{x0:a.x+ux*(a.r+6),y0:a.y+uy*(a.r+6),x1:h.x-ux*(h.r+6),y1:h.y-uy*(h.r+6),len:L-a.r-h.r-12}}
+  function draw(dt){
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    for(const k in P){const p=P[k],s=seg(k);if(s.len<=0)continue;
+      const tgt=Math.min(1,p.kw/.12);p.op+=(tgt-p.op)*Math.min(1,dt*4);
+      ctx.lineCap='round';ctx.strokeStyle=cols.track;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(s.x0,s.y0);ctx.lineTo(s.x1,s.y1);ctx.stroke();
+      if(p.op<.02)continue;
+      ctx.globalAlpha=.35*p.op;ctx.strokeStyle=cols[k];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(s.x0,s.y0);ctx.lineTo(s.x1,s.y1);ctx.stroke();
+      const speed=26+p.kw*58;if(!RM)p.ph=(p.ph+dt*speed/s.len*p.dir+10)%1;
+      const N=Math.max(4,Math.round(s.len/34));
+      ctx.fillStyle=cols[k];ctx.shadowColor=cols[k];ctx.shadowBlur=12;
+      for(let i=0;i<N;i++){const f=(p.ph+i/N)%1;
+        for(let t=0;t<4;t++){const ff=f-t*.018*p.dir;if(ff<0||ff>1)continue;
+          const x=s.x0+(s.x1-s.x0)*ff,y=s.y0+(s.y1-s.y0)*ff,edge=Math.min(1,Math.min(ff,1-ff)*8);
+          ctx.globalAlpha=p.op*edge*(1-t*.26);ctx.beginPath();ctx.arc(x,y,3.3-t*.6,0,Math.PI*2);ctx.fill()}}
+      ctx.shadowBlur=0;ctx.globalAlpha=1}
+  }
+  function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;draw(dt);raf=requestAnimationFrame(loop)}
+  new ResizeObserver(size).observe(el);
+  new MutationObserver(colors).observe(root,{attributes:true,attributeFilter:['data-theme']});
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>setTimeout(colors,50));
+  document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(raf);if(!document.hidden)raf=requestAnimationFrame(loop)});
+  size();raf=requestAnimationFrame(loop);
+  return{set(s){P.pv.kw=s.pv;P.pv.dir=1;P.home.kw=s.home;P.home.dir=-1;
+    P.grid.kw=Math.abs(s.grid);P.grid.dir=s.grid>0?-1:1;P.batt.kw=Math.abs(s.batt);P.batt.dir=s.batt>0?-1:1}};
+})();
+
+/* Tagesverlauf */
+const chart=(function(){
+  const el=$('#chart');let X,YK,YS;
+  function build(){const W=el.clientWidth,H=el.clientHeight,pl=40,pr=38,pt=10,pb=24,iw=W-pl-pr,ih=H-pt-pb;
+    X=i=>pl+i/287*iw;YK=v=>pt+ih-Math.min(4,v)/4*ih;YS=v=>pt+ih-v/100*ih;
+    let g='';for(let k=0;k<=4;k++){g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+YK(k)+'" y2="'+YK(k)+'"/><text x="'+(pl-8)+'" y="'+(YK(k)+4)+'" text-anchor="end">'+k+' kW</text>'}
+    for(const p of[0,50,100])g+='<text x="'+(W-pr+8)+'" y="'+(YS(p)+4)+'">'+p+' %</text>';
+    for(let h=0;h<=24;h+=3){const x=X(Math.min(287,h*12));if(W<520&&h%6)continue;g+='<text x="'+x+'" y="'+(H-4)+'" text-anchor="middle">'+String(h).padStart(2,'0')+'</text>'}
+    const line=f=>D.map((s,i)=>(i?'L':'M')+X(i).toFixed(1)+','+f(s).toFixed(1)).join('');
+    const area='M'+X(0)+','+YK(0)+D.map((s,i)=>'L'+X(i).toFixed(1)+','+YK(s.pv).toFixed(1)).join('')+'L'+X(287)+','+YK(0)+'Z';
+    el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+g+'<path class="ar" d="'+area+'"/>'+
+      '<path class="ln pv" pathLength="1" d="'+line(s=>YK(s.pv))+'"/><path class="ln hm" pathLength="1" d="'+line(s=>YK(s.home))+'"/>'+
+      '<path class="ln soc" pathLength="1" stroke-dasharray="1" d="'+line(s=>YS(s.soc))+'"/>'+
+      '<g class="mk"><line y1="'+pt+'" y2="'+(pt+ih)+'"/><circle r="4.5" style="fill:var(--sun)"/><circle r="4.5" style="fill:var(--home)"/><circle r="4" style="fill:var(--batt)"/></g></svg>';
+    mark(idx)}
+  function mark(i){const g=el.querySelector('.mk');if(!g)return;const s=D[i],x=X(i);
+    g.querySelector('line').setAttribute('x1',x);g.querySelector('line').setAttribute('x2',x);
+    const c=g.querySelectorAll('circle');c[0].setAttribute('cx',x);c[0].setAttribute('cy',YK(s.pv));c[1].setAttribute('cx',x);c[1].setAttribute('cy',YK(s.home));c[2].setAttribute('cx',x);c[2].setAttribute('cy',YS(s.soc))}
+  let w=0;new ResizeObserver(()=>{if(el.clientWidth!==w){w=el.clientWidth;build()}}).observe(el);
+  return{mark};
+})();
+
+/* BYD HVS: BMU oben, Modul 1–3, Sockel; Ladestand als Flüssigkeit je Modul */
+const tower=(function(){
+  const el=$('#tower'),X0=52,X1=184,DX=-32,DY=-15,k=DY/DX;
+  const side=(y0,y1)=>X0+','+y0+' '+X0+','+y1+' '+(X0+DX)+','+(y1+DY)+' '+(X0+DX)+','+(y0+DY);
+  const sk=(dx,y)=>(X0+dx)+','+(y+dx*k).toFixed(1);
+  const W=X1-X0-20,MH=46,mods=[[83,145],[148,210],[213,275]];
+  let s='<defs><linearGradient id="dvF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--dev-white)"/><stop offset="1" stop-color="var(--dev-white-2)"/></linearGradient>'+
+    '<linearGradient id="dvL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--batt) 75%,#fff)"/><stop offset="1" stop-color="var(--batt)"/></linearGradient>'+
+    '<linearGradient id="dvS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>';
+  mods.forEach(([a],i)=>{s+='<clipPath id="dvC'+i+'"><rect x="'+(X0+10)+'" y="'+(a+8)+'" width="'+W+'" height="'+MH+'" rx="7"/></clipPath>'});
+  s+='</defs>';
+  /* Füße und Sockel */
+  s+='<rect x="62" y="294" width="12" height="7" rx="2" fill="var(--dev-grey-side)"/><rect x="164" y="294" width="12" height="7" rx="2" fill="var(--dev-grey-side)"/><rect x="28" y="285" width="10" height="6" rx="2" fill="var(--dev-grey-side)"/>';
+  s+='<polygon points="'+side(278,294)+'" fill="var(--dev-grey-side)"/><rect x="'+X0+'" y="278" width="'+(X1-X0)+'" height="16" fill="var(--dev-grey)"/>';
+  /* Module */
+  mods.forEach(([a,b],i)=>{const ym=(a+b)/2,wy=a+8;
+    let wave='M'+(X0+10-112)+','+(wy+4);for(let x=-112;x<W+112;x+=28)wave+=' q7,-4 14,0 t14,0';wave+=' V'+(wy+MH+70)+' H'+(X0+10-112)+'Z';
+    s+='<g class="mod-g" data-m="'+(i+1)+'" tabindex="0" role="img" aria-label="Modul '+(i+1)+'">'+
+      '<polygon points="'+side(a,b)+'" fill="var(--dev-side)"/>'+
+      '<polygon points="'+sk(-8,ym-7)+' '+sk(-8,ym+7)+' '+sk(-22,ym+7)+' '+sk(-22,ym-7)+'" fill="rgba(0,0,0,.28)"/>'+
+      '<line class="led" x1="'+(X0-4)+'" y1="'+(b-15)+'" x2="'+(X0-4)+'" y2="'+(b-6)+'"/>'+
+      '<rect class="front" x="'+X0+'" y="'+a+'" width="'+(X1-X0)+'" height="'+(b-a)+'" fill="url(#dvF)" stroke="rgba(0,0,0,.08)"/>'+
+      '<rect x="'+(X0+10)+'" y="'+wy+'" width="'+W+'" height="'+MH+'" rx="7" fill="rgba(20,20,18,.07)"/>'+
+      '<g clip-path="url(#dvC'+i+')"><g class="liq" data-liq style="transform:translateY('+MH+'px)">'+
+        '<path class="wv wv2" d="'+wave+'" style="fill:var(--batt)"/><path class="wv" d="'+wave+'" fill="url(#dvL)"/></g>'+
+        '<rect class="sweep" x="'+(X0+10)+'" y="'+(wy-10)+'" width="'+W+'" height="'+(MH+20)+'" fill="url(#dvS)"/></g>'+
+      '<text x="'+(X1-16)+'" y="'+(wy+MH-8)+'" text-anchor="end" font-size="10" font-weight="600" fill="rgba(20,20,18,.55)" font-family="var(--font)">'+(i+1)+'</text>'+
+      '<title>Modul '+(i+1)+'</title></g>'});
+  /* BMU */
+  s+='<polygon points="'+X0+',34 '+X1+',34 '+(X1+DX)+','+(34+DY)+' '+(X0+DX)+','+(34+DY)+'" fill="var(--dev-grey-top)"/>'+
+    '<polygon points="'+side(34,80)+'" fill="var(--dev-grey-side)"/>'+
+    '<polygon points="'+sk(-6,40)+' '+sk(-6,66)+' '+sk(-27,66)+' '+sk(-27,40)+'" fill="#232527"/>'+
+    [[-12,48],[-21,48],[-12,58],[-21,58]].map(([dx,y])=>{const [cx,cy]=sk(dx,y).split(',');return'<circle cx="'+cx+'" cy="'+cy+'" r="3.1" fill="#3b3e41" stroke="#111" stroke-width="1"/>'}).join('')+
+    '<rect x="'+X0+'" y="34" width="'+(X1-X0)+'" height="46" fill="var(--dev-grey)"/>'+
+    '<circle cx="'+(X0+22)+'" cy="50" r="5.5" fill="#9a9da0" stroke="#d9dbdc" stroke-width="1.4"/><circle cx="'+(X0+22)+'" cy="50" r="2.2" fill="#6d7073"/>'+
+    '<ellipse cx="'+(X1-20)+'" cy="45" rx="12" ry="6.5" fill="none" stroke="var(--dev-red)" stroke-width="1.4"/>'+
+    '<text x="'+(X1-20)+'" y="47.6" text-anchor="middle" font-size="7.2" font-weight="700" fill="var(--dev-red)" font-family="var(--font)" letter-spacing=".4">BYD</text>'+
+    '<text x="'+(X0+8)+'" y="75" font-size="5.6" font-weight="600" fill="rgba(255,255,255,.72)" font-family="var(--font)" letter-spacing=".5">PREMIUM</text>';
+  el.innerHTML=s;
+  /* Hover: Modul ↔ Liste ↔ Zellmonitor */
+  const hl=m=>{$$('[data-m],[data-mod]').forEach(x=>x.classList.toggle('hl',x.dataset.m==m||x.dataset.mod==m));$$('#mods .mod').forEach((x,i)=>x.classList.toggle('hl',i+1==m))};
+  $$('[data-m],[data-mod]').forEach(x=>{const m=x.dataset.m||x.dataset.mod;x.addEventListener('pointerenter',()=>hl(m));x.addEventListener('focus',()=>hl(m));x.addEventListener('pointerleave',()=>hl(0));x.addEventListener('blur',()=>hl(0))});
+  return{set(s){const off=MH*(1-s.soc/100)-2;$$('[data-liq]',el).forEach(g=>g.style.transform='translateY('+off.toFixed(1)+'px)');
+    el.dataset.flow=s.batt>.05?'up':s.batt<-.05?'down':'idle'}};
+})();
+
+
+/* SMA Sunny Tripower Smart Energy: Gehäuse, LED-Leiste, Kabel mit Energiepunkten */
+const inv=(function(){
+  const svg=$('#invsvg');
+  const cab={pv:['M26,178 C26,200 18,214 14,246','M34,178 C34,202 30,220 28,246','M44,178 C44,204 44,224 42,246','M52,178 C52,204 56,224 56,246'],
+    bat:['M78,178 C78,206 74,228 72,246','M88,178 C88,206 88,228 88,246'],ac:['M122,178 C124,206 130,226 136,246']};
+  let s='<defs><linearGradient id="ivB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--inv-w1)"/><stop offset="1" stop-color="var(--inv-w2)"/></linearGradient></defs>'+
+    '<rect x="8" y="4" width="154" height="176" rx="18" fill="#d6d7d6"/><rect x="6" y="2" width="152" height="176" rx="17" fill="url(#ivB)" stroke="rgba(0,0,0,.08)"/>'+
+    '<rect x="150" y="24" width="2" height="120" rx="1" fill="rgba(0,0,0,.08)"/>'+
+    '<rect x="118" y="16" width="30" height="17" rx="2" fill="var(--inv-blue)"/><text x="133" y="27" text-anchor="middle" font-size="8" font-weight="800" fill="#fff" font-family="var(--font)" letter-spacing=".3">SMA</text>'+
+    '<path d="M118 33 q15 -6 30 -2 v2 h-30z" fill="var(--inv-red)"/>'+
+    '<text x="18" y="150" font-size="5.6" fill="#6b6e72" font-family="var(--font)" letter-spacing=".4">SUNNY TRIPOWER</text><text x="18" y="158" font-size="5.6" fill="#8a8d91" font-family="var(--font)" letter-spacing=".4">SMART ENERGY</text>'+
+    '<rect x="104" y="128" width="42" height="15" rx="2" fill="none" stroke="#c9cbcd" stroke-width=".7"/><rect x="108" y="131" width="8" height="8" fill="#9a9da1"/><rect x="121" y="131" width="8" height="8" fill="none" stroke="#9a9da1" stroke-width=".8"/><rect x="134" y="130" width="7" height="11" rx="1.5" fill="none" stroke="#9a9da1" stroke-width=".8"/>'+
+    '<rect x="102" y="148" width="46" height="9" rx="2.5" fill="#1b1c1e"/>'+
+    '<rect class="led-g" x="108" y="151.3" width="9" height="2.4" rx="1.2" fill="#3ee06a"/><rect x="121" y="151.3" width="9" height="2.4" rx="1.2" fill="#5a2a2a"/><rect class="led-b" x="134" y="151.3" width="9" height="2.4" rx="1.2" fill="#4aa8ff"/>';
+  const glands=[26,34,44,52,78,88,122];glands.forEach(x=>s+='<rect x="'+(x-4)+'" y="176" width="8" height="7" rx="1.5" fill="#2a2b2d"/>');
+  const all=[...cab.pv.map(d=>['pv',d,1.6]),...cab.bat.map(d=>['bat',d,2.2]),...cab.ac.map(d=>['ac',d,3.6])];
+  all.forEach(([k,d,w])=>s+='<path d="'+d+'" fill="none" stroke="#1d1e20" stroke-width="'+w+'" stroke-linecap="round"/>');
+  s+='<text x="34" y="256" text-anchor="middle" font-size="7" fill="var(--fg-3)" font-family="var(--font)">PV</text><text x="80" y="256" text-anchor="middle" font-size="7" fill="var(--fg-3)" font-family="var(--font)">Batterie</text><text x="136" y="256" text-anchor="middle" font-size="7" fill="var(--fg-3)" font-family="var(--font)">Netz</text>';
+  s+='<g id="ivdots"></g>';svg.innerHTML=s;
+  const g=$('#ivdots'),paths=[...svg.querySelectorAll('path[stroke="#1d1e20"]')],kinds=all.map(a=>a[0]),C={pv:'var(--sun)',bat:'var(--batt)',ac:'var(--grid)'};
+  const dots=[];paths.forEach((p,i)=>{const L=p.getTotalLength();for(let n=0;n<3;n++){const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('r',kinds[i]==='ac'?2.3:1.7);c.style.fill=C[kinds[i]];c.style.filter='drop-shadow(0 0 2px '+C[kinds[i]]+')';g.appendChild(c);dots.push({p,L,k:kinds[i],ph:n/3+i*.13,c})}});
+  let st={pv:0,bat:0,ac:0},last=performance.now();
+  (function f(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+    dots.forEach(d=>{const kw=st[d.k],on=Math.abs(kw)>.05;const dir=d.k==='pv'?-1:d.k==='bat'?(kw>0?1:-1):(kw>0?1:-1);
+      if(!RM&&on)d.ph=(d.ph+dt*(.25+Math.abs(kw)*.22)*dir+1)%1;
+      const pt=d.p.getPointAtLength(d.ph*d.L);d.c.setAttribute('cx',pt.x.toFixed(1));d.c.setAttribute('cy',pt.y.toFixed(1));d.c.style.opacity=on?(.35+.65*Math.sin(d.ph*Math.PI)).toFixed(2):0});
+    requestAnimationFrame(f)})(last);
+  return{set(x){st={pv:x.pv,bat:x.batt,ac:x.grid};
+    $('[data-il=pv]').textContent=de(x.pv,1)+' kW';
+    $('[data-il=bat]').textContent=(x.batt>.05?'lädt ':x.batt<-.05?'entlädt ':'')+de(Math.abs(x.batt),1)+' kW';
+    $('[data-il=grid]').textContent=(x.grid>.05?'Einspeisung ':x.grid<-.05?'Bezug ':'')+de(Math.abs(x.grid),1)+' kW'}};
+})();
+/* Wallboxen: Pulsar Plus in Carport und Garage (mywallbox.0), Laden mit PV-Überschuss */
+const WB=(function(){
+  const box=$('#wbs');
+  const L=[{id:'481920',n:'Carport',car:true,mode:'sonne',amp:16,lock:false,kwh:0},{id:'481937',n:'Garage',car:false,mode:'sonne',amp:16,lock:false,kwh:0}];
+  const LC={'lädt':'#2f8cff','wartet':'#e0a526','bereit':'#2fbf71','voll':'#2fbf71','gesperrt':'#9b7bff'};
+  const svg=k=>'<svg viewBox="0 0 160 230" aria-hidden="true"><defs><linearGradient id="wbg'+k+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3b3f"/><stop offset=".55" stop-color="#18191b"/><stop offset="1" stop-color="#0d0d0e"/></linearGradient></defs>'+
+    '<rect x="20" y="8" width="120" height="120" rx="24" fill="url(#wbg'+k+')"/><rect x="20" y="8" width="120" height="120" rx="24" fill="none" stroke="rgba(255,255,255,.12)"/>'+
+    '<path d="M28 20 Q80 6 132 22 L132 40 Q80 22 28 40Z" fill="rgba(255,255,255,.07)"/>'+
+    '<rect class="led" x="46" y="34" width="68" height="68" rx="20"/>'+
+    '<circle cx="80" cy="68" r="3" fill="rgba(255,255,255,.5)"/>'+
+    '<path d="M80 128 C80 168 38 158 40 190 C42 214 96 214 112 196" fill="none" stroke="#1c1d20" stroke-width="7" stroke-linecap="round"/>'+
+    '<path class="flow" d="M80 128 C80 168 38 158 40 190 C42 214 96 214 112 196"/>'+
+    '<rect x="108" y="182" width="26" height="22" rx="6" fill="#26272a" transform="rotate(-30 121 193)"/>'+
+    '<g class="car"><path d="M118 224 l8 -18 h26 l8 18z" fill="none" stroke="var(--fg-3)" stroke-width="2"/></g></svg>';
+  box.innerHTML=L.map((w,k)=>'<div class="wb" data-k="'+k+'"><div>'+svg(k)+'</div><div>'+
+    '<h3>Wallbox '+w.n+' <span class="pill" data-ws>–</span></h3>'+
+    '<div class="kw"><span data-wp>0</span><span class="unit"> kW</span></div><div class="sub" data-wsub>–</div>'+
+    '<dl class="kv"><dt>Diese Ladung</dt><dd data-we>–</dd><dt>Modus</dt><dd data-wm>–</dd><dt>WLAN</dt><dd>'+(k?'68 %':'50 %')+'</dd></dl>'+
+    '<div class="amp"><span>Strom</span><input class="slider" type="range" min="6" max="16" value="'+w.amp+'" aria-label="Ladestrom Wallbox '+w.n+'" data-wa><span data-wav>'+w.amp+' A</span></div>'+
+    '<div class="btns"><button class="btn on" type="button" data-wmode>Sonne bevorzugt</button><button class="btn" type="button" data-wcar>'+(w.car?'Auto abziehen':'Auto anstecken')+'</button><button class="btn" type="button" data-wlock>Sperren</button></div></div></div>').join('');
+  let last=null;
+  function set(s){last=s;
+    const surplus=Math.max(0,s.pv-s.home+.2);
+    L.forEach((w,k)=>{const el=box.querySelector('[data-k="'+k+'"]'),max=w.amp*3*.23;
+      let st,kw=0;
+      if(w.lock)st='gesperrt';else if(!w.car)st='bereit';else if(w.kwh>=38)st='voll';
+      else if(w.mode==='sonne'){kw=surplus>=1.4?Math.min(max,Math.max(4.1,surplus)):0;st=kw?'lädt':'wartet'}else{kw=max;st='lädt'}
+      w.sun=kw?Math.min(100,Math.round(surplus/kw*100)):0;
+      el.dataset.s=st;el.dataset.car=w.car?1:0;el.style.setProperty('--lc',LC[st]);
+      const p=el.querySelector('[data-ws]');p.textContent=st;p.className='pill '+(st==='lädt'?'info live':st==='wartet'?'warn':st==='gesperrt'?'idle':'ok');
+      el.querySelector('[data-wp]').textContent=de(kw,1);
+      el.querySelector('[data-wsub]').textContent=st==='lädt'?w.sun+' % Sonne · +'+Math.round(kw*6.5)+' km pro Stunde':st==='wartet'?'wartet auf ≥ 1,4 kW Sonnen-Überschuss':st==='bereit'?'kein Auto angesteckt':st==='voll'?'Auto ist voll':'Ladekabel gesperrt';
+      el.querySelector('[data-we]').textContent=w.car?de(w.kwh,1)+' kWh · +'+Math.round(w.kwh*6.5)+' km':'–';
+      el.querySelector('[data-wm]').textContent=w.mode==='sonne'?'Sonne bevorzugt · min. 3 × 6 A':'sofort, volle Leistung';
+      w.kw=kw});
+    $('[data-wbm=kwh]').textContent='212 kWh';$('[data-wbm=sun]').textContent='71 %';$('[data-wbm=eur]').textContent='18,40 €';$('[data-wbm=n]').textContent='14'}
+  setInterval(()=>{L.forEach(w=>{if(w.kw)w.kwh=Math.min(38,w.kwh+w.kw*5/3600)});if(last)set(last)},5000);
+  L[0].kwh=12.4;
+  box.addEventListener('input',e=>{const a=e.target.closest('[data-wa]');if(!a)return;const k=+a.closest('.wb').dataset.k;L[k].amp=+a.value;a.style.setProperty('--p',(a.value-6)/10*100+'%');a.closest('.amp').querySelector('[data-wav]').textContent=a.value+' A';set(last)});
+  box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=+b.closest('.wb').dataset.k,w=L[k];
+    if(b.dataset.wmode!==undefined){w.mode=w.mode==='sonne'?'sofort':'sonne';b.classList.toggle('on',w.mode==='sonne');toast('Wallbox '+w.n+': '+(w.mode==='sonne'?'Sonne bevorzugt':'sofort laden')+' (Demo)')}
+    if(b.dataset.wcar!==undefined){w.car=!w.car;if(w.car)w.kwh=0;b.textContent=w.car?'Auto abziehen':'Auto anstecken'}
+    if(b.dataset.wlock!==undefined){w.lock=!w.lock;b.classList.toggle('on',w.lock);b.textContent=w.lock?'Entsperren':'Sperren';toast('Wallbox '+w.n+(w.lock?' gesperrt':' entsperrt')+' (Demo)')}
+    set(last)});
+  $$('[data-wa]',box).forEach(a=>a.style.setProperty('--p',(a.value-6)/10*100+'%'));
+  return{set};
+})();
+/* Zustand zur gewählten Uhrzeit */
+function render(i,fast){
+  const s=D[i],ms=fast?250:900,t=hhmm(i);
+  idx=i;slider.value=i;slider.style.setProperty('--p',i/287*100+'%');WB.set(s);
+  $$('[data-time]').forEach(e=>e.textContent=t);
+  tween($('[data-f=pv]'),s.pv,1,'',ms);tween($('[data-f=home]'),s.home,1,'',ms);tween($('[data-f=grid]'),Math.abs(s.grid),1,'',ms);tween($('[data-f=batt]'),Math.abs(s.batt),1,'',ms);
+  $('[data-fl=grid]').textContent=s.grid>.05?'Einspeisung':s.grid<-.05?'Netzbezug':'Netz';
+  $('[data-fl=batt]').textContent=s.batt>.05?'lädt':s.batt<-.05?'entlädt':'Batterie';
+  $('[data-node=pv]').classList.toggle('dim',s.pv<.05);$('[data-node=grid]').classList.toggle('dim',Math.abs(s.grid)<.05);
+  $('[data-pvicon] use').setAttribute('href',s.pv<.05?'#i-moon':'#i-sun');
+  const sg=$('.sunglow');sg.style.setProperty('--s',(.45+s.pv/3.8*.75).toFixed(2));sg.style.setProperty('--o',Math.min(1,s.pv/1.2).toFixed(2));
+  flow.set(s);chart.mark(i);
+  /* Hero */
+  let a,b;
+  if(s.pv>.3){a='Die Sonne liefert';b=de(s.pv,1)+' kW.'}else if(s.batt<-.05){a=i<144?'Nachts trägt':'Am Abend trägt';b='die Batterie.'}else{a='Das Haus läuft';b='am Netz.'}
+  $('[data-h1a]').textContent=a;$('[data-h1b]').textContent=b;
+  const cover=Math.min(100,Math.round(100*Math.min(s.home,s.pv+Math.max(0,-s.batt))/s.home));
+  $('[data-lede]').innerHTML='Um <b>'+t+'</b> decken Sonne und Speicher <b>'+cover+' %</b> des Hauses. Batterie bei <b>'+Math.round(s.soc)+' %</b>'+(s.grid>.05?', <b>'+de(s.grid,1)+' kW</b> gehen ins Netz.':s.grid<-.05?', <b>'+de(-s.grid,1)+' kW</b> kommen aus dem Netz.':', das Netz ruht.');
+  /* Batterie */
+  tower.set(s);inv.set(s);tween($('[data-soc]'),s.soc,0,'',ms);
+  const bp=$('[data-bpill]');bp.className='pill '+(s.batt>.05?'ok live':s.batt<-.05?'warn live':'idle');bp.textContent=s.batt>.05?'lädt':s.batt<-.05?'entlädt':'ruht';
+  $('[data-bkw]').textContent=(s.batt>0?'+':s.batt<0?'−':'')+de(Math.abs(s.batt),2)+' kW';$('[data-bkwh]').textContent=de(s.soc/100*7.7,1)+' kWh';
+  /* Bilanz */
+  ring($('#r-aut'),s.use?1-s.imp/s.use:0);ring($('#r-eig'),s.gen>.01?1-s.exp/s.gen:0,s.gen>.01?undefined:'–');
+  $('[data-k=gen]').textContent=de(s.gen,1)+' kWh';$('[data-k=use]').textContent=de(s.use,1)+' kWh';$('[data-k=exp]').textContent=de(s.exp,1)+' kWh';$('[data-k=imp]').textContent=de(s.imp,1)+' kWh';
+  $('[data-wrt]').textContent=de(21+s.pv*7.2,1);
+}
+slider.addEventListener('input',()=>{live=false;stop();render(+slider.value,true)});
+$('[data-live]').addEventListener('click',()=>{live=true;stop();render(nowIdx())});
+let praf=0;
+function stop(){playing=false;cancelAnimationFrame(praf);$$('[data-play]').forEach(b=>{b.classList.remove('on');b.querySelector('span').textContent=b.classList.contains('ink')?'Tag abspielen':'Abspielen'});$$('[data-playicon] use').forEach(u=>u.setAttribute('href','#i-play'))}
+function play(){if(playing){stop();return}playing=true;live=false;let start=performance.now(),from=idx>=280?0:idx,lastI=-1;
+  $$('[data-play]').forEach(b=>{b.classList.add('on');b.querySelector('span').textContent='Pause'});$$('[data-playicon] use').forEach(u=>u.setAttribute('href','#i-pause'));
+  const step=t=>{if(!playing)return;const i=Math.min(287,from+Math.floor((t-start)/70));if(i!==lastI){render(i,true);lastI=i}if(i>=287){stop();return}praf=requestAnimationFrame(step)};praf=requestAnimationFrame(step)}
+$$('[data-play]').forEach(b=>b.addEventListener('click',play));
+setInterval(()=>{if(live)render(nowIdx())},30000);
+render(idx);
+
+/* Zellmonitor: 3 Module × 32 Zellen, Modul 1 oben */
+const cellsV=(function(){const r=rng(69),v=[];for(let i=1;i<=96;i++){let x=3315+(r()-.5)*11;if(i===69)x=3302;if(i===4)x=3305;if(i===22)x=3326;v.push(x)}return v})();
+(function(){const mods=$('#mods');let h='';for(let m=0;m<3;m++){h+='<div class="mod"><span><b>Modul '+(m+1)+'</b>'+(m===0?'oben':m===2?'unten':'Mitte')+'</span><div class="cells">';
+  for(let c=0;c<32;c++){const n=m*32+c+1;h+='<i data-n="'+n+'" style="--k:'+(m*32+c)+'" title="Zelle '+n+' · M'+(m+1)+' Z'+(c+1)+'"></i>'}h+='</div></div>'}mods.innerHTML=h;
+  paintCells();requestAnimationFrame(()=>requestAnimationFrame(()=>$$('.cells').forEach(c=>c.classList.add('in'))))})();
+function paintCells(){const mean=cellsV.reduce((a,b)=>a+b)/96,min=Math.min(...cellsV),max=Math.max(...cellsV);
+  $$('.cells i').forEach(e=>{const n=+e.dataset.n,v=cellsV[n-1];e.style.setProperty('--h',(16+(v-3298)/30*84).toFixed(1)+'%');
+    e.className=v===min?'min':v<mean-4?'lo':v===max?'hi':'';e.title='Zelle '+n+' · '+de(v,0)+' mV'});
+  [1,2,3].forEach(m=>{const v=cellsV.slice((m-1)*32,m*32);$('[data-mv="'+m+'"]').textContent='Ø '+de(v.reduce((a,b)=>a+b)/32,0)+' mV'});
+  $('[data-c=mean]').textContent=de(mean,0)+' mV';$('[data-c=min]').textContent=de(min,0)+' mV';$('[data-c=max]').textContent=de(max,0)+' mV';$('[data-c=spread]').textContent=de(max-min,0)+' mV'}
+setInterval(()=>{for(let k=0;k<6;k++){const i=Math.floor(Math.random()*96);if(i===68||i===21)continue;cellsV[i]=Math.max(3306,Math.min(3324,cellsV[i]+(Math.random()-.5)*3));
+  const e=$('.cells i[data-n="'+(i+1)+'"]');e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}paintCells()},7000);
+
+/* Wechselrichter: Netzfrequenz als Lebenszeichen */
+setInterval(()=>{tween($('[data-hz]'),50+(Math.random()-.5)*.05,2,'',600);tween($('[data-v]'),231+(Math.random()-.5)*2.4,1,'',600)},1500);
+
+GlasSkyline($('#sky'),{endMs:YEAR.endMs,locale:'de-DE',weekStart:1,datasets:[
+  {label:'Sonnenertrag',unit:'kWh',decimals:1,totalLabel:'Jahresertrag',streakLabel:'über 25 kWh',streakTest:v=>v>=25,data:YEAR.PV,palette:PAL.sun,
+   title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> Sonnenertrag in den letzten 12 Monaten'},
+  {label:'Einspeisung',unit:'kWh',decimals:1,totalLabel:'Eingespeist',streakLabel:'über 10 kWh',streakTest:v=>v>=10,data:YEAR.EXP,palette:PAL.violet,
+   title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> ins Netz eingespeist'},
+  {label:'Netzbezug',unit:'kWh',decimals:1,totalLabel:'Bezogen',streakLabel:'unter 1 kWh',streakTest:v=>v<1,data:YEAR.IMP,palette:PAL.blue,
+   title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> aus dem Netz bezogen'}
+]});
+</script>

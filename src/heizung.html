@@ -1,0 +1,322 @@
+<meta charset="utf-8">
+<title>Glashaus Heizung</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.tall{grid-row:span 2}
+@media (max-width:1060px){.tall{grid-row:auto;grid-column:1/-1}}
+.btn.on{background:var(--fg);color:var(--bg)}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-moz-range-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:50%;background:var(--fg);border:3px solid var(--bg);box-shadow:0 2px 8px var(--shadow);transition:transform .3s var(--spring)}
+.slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--fg);border:3px solid var(--bg)}
+.slider:active::-webkit-slider-thumb{transform:scale(1.25)}
+.code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all}
+
+/* Speicher */
+.tank{display:grid;grid-template-columns:130px minmax(0,1fr);gap:18px;align-items:center}
+.tank svg{width:130px;height:auto;display:block;overflow:visible}
+.tank .shell{fill:none;stroke:var(--fg-3);stroke-width:1.5}
+.tank .bub{fill:color-mix(in srgb,var(--bg) 65%,transparent);opacity:0}
+.tank.heating .bub{animation:rise-b var(--d,5s) linear infinite;animation-delay:var(--dl,0s)}
+@keyframes rise-b{0%{opacity:0;transform:translateY(0)}15%{opacity:.8}100%{opacity:0;transform:translateY(-190px)}}
+.tank .shim{animation:shim 6s ease-in-out infinite}
+@keyframes shim{50%{opacity:.75}}
+.sensors{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.sensors li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.sensors li:last-child{border-bottom:0}
+.sensors span{color:var(--fg-2);display:flex;align-items:center;gap:8px}
+.sensors span::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--t)}
+.sensors b{font-weight:550;font-variant-numeric:tabular-nums}
+@media (max-width:420px){.tank{grid-template-columns:96px minmax(0,1fr)}.tank svg{width:96px}}
+
+/* Zirkulation */
+.circ-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:22px;align-items:center}
+.imp{width:118px;height:118px;flex:none}
+.imp svg{width:100%;height:100%;display:block}
+.imp .rotor{transform-origin:0 0}
+.imp .casing{fill:color-mix(in srgb,var(--heat) 10%,transparent);stroke:var(--fg-3);stroke-width:1.5}
+.imp .blade{fill:var(--heat)}
+.modes{display:inline-flex;padding:3px;border-radius:99px;background:var(--track);gap:2px;margin-bottom:12px}
+.modes button{border:0;background:transparent;height:30px;padding:0 13px;border-radius:99px;font-size:13px;font-weight:500;color:var(--fg-2);cursor:pointer;transition:background .45s var(--ease),color .3s}
+.modes button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.circ-top .ring{--sz:84px}
+.circ-top .ring b{font-size:15px}
+.timeline{position:relative;height:56px;margin:22px 0 6px;border-radius:12px;background:var(--track);overflow:hidden}
+.timeline .win{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--heat) 12%,transparent);transition:left .6s var(--ease),width .6s var(--ease)}
+.timeline .run{position:absolute;top:14px;bottom:14px;border-radius:3px;background:var(--heat);opacity:.75;transform-origin:bottom;animation:grow .7s var(--spring) both;animation-delay:calc(var(--k)*18ms)}
+.timeline .run.past{opacity:.3}
+@keyframes grow{from{transform:scaleY(0)}}
+.timeline .now{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--fg)}
+.timeline .now::after{content:"";position:absolute;top:-1px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--fg)}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+@media (max-width:640px){.circ-top{grid-template-columns:auto minmax(0,1fr)}.circ-top .ring{grid-column:1/-1;justify-self:start}}
+
+/* Heizkreis */
+.spark{width:100%;height:70px;margin-top:14px}
+.spark svg{width:100%;height:100%;display:block;overflow:visible}
+.spark path{fill:none;stroke:var(--cool);stroke-width:2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2s var(--ease) forwards .3s}
+.spark .ar{fill:color-mix(in srgb,var(--cool) 16%,transparent);stroke:none;animation:fade 1.4s var(--ease) both .5s;stroke-dasharray:none;stroke-dashoffset:0}
+.spark text{fill:var(--fg-3);font-size:10.5px;font-family:var(--font)}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{from{opacity:0}}
+
+/* Räume */
+.rooms{list-style:none;margin:0;padding:0}
+.rooms li{border-bottom:1px solid var(--track)}
+.rooms li:last-child{border-bottom:0}
+.rooms a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:baseline;padding:9px 0;text-decoration:none;color:inherit}
+.rooms a:hover b{text-decoration:underline;text-underline-offset:4px}
+.rooms b{font-weight:550;font-size:13.5px}
+.rooms .t{font-variant-numeric:tabular-nums;font-size:13.5px}
+.rooms .t i{font-style:normal;color:var(--fg-3)}
+.rooms small{grid-column:1/-1;font-size:12px;color:var(--fg-2)}
+.rooms small .w{color:var(--warn);font-weight:550}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">wärme</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="__URL_ZUHAUSE__">Glashaus®</a>
+  <ul class="links">
+    <li><a href="__URL_ZUHAUSE__">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="#" aria-current="page">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">Heizung · Warmwasser · Räume · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span>Speicher bei 52 °C,</span><span class="it" data-h1b>die Sonne heizt.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-lede>Warmwasser, Zirkulation und Räume im Blick.</p>
+      <div class="ctas">
+        <button class="ink" type="button" data-manual>Pumpe 9 min starten <svg><use href="#i-arrow"/></svg></button>
+        <a class="uline" href="#raeume">Zu den Räumen <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-4 tall" style="--i:0">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--heat)"><svg><use href="#i-drop"/></svg></span>Warmwasserspeicher</h2><span class="pill" data-solar>Solar</span></div>
+    <div class="tank" id="tank">
+      <svg viewBox="0 0 130 300" role="img" aria-label="Speicher mit Temperaturschichtung, oben 52 Grad, unten 36 Grad">
+        <defs>
+          <linearGradient id="strat" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:color-mix(in srgb,var(--heat) 92%,var(--cool))"/>
+            <stop offset=".38" style="stop-color:color-mix(in srgb,var(--heat) 70%,var(--cool))"/>
+            <stop offset=".7" style="stop-color:color-mix(in srgb,var(--heat) 35%,var(--cool))"/>
+            <stop offset="1" style="stop-color:var(--cool)"/>
+          </linearGradient>
+          <clipPath id="tclip"><rect x="16" y="12" width="98" height="276" rx="44"/></clipPath>
+        </defs>
+        <g clip-path="url(#tclip)">
+          <rect class="shim" x="16" y="12" width="98" height="276" fill="url(#strat)" opacity=".9"/>
+          <g>
+            <circle class="bub" cx="40" cy="270" r="3" style="--d:5.5s;--dl:0s"/>
+            <circle class="bub" cx="62" cy="276" r="2.2" style="--d:4.6s;--dl:1.2s"/>
+            <circle class="bub" cx="84" cy="272" r="3.4" style="--d:6.2s;--dl:2.1s"/>
+            <circle class="bub" cx="52" cy="280" r="2" style="--d:5s;--dl:3s"/>
+            <circle class="bub" cx="94" cy="278" r="2.4" style="--d:4.2s;--dl:.6s"/>
+            <circle class="bub" cx="72" cy="268" r="1.8" style="--d:5.8s;--dl:3.8s"/>
+          </g>
+        </g>
+        <rect class="shell" x="16" y="12" width="98" height="276" rx="44"/>
+      </svg>
+      <ul class="sensors">
+        <li style="--t:color-mix(in srgb,var(--heat) 92%,var(--cool))"><span>Speicher oben</span><b data-ts="top">52,4 °C</b></li>
+        <li style="--t:color-mix(in srgb,var(--heat) 88%,var(--cool))"><span>Warmwasser aus</span><b>51,8 °C</b></li>
+        <li style="--t:color-mix(in srgb,var(--heat) 55%,var(--cool))"><span>Zirkulation</span><b>41,3 °C</b></li>
+        <li style="--t:color-mix(in srgb,var(--heat) 40%,var(--cool))"><span>Speicher-RL</span><b>36,5 °C</b></li>
+        <li style="--t:var(--sun)"><span>Solar-VL</span><b data-ts="svl">–</b></li>
+        <li style="--t:var(--sun)"><span>Solar-RL</span><b data-ts="srl">–</b></li>
+        <li style="--t:var(--cool)"><span>Kaltwasser ein</span><b>14,2 °C</b></li>
+      </ul>
+    </div>
+    <hr class="sep">
+    <dl class="kv">
+      <dt>Brenner</dt><dd>aus · lädt bis 47 °C</dd>
+      <dt>Nachladen ab</dt><dd>≤ 41 °C</dd>
+      <dt>Speicher-Schutz Zirkulation</dt><dd>&lt; 38 °C</dd>
+    </dl>
+  </article>
+
+  <article class="glass tile s-8" style="--i:1">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--heat)"><svg><use href="#i-pump"/></svg></span>Zirkulationspumpe</h2><span class="pill" data-pstate>Auto</span></div>
+    <div class="circ-top">
+      <div class="imp" aria-hidden="true"><svg viewBox="0 0 120 120"><circle class="casing" cx="60" cy="60" r="56"/><g class="rotor" id="rotor">
+        <path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z"/><path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z" transform="rotate(60 60 60)"/>
+        <path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z" transform="rotate(120 60 60)"/><path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z" transform="rotate(180 60 60)"/>
+        <path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z" transform="rotate(240 60 60)"/><path class="blade" d="M60 60 C60 40 68 22 84 14 C78 30 72 46 64 58Z" transform="rotate(300 60 60)"/>
+        <circle cx="60" cy="60" r="9" style="fill:var(--fg)"/></g></svg></div>
+      <div>
+        <div class="modes" role="group" aria-label="Betriebsart (Demo)"><button type="button" data-m="sonne" aria-pressed="true">Sonne</button><button type="button" data-m="gas">Gas</button><button type="button" data-m="ersatz">Ersatz</button></div>
+        <dl class="kv">
+          <dt>Leistung</dt><dd data-pw>0 W</dd>
+          <dt>Steckdose · WLAN</dt><dd><span class="pill warn">−81 dBm</span></dd>
+          <dt>Takt</dt><dd data-takt>alle 30 min · 9 min</dd>
+        </dl>
+      </div>
+      <div class="ring" id="r-next" style="--c:var(--heat)"></div>
+    </div>
+    <div class="timeline" id="tl" aria-hidden="true"></div>
+    <div class="ticks"><span>00</span><span>03</span><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>
+    <p class="small muted" style="margin:10px 0 0" data-mtext>Sonnenmodus: Speicher ≥ 50 °C oder Solar lädt → 06–22 Uhr alle 30 min.</p>
+  </article>
+
+  <article class="glass tile s-4" style="--i:2">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--cool)"><svg><use href="#i-thermo"/></svg></span>Heizkreis</h2><span class="pill idle">BSB-LAN</span></div>
+    <dl class="kv">
+      <dt>Außen <span class="code">15030</span></dt><dd>9,4 °C</dd>
+      <dt>Vorlauf <span class="code">15032</span></dt><dd>38,6 °C</dd>
+      <dt>Rücklauf</dt><dd>31,2 °C</dd>
+      <dt>Brenner-Modulation</dt><dd>0 %</dd>
+    </dl>
+    <div class="spark" id="spark" aria-label="Außentemperatur der letzten 24 Stunden" role="img"></div>
+  </article>
+
+  <article class="glass tile s-4" id="raeume" style="--i:3">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--heat)"><svg><use href="#i-thermo"/></svg></span>Räume</h2><span class="small muted">ist · soll</span></div>
+    <ul class="rooms">
+      <li><a href="__URL_ZIMMER__#leo"><b>Leo</b><span class="t">22,5 <i>· 23 °C</i></span><small>FRITZ!DECT Heizkörper · Batterie 40 %</small></a></li>
+      <li><a href="__URL_ZIMMER__#mia"><b>Mia</b><span class="t">23,0 <i>· 23 °C</i></span><small>FRITZ!DECT Heizkörper · Batterie 40 %</small></a></li>
+      <li><a href="__URL_ZIMMER__#buero"><b>Büro</b><span class="t">23,0 <i>· 23 °C</i></span><small>FRITZ!Smart · <span class="w">Batterie 20 %</span></small></a></li>
+      <li><a href="__URL_ZIMMER__#wohnen_h"><b>Wohnzimmer</b><span class="t">22,3 <i>· 22,6 °C</i></span><small>Fußbodenheizung Alpha2 · Zone 1 · heizt</small></a></li>
+      <li><a href="__URL_ZIMMER__#kochen_h"><b>Küche</b><span class="t">22,2 <i>· 22,6 °C</i></span><small>Fußbodenheizung Alpha2 · Zone 2 · heizt</small></a></li>
+      <li><a href="__URL_ZIMMER__#wohnen_o"><b>Wohnzimmer Opa</b><span class="t">22,2 <i>· 23 °C</i></span><small>Fußbodenheizung Alpha2 · Zone 5 · heizt</small></a></li>
+      <li><a href="__URL_ZIMMER__#kochen_o"><b>Küche Opa</b><span class="t">22,2 <i>· 22,5 °C</i></span><small>Alpha2 · Zone 4 · <span class="w">Sollwert-Alias zeigt auf Istwert</span></small></a></li>
+    </ul>
+  </article>
+
+  <div class="s-12" id="jahr">
+    <div class="sec-h"><h2>Das Jahr in <span class="it">Wärme.</span></h2><span class="small">Tageswerte der letzten 12 Monate</span></div>
+  </div>
+  <article class="glass tile s-12" style="--i:2"><div id="sky"></div></article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Heizung, Warmwasser, Räume</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Widget → Datenpunkt</h3>
+        <div class="tbl"><table>
+          <tr><th>Widget</th><th>Datenpunkt</th><th>Hinweis</th></tr>
+          <tr><td>Speicher, Solar, Zirkulation</td><td><code>alias.0.Heizung.*</code></td><td>Quelle ESPHome <code>esphome.1.A4C1385E92D7</code> und BSB-LAN</td></tr>
+          <tr><td>Außen, Vorlauf</td><td><code>mqtt.0.BSB-LAN.*</code></td><td>15030 Außen · 15032 Vorlauf · 15021 Speicher</td></tr>
+          <tr><td>Zirkulationspumpe</td><td><code>shelly.0.SHPLG-S#068CC2#1.Relay0.Switch</code></td><td>.Power für die Leistung</td></tr>
+          <tr><td>Leo, Mia, Büro</td><td><code>fritzdect.0.DECT_*</code></td><td><code>.tist</code> ist · <code>.tsoll</code> soll · <code>.battery</code></td></tr>
+          <tr><td>Fußbodenheizung EG</td><td><code>alpha2.0.HEATAREA.&lt;n&gt;</code></td><td>Wohnzimmer 1 · Küche 2 · Küche Opa 4 · Wohnzimmer Opa 5 (<code>T_ACTUAL</code>, <code>T_TARGET</code>)</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <h3>Projekt-CSS</h3>
+        <p>Dasselbe Projekt-CSS wie in der Ansicht Zuhause, ergänzt um das Pumpenrad. Die Klasse <code>gh-spin</code> per Binding auf den Schaltzustand der Pumpe setzen.</p>
+<pre class="css" id="vis-css">/* Pumpenrad dreht nur bei laufender Pumpe */
+.gh-spin svg{animation:gh-spin 1.4s linear infinite}
+@keyframes gh-spin{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .gh-spin svg{animation:none!important}
+}</pre>
+        <button class="btn" type="button" data-copy="#vis-css"><svg><use href="#i-copy"/></svg><span>CSS kopieren</span></button>
+        <p style="margin-top:10px">Beispiel CSS-Klasse: <code>gh-spin {v:shelly.0.SHPLG-S#068CC2#1.Relay0.Switch; v ? 'gh-spin' : ''}</code></p>
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Entwurf für ioBroker VIS 2 · Alle Werte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*SKYLINE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('heizung');
+const setP=el=>el.style.setProperty('--p',(el.value-el.min)/(el.max-el.min)*100+'%');
+$$('.slider').forEach(setP);document.addEventListener('input',e=>{if(e.target.classList.contains('slider'))setP(e.target)});
+
+/* Speicher und Solar */
+function solar(){const s=D[nowIdx()],on=s.pv>1;
+  const sp=$('[data-solar]');sp.className='pill '+(on?'warn live':'idle');sp.textContent=on?'Solar lädt':'Solar aus';
+  $('#tank').classList.toggle('heating',on);
+  $('[data-ts=svl]').textContent=de(on?44+s.pv*6:22.5,1)+' °C';$('[data-ts=srl]').textContent=de(on?36+s.pv*3:21.8,1)+' °C';
+  $('[data-h1b]').textContent=on?'die Sonne heizt.':'der Brenner ruht.';
+  return on}
+
+/* Zirkulation: Fenster je Betriebsart, Lauf zur vollen und halben Stunde für 9 min */
+const MODES={sonne:{win:[[6,22]],txt:'Sonnenmodus: Speicher ≥ 50 °C oder Solar lädt → 06–22 Uhr alle 30 min.'},
+  gas:{win:[[6,9],[17,22]],txt:'Gasmodus: nur 06–09 und 17–22 Uhr; bei Speicher ≤ 41 °C oder laufendem Brenner wird der Lauf bis 30 min verschoben.'},
+  ersatz:{win:[[6,22]],txt:'Ersatzmodus: BSB-LAN fehlt → feste Zeiten 06–22 Uhr.'}};
+let mode='sonne',manualUntil=0;
+const inWin=m=>MODES[mode].win.some(([a,b])=>m>=a*60&&m<b*60);
+function timeline(){const tl=$('#tl'),m0=new Date().getHours()*60+new Date().getMinutes();let h='',k=0;
+  for(const[a,b]of MODES[mode].win)h+='<span class="win" style="left:'+(a/24*100)+'%;width:'+((b-a)/24*100)+'%"></span>';
+  for(let m=0;m<1440;m+=30)if(inWin(m))h+='<span class="run'+(m+9<=m0?' past':'')+'" style="--k:'+(k++)+';left:'+(m/1440*100)+'%;width:'+(9/1440*100)+'%"></span>';
+  h+='<span class="now" style="left:'+(m0/1440*100)+'%"></span>';tl.innerHTML=h;$('[data-mtext]').textContent=MODES[mode].txt}
+function nextRun(m){for(let x=m+1;x<m+1440;x++){const mm=x%1440;if(mm%30===0&&inWin(mm))return x-m}return 0}
+let running=false;
+function pump(){const n=new Date(),m=n.getHours()*60+n.getMinutes(),sec=n.getSeconds();
+  const auto=inWin(m)&&m%30<9,man=Date.now()<manualUntil;running=auto||man;
+  let label,p,txt;
+  if(man){const left=Math.ceil((manualUntil-Date.now())/1000);label=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');p=left/540;txt='Läuft · manuell'}
+  else if(auto){const left=(9-m%30)*60-sec;label=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');p=left/540;txt='Läuft · 20 W'}
+  else{const nx=nextRun(m);label=nx>90?(Math.floor(nx/60)+' h'):nx+' min';p=1-Math.min(nx,30)/30;txt=nx>90?'Nächster Lauf morgen':'Nächster Lauf in '+nx+' min'}
+  ring($('#r-next'),p,label);
+  const ps=$('[data-pstate]');ps.className='pill '+(running?'warn live':'idle');ps.textContent=running?'Läuft':'Wartet';
+  $('[data-pw]').textContent=running?'20 W':'0 W';
+  $('[data-lede]').innerHTML='Zirkulation <b>'+txt.replace('Läuft · ','läuft · ').replace('Nächster Lauf ','nächster Lauf ')+'</b>, Brenner <b>aus</b>, alle Räume nah am Sollwert.'}
+/* Laufrad mit Anlauf und Auslauf */
+(function(){const r=$('#rotor');let a=0,v=0,last=performance.now();
+  const f=t=>{const dt=Math.min(.05,(t-last)/1000);last=t;const target=running&&!RM?420:0;v+=(target-v)*Math.min(1,dt*(target?1.6:.9));a=(a+v*dt)%360;r.setAttribute('transform','rotate('+a.toFixed(1)+' 60 60)');requestAnimationFrame(f)};requestAnimationFrame(f)})();
+$$('.modes button').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.m;$$('.modes button').forEach(x=>x.setAttribute('aria-pressed',x===b));timeline();pump();toast('Betriebsart (Demo): '+b.textContent)}));
+$('[data-manual]').addEventListener('click',()=>{manualUntil=Date.now()+540000;pump();toast('Zirkulationspumpe läuft 9 Minuten (Demo)')});
+
+/* Außentemperatur 24 h */
+(function(){const el=$('#spark'),r=rng(7),pts=[];for(let i=0;i<=48;i++){const h=i/2;pts.push(6.5+4.2*Math.sin(Math.PI*(h-9)/12)+(r()-.5)*.6)}
+  const draw=()=>{const W=el.clientWidth,H=el.clientHeight,mn=Math.min(...pts)-1,mx=Math.max(...pts)+1,x=i=>i/48*W,y=v=>H-14-(v-mn)/(mx-mn)*(H-22);
+    const d=pts.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(v).toFixed(1)).join('');
+    el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><path class="ar" d="'+d+'L'+W+','+(H-14)+'L0,'+(H-14)+'Z"/><path pathLength="1" d="'+d+'"/><text x="0" y="'+H+'">vor 24 h</text><text x="'+W+'" y="'+H+'" text-anchor="end">jetzt · '+de(pts[48],1)+' °C</text></svg>'};
+  let w=0;new ResizeObserver(()=>{if(el.clientWidth!==w){w=el.clientWidth;draw()}}).observe(el)})();
+
+solar();timeline();pump();
+setInterval(pump,1000);setInterval(()=>{solar();timeline()},60000);
+
+/* Wärmejahr aus dem Sonnenertrag abgeleitet (Demo) */
+const r2=rng(5),HOT=[],BURN=[],CIRC=[];
+YEAR.PV.forEach(d=>{const sun=d.value/64,top=Math.min(74,41+sun*40+(r2()-.5)*3),b=top>=50?0:Math.max(0,Math.round((50-top)/3+r2()*1.5));
+  HOT.push({date:d.date,value:Math.round(top)});BURN.push({date:d.date,value:b});CIRC.push({date:d.date,value:(top>=50?32:16)*9-Math.round(r2()*18)})});
+GlasSkyline($('#sky'),{endMs:YEAR.endMs,locale:'de-DE',weekStart:1,datasets:[
+  {label:'Speicher max',unit:'°C',decimals:0,totalLabel:'Ø Tageshöchstwert',totalUnit:'°C',totalIsMean:true,streakLabel:'über 55 °C',streakTest:v=>v>=55,data:HOT,palette:PAL.sun,
+   title:(s,nf)=>'<b>Ø '+nf.format(s.total/371)+' °C</b> Speicher-Höchstwert pro Tag'},
+  {label:'Brenner',unit:'Ladungen',decimals:0,totalLabel:'Brennerladungen',totalUnit:'Ladungen',streakLabel:'ohne Brenner',streakTest:v=>v===0,data:BURN,palette:PAL.violet,
+   title:(s,nf)=>'<b>'+nf.format(s.total)+' Ladungen</b> durch den Gasbrenner'},
+  {label:'Zirkulation',unit:'min',decimals:0,totalLabel:'Laufzeit',totalUnit:'min',streakLabel:'Sonnenmodus',streakTest:v=>v>200,data:CIRC,palette:PAL.blue,
+   title:(s,nf)=>'<b>'+nf.format(Math.round(s.total/60))+' h</b> Laufzeit der Zirkulationspumpe'}
+]});
+</script>

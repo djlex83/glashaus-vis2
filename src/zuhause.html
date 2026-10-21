@@ -1,0 +1,304 @@
+<meta charset="utf-8">
+<title>Glashaus Zuhause</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/*BASE_CSS*/
+.mflow{display:flex;align-items:center;gap:8px;margin:6px 0 20px}
+.node{flex:0 0 auto;width:74px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;transition:opacity .5s}
+.node .dot{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 40%,transparent);animation:pulse 2.8s ease-out infinite}
+.node .dot svg{width:22px;height:22px}
+.node b{font-size:18px}
+.node small{font-size:11.5px;color:var(--fg-2)}
+.node.dim{opacity:.4}.node.dim .dot{animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 12px transparent}}
+.wire{flex:1;min-width:10px;height:3px;border-radius:3px;background:var(--track);position:relative;overflow:hidden;margin-bottom:44px}
+.wire::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--c) 0 6px,transparent 6px 18px);animation:wire var(--dur,1s) linear infinite;transition:opacity .5s}
+.wire.rev::after{animation-direction:reverse}
+.wire.idle::after{opacity:0}
+@keyframes wire{from{background-position:0 0}to{background-position:18px 0}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stats div{padding:12px 14px;border-radius:var(--r-m);background:var(--track)}
+.stats b{display:block;font-size:22px}
+.stats span{font-size:12px;color:var(--fg-2)}
+.strat{height:10px;border-radius:99px;background:linear-gradient(90deg,var(--cool),var(--heat));position:relative;margin:16px 0 6px}
+.strat i{position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;background:var(--knob);box-shadow:0 2px 8px rgba(0,0,0,.28);transform:translateX(-50%);transition:left 1.2s var(--ease)}
+.scenes{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 10px;scrollbar-width:none}
+.scene{flex:0 0 auto;display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 8px;border:0;border-radius:99px;cursor:pointer;font-size:14.5px;font-weight:500;transition:transform .5s var(--spring),background .45s var(--ease),color .45s}
+.scene .ico{border-radius:50%;width:40px;height:40px}
+.scene:active{transform:scale(.94)}
+.scene.on{background:var(--fg);color:var(--bg)}
+.scene.on .ico{background:var(--c);color:var(--bg)}
+.accs{display:grid;grid-template-columns:repeat(auto-fill,minmax(164px,1fr));gap:12px}
+.acc{display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:16px;min-height:140px;text-align:left;border:0;cursor:pointer;width:100%;transition:transform .5s var(--spring),background .45s var(--ease),color .45s;animation:rise 1s var(--ease) both;animation-delay:calc(var(--i,0)*50ms + .25s)}
+.acc:active{transform:scale(.95)}
+.acc .ico{transition:background .45s,color .45s,box-shadow .45s}
+.acc .nm{font-weight:550;font-size:14.5px;line-height:1.2;display:block}
+.acc .st{font-size:13px;color:var(--fg-2);display:block;margin-top:3px;font-variant-numeric:tabular-nums}
+.acc>span:last-child{margin-top:auto}
+.acc.on{background:var(--fg);color:var(--bg)}
+.acc.on .st{color:var(--on-ink)}
+.acc.on .ico{background:var(--c);color:var(--bg);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 24%,transparent),0 8px 26px -4px var(--c)}
+.acc.spin.on .ico svg{animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dev{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--track)}
+.dev:last-child{border-bottom:0}
+.dev .ring{--sz:56px}
+.dev>div:nth-child(2){min-width:0;flex:1}
+.dev .nm{font-weight:550}
+.dev .st{font-size:13px;color:var(--fg-2)}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.feed li:last-child{border-bottom:0}
+.feed .d{width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--c)}
+.feed time{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+</style>
+<!--SPRITE-->
+<div class="stage" aria-hidden="true">
+  <div class="backdrop">zuhause</div>
+  <img class="sc-fallback" alt="" draggable="false">
+  <div class="hint">Über die Form streichen</div>
+</div>
+<span class="sk-sr">Hintergrund: Linienzeichnung, die beim Berühren in Partikel zerfließt und sich wieder zusammensetzt.</span>
+
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="#">Glashaus®</a>
+  <ul class="links">
+    <li><a href="#" aria-current="page">Zuhause</a></li>
+    <li><a href="__URL_ENERGIE__">Energie</a></li>
+    <li><a href="__URL_HEIZUNG__">Heizung</a></li>
+    <li><a href="__URL_GERAETE__">Geräte</a></li>
+    <li><a href="__URL_EINFAHRT__">Einfahrt</a></li>
+    <li><a href="__URL_HAUS__">Haus</a></li>
+    <li><a href="__URL_ZIMMER__">Zimmer</a></li>
+    <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
+    <li><span class="outline" data-clock>07:16</span></li>
+  </ul>
+</header>
+
+<section class="hero">
+  <div class="band"></div>
+  <div class="hero-copy">
+    <div>
+      <p class="eyebrow">Familie · <span data-date>Mittwoch, 21. Oktober</span></p>
+      <h1 class="h1"><span data-greet>Guten Morgen,</span><span class="it">alles im Fluss.</span></h1>
+    </div>
+    <div class="aside">
+      <p class="lede" data-summary>Batterie, Garage und Geräte im Blick.</p>
+      <div class="ctas">
+        <a class="ink" href="#szenen">Szenen öffnen <svg><use href="#i-arrow"/></svg></a>
+        <a class="uline" href="__URL_ENERGIE__">Zur Energie <svg><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="grid">
+  <article class="glass tile s-7 stretch" style="--i:0">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--sun)"><svg><use href="#i-bolt"/></svg></span>Energie jetzt</h2><span class="pill ok live">SMA · 235 Netzparallel</span></div>
+    <div class="mflow">
+      <div class="node" data-n="batt" style="--c:var(--batt)"><span class="dot"><svg><use href="#i-byd"/></svg></span><b class="num" data-v="soc">0</b><small data-l="batt">Batterie</small></div>
+      <div class="wire" data-w="batt" style="--c:var(--batt)"></div>
+      <div class="node" data-n="pv" style="--c:var(--sun)"><span class="dot"><svg><use href="#i-sun"/></svg></span><b class="num" data-v="pv">0</b><small>PV · kW</small></div>
+      <div class="wire" data-w="home" style="--c:var(--sun)"></div>
+      <div class="node" style="--c:var(--home)"><span class="dot"><svg><use href="#i-home"/></svg></span><b class="num" data-v="home">0</b><small>Haus · kW</small></div>
+      <div class="wire" data-w="grid" style="--c:var(--grid)"></div>
+      <div class="node" data-n="grid" style="--c:var(--grid)"><span class="dot"><svg><use href="#i-grid"/></svg></span><b class="num" data-v="grid">0</b><small data-l="grid">Netz · kW</small></div>
+    </div>
+    <div class="stats">
+      <div><b class="num" data-v="aut">0</b><span>Autarkie heute</span></div>
+      <div><b class="num" data-v="gen">0</b><span>erzeugt heute</span></div>
+      <div><b class="num" data-v="exp">0</b><span>eingespeist</span></div>
+    </div>
+  </article>
+
+  <article class="glass tile s-5 stretch" style="--i:1">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--heat)"><svg><use href="#i-drop"/></svg></span>Warmwasser</h2><span class="pill" data-solar>Solar</span></div>
+    <div class="num big">52,4<span class="unit">°C oben</span></div>
+    <div class="strat" aria-hidden="true"><i style="left:56%"></i></div>
+    <div class="small muted" style="display:flex;justify-content:space-between"><span>30 °C</span><span>70 °C</span></div>
+    <hr class="sep">
+    <dl class="kv">
+      <dt>Zirkulation · Betriebsart</dt><dd>Sonne</dd>
+      <dt>Nächster Lauf</dt><dd data-znext>–</dd>
+      <dt>Brenner</dt><dd>aus · lädt ab ≤ 41 °C</dd>
+    </dl>
+  </article>
+
+  <div class="s-12" id="szenen">
+    <div class="sec-h"><h2>Szenen</h2></div>
+    <div class="scenes" role="group" aria-label="Szenen">
+      <button class="scene glass" style="--c:var(--sun)"><span class="ico"><svg><use href="#i-sunrise"/></svg></span>Guten Morgen</button>
+      <button class="scene glass" style="--c:var(--heat)"><span class="ico"><svg><use href="#i-plate"/></svg></span>Abendessen</button>
+      <button class="scene glass" style="--c:var(--grid)"><span class="ico"><svg><use href="#i-film"/></svg></span>Kino</button>
+      <button class="scene glass" style="--c:var(--home)"><span class="ico"><svg><use href="#i-moon"/></svg></span>Nachtlicht Kinder</button>
+      <button class="scene glass" style="--c:var(--crit)"><span class="ico"><svg><use href="#i-power"/></svg></span>Alles aus</button>
+    </div>
+  </div>
+
+  <div class="s-12">
+    <div class="sec-h"><h2>Schalter</h2><span class="small">Antippen schaltet</span></div>
+    <div class="accs">
+      <button class="acc glass on" style="--c:var(--sun);--i:0" data-acc="Küche Licht"><span class="ico"><svg><use href="#i-bulb"/></svg></span><span><span class="nm">Küche Licht</span><span class="st" data-on="An · Auto-Aus 10 h" data-off="Aus">An · Auto-Aus 10 h</span></span></button>
+      <button class="acc glass" style="--c:var(--grid);--i:1" data-acc="Küche WLED"><span class="ico"><svg><use href="#i-strip"/></svg></span><span><span class="nm">Küche WLED</span><span class="st" data-on="An" data-off="Aus">Aus</span></span></button>
+      <button class="acc glass" style="--c:var(--home);--i:2" data-acc="Carport WLED"><span class="ico"><svg><use href="#i-strip"/></svg></span><span><span class="nm">Carport WLED</span><span class="st" data-on="Preset 11 · Garage Spot" data-off="Preset 1 · Alles aus">Preset 1 · Alles aus</span></span></button>
+      <button class="acc glass on" style="--c:var(--sun);--i:3" data-acc="Leo"><span class="ico"><svg><use href="#i-bulb"/></svg></span><span><span class="nm">Leo</span><span class="st" data-on="Nachtlicht · 8 %" data-off="Aus">Nachtlicht · 8 %</span></span></button>
+      <button class="acc glass" style="--c:var(--sun);--i:4" data-acc="Mia"><span class="ico"><svg><use href="#i-bulb"/></svg></span><span><span class="nm">Mia</span><span class="st" data-on="Hell · 100 %" data-off="Aus">Aus</span></span></button>
+      <button class="acc glass" style="--c:var(--ok);--i:5" data-garage><span class="ico"><svg><use href="#i-garage"/></svg></span><span><span class="nm">Garage</span><span class="st">Zu · beide Kontakte ok</span></span></button>
+      <button class="acc glass on spin" style="--c:var(--cool);--i:6" data-acc="Lüfter Wohnzimmer"><span class="ico"><svg><use href="#i-fan"/></svg></span><span><span class="nm">Lüfter Wohnzimmer</span><span class="st" data-on="Stufe 2 · 52 % rF" data-off="Aus · 52 % rF">Stufe 2 · 52 % rF</span></span></button>
+      <button class="acc glass" style="--c:var(--heat);--i:7" data-pump><span class="ico"><svg><use href="#i-pump"/></svg></span><span><span class="nm">Zirkulationspumpe</span><span class="st" data-pumpst>Auto</span></span></button>
+    </div>
+  </div>
+
+  <article class="glass tile s-6" style="--i:3">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--home)"><svg><use href="#i-washer"/></svg></span>Hausgeräte</h2><a class="pill info" href="__URL_GERAETE__">Alle Geräte</a></div>
+    <div class="dev"><div class="ring" data-gr="wm" style="--c:var(--home)"></div><div><div class="nm">Waschmaschine</div><div class="st" data-gst="wm">–</div></div></div>
+    <div class="dev"><div class="ring" data-gr="dr" style="--c:var(--heat)"></div><div><div class="nm">Trockner</div><div class="st" data-gst="dr">–</div></div></div>
+    <div class="dev"><div class="ring" data-gr="sp" style="--c:var(--cool)"></div><div><div class="nm">Spülmaschine</div><div class="st" data-gst="sp">–</div></div></div>
+  </article>
+
+  <article class="glass tile s-6" style="--i:4">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--warn)"><svg><use href="#i-bell"/></svg></span>Meldungen</h2><span class="pill warn">3 offen</span></div>
+    <ul class="feed">
+      <li style="--c:var(--warn)"><span class="d"></span><span>Würfel Leo: Batterie 0 %, offline</span><time>Jan.</time></li>
+      <li style="--c:var(--warn)"><span class="d"></span><span>Wallbox-Adapter aus: keine Ladedaten von Carport und Garage seit Feb. 2024</span><time>heute</time></li>
+      <li style="--c:var(--warn)"><span class="d"></span><span>Steckdose Zirkulationspumpe: WLAN schwach (−81 dBm)</span><time>gestern</time></li>
+      <li style="--c:var(--ok)"><span class="d"></span><span>Heizungs-ESP stabil seit Repeater-Wechsel</span><time>gestern</time></li>
+      <li style="--c:var(--home)"><span class="d"></span><span>BYD-Zelle 69 (Modul 3 · Z 5) weiterhin schwächste</span><time>heute</time></li>
+    </ul>
+  </article>
+
+  <article class="glass tile s-12" id="muell" style="--i:5">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Müllabfuhr</h2><a class="pill info" href="__URL_EINFAHRT__#tonnen">Kalender &amp; Gebühr</a></div>
+    <p class="mhint" data-mhint></p>
+    <div class="bins" data-bins></div>
+  </article>
+
+  <details class="glass vis s-12">
+    <summary><span>In VIS 2 übernehmen <small>· Übersicht, Projekt-CSS, Skulptur und Skyline</small></span><svg class="chev"><use href="#i-chev"/></svg></summary>
+    <div class="vis-body">
+      <div>
+        <h3>Widget → Datenpunkt</h3>
+        <div class="tbl"><table>
+          <tr><th>Widget</th><th>Datenpunkt</th><th>Hinweis</th></tr>
+          <tr><td>Küche Licht</td><td><code>shelly.0.SHSW-25#421DC5EC0DB4#1.Relay0.Switch</code></td><td>Shelly .118, nicht das Garagentor</td></tr>
+          <tr><td>Küche WLED</td><td><code>shelly.0.SHSW-25#421DC5EC0DB4#1.Relay1.Switch</code></td><td></td></tr>
+          <tr><td>Carport WLED</td><td><code>wled.0.6fe7eba7af9e</code></td><td>Preset 11 an, Preset 1 aus</td></tr>
+          <tr><td>Leo / Mia</td><td><code>hue.0.Leo.command</code><br><code>hue.0.Mia.command</code></td><td>JSON <code>{"on":true,"bri":20}</code>, nicht .on + .level einzeln</td></tr>
+          <tr><td>Garage</td><td><code>javascript.0.CurrentDoorState</code></td><td>0 offen · 1 zu · 2 öffnet · 3 schließt</td></tr>
+          <tr><td>Lüfter</td><td><code>suedwind-ambientika.0.BDB8947CAB05.*</code></td><td>fanSpeed, humidity</td></tr>
+          <tr><td>Zirkulation</td><td><code>shelly.0.SHPLG-S#068CC2#1.Relay0.Switch</code></td><td>Steuerung macht das Script</td></tr>
+          <tr><td>Hausgeräte</td><td colspan="2">siehe Ansicht Geräte</td></tr>
+          <tr><td>Müllabfuhr</td><td><code>0_userdata.0.Muell.termine</code><br><code>0_userdata.0.Muell.morgen</code></td><td>JSON der nächsten 60 Tage; „morgen“ leer = keine Abfuhr</td></tr>
+          <tr><td>Batterie</td><td><code>bydhvs.0.State.*</code></td><td>SOC, Power</td></tr>
+          <tr><td>Skyline (Energie, Heizung)</td><td>InfluxDB <code>192.168.0.76:8086</code></td><td>Tageswerte per <code>aggregateWindow(every: 1d)</code></td></tr>
+        </table></div>
+      </div>
+      <div>
+        <h3>Projekt-CSS</h3>
+        <p>Im VIS-2-Editor unter Projekt → CSS einfügen und bei jedem Widget im Feld CSS-Klasse <code>gh-glass</code> eintragen. Skulptur und Skyline liegen als eigene Skripte im Ordner <code>vis2-glashaus/src</code> (<code>sculpture.js</code>, <code>skyline.js</code>) und laufen in einem HTML-Widget.</p>
+<pre class="css" id="vis-css">/* Glashaus – VIS 2 Projekt-CSS */
+.gh-page{
+  background:#ebe9e5;
+  color:#151514;
+  font-family:"Geist",-apple-system,"Helvetica Neue",sans-serif;
+}
+.gh-glass{
+  background:rgba(255,255,255,.34)!important;
+  -webkit-backdrop-filter:blur(26px) saturate(150%);
+  backdrop-filter:blur(26px) saturate(150%);
+  border-radius:26px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 0 0 1px rgba(255,255,255,.55),
+    0 30px 60px -34px rgba(60,48,28,.2)!important;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1),
+    background .45s,color .45s;
+}
+.gh-glass:active{transform:scale(.96)}
+/* Zustand „an“: Tinte statt Glas */
+.gh-on{background:#151514!important;color:#ebe9e5}
+
+.gh-serif{
+  font-family:"Instrument Serif",serif;
+  font-style:italic;font-weight:400;
+}
+.gh-rise{animation:gh-rise 1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes gh-rise{from{opacity:0;transform:translateY(18px);filter:blur(6px)}}
+
+.gh-spin svg{animation:gh-spin 1.4s linear infinite}
+@keyframes gh-spin{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  .gh-rise,.gh-spin svg{animation:none!important}
+}</pre>
+        <button class="btn" type="button" data-copy="#vis-css"><svg><use href="#i-copy"/></svg><span>CSS kopieren</span></button>
+        <p style="margin-top:10px">Schalt-Zustand als Klasse, z. B. im Feld CSS-Klasse: <code>gh-glass {v:shelly.0.SHSW-25#421DC5EC0DB4#1.Relay0.Switch; v ? 'gh-on' : ''}</code></p>
+      </div>
+    </div>
+  </details>
+</main>
+<footer class="foot"><span>Glashaus · Entwurf für ioBroker VIS 2 · Alle Werte sind Demo-Werte</span><a href="https://github.com/djlex83/glashaus-vis2" target="_blank" rel="noopener">Quelltext auf GitHub</a></footer>
+</div>
+<div class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+<script>
+/*SCULPTURE_JS*/
+</script>
+<script>
+/*COMMON_JS*/
+initSculpture('zuhause');
+
+function wire(el,kw,rev){el.classList.toggle('idle',Math.abs(kw)<.05);el.classList.toggle('rev',!!rev);el.style.setProperty('--dur',Math.max(.35,1.6/Math.max(.2,Math.abs(kw)))+'s')}
+function energy(){const s=D[nowIdx()],j=1+(Math.random()-.5)*.06;
+  tween($('[data-v=pv]'),s.pv*j,1);tween($('[data-v=home]'),s.home*j,1);tween($('[data-v=soc]'),s.soc,0,' %');tween($('[data-v=grid]'),Math.abs(s.grid),1);
+  tween($('[data-v=aut]'),Math.max(0,100*(1-s.imp/s.use)),0,' %');tween($('[data-v=gen]'),s.gen,1,' kWh');tween($('[data-v=exp]'),s.exp,1,' kWh');
+  $('[data-l=batt]').textContent=s.batt>.05?'lädt':s.batt<-.05?'entlädt':'Batterie';
+  $('[data-l=grid]').textContent=s.grid>.05?'Einspeisung':s.grid<-.05?'Bezug · kW':'Netz · kW';
+  $('[data-n=pv]').classList.toggle('dim',s.pv<.05);$('[data-n=grid]').classList.toggle('dim',Math.abs(s.grid)<.05);
+  wire($('[data-w=batt]'),s.batt,s.batt>0);
+  wire($('[data-w=home]'),Math.max(s.pv,s.batt<0?-s.batt:0),false);
+  wire($('[data-w=grid]'),s.grid,s.grid<0);
+  const sol=s.pv>1,sp=$('[data-solar]');sp.className='pill '+(sol?'warn live':'idle');sp.textContent=sol?'Solar lädt':'Solar aus';
+  return s}
+
+/* Zirkulation: Sonnenmodus 06–22 Uhr, alle 30 min für 9 min */
+function pump(){const n=new Date(),m=n.getHours()*60+n.getMinutes();
+  const inWin=m>=360&&m<1320,run=inWin&&m%30<9;
+  const next=run?'läuft noch '+(9-m%30)+' min':(!inWin?(m<360?'um 06:00':'morgen 06:00'):'in '+(30-m%30)+' min');
+  $('[data-znext]').textContent=next;$('[data-pumpst]').textContent=run?'Läuft · 20 W':'Auto · '+next;
+  const p=$('[data-pump]');p.classList.toggle('on',run);p.classList.toggle('spin',run)}
+
+function summary(s){const mo=muellAm(new Date(Date.now()+864e5));
+  $('[data-summary]').innerHTML=(s.pv>.3?'Die Sonne liefert <b>'+de(s.pv,1)+' kW</b>. ':'')+'Batterie bei <b>'+Math.round(s.soc)+' %</b>, Garage <b>zu</b>, '+WM.summary()+'.'+(mo.length?' Morgen '+(mo.length>1?'kommen':'kommt')+' <b>'+mo.map(t=>t.der).join(' und ')+'</b>.':'')}
+
+/* Müllabfuhr: Tonnen nach nächstem Termin sortiert, Hinweis am Vorabend */
+function muell(){const L=TONNEN.map(t=>({...t,d:muellNext(t.k)})).sort((a,b)=>(a.d||Infinity)-(b.d||Infinity));
+  $('[data-bins]').innerHTML=L.map((t,i)=>{const n=t.d?tageBis(t.d):null;
+    return '<div class="bin'+(n!==null&&n<=1?' soon':'')+'" style="--c:'+t.c+';--k:'+i+'">'+tonneSvg(t)+'<div class="nm">'+t.n+(t.sub?' <small>'+t.sub+'</small>':'')+'</div><div class="st">'+(t.d?fmtTag(t.d):'Kalender '+(MUELL_Y+1)+' fehlt')+'</div><b class="cd">'+(n===null?'–':inTagen(n))+'</b></div>'}).join('');
+  const now=new Date(),mo=muellAm(new Date(Date.now()+864e5)),he=now.getHours()<12?muellAm(now):[],nx=L[0];
+  $('[data-mhint]').innerHTML=mo.length?'<span class="pill warn live">Heute Abend</span><span><b>'+mo.map(t=>t.n).join(' und ')+'</b> an die Straße stellen, Abholung morgen ab 6 Uhr.</span>'
+    :he.length?'<span class="pill info">Heute</span><span><b>'+he.map(t=>t.n).join(' und ')+'</b> wird abgeholt.</span>'
+    :nx&&nx.d?'<span>Nächste Abfuhr <b>'+fmtTag(nx.d)+'</b>: '+L.filter(t=>t.d&&+t.d===+nx.d).map(t=>t.n).join(' und ')+'.</span>':'';
+  const feed=$('.feed');if(mo.length&&feed&&!feed.querySelector('[data-mfeed]'))feed.insertAdjacentHTML('afterbegin','<li data-mfeed style="--c:var(--bin-bio)"><span class="d"></span><span>Heute Abend rausstellen: '+mo.map(t=>t.n).join(', ')+'</span><time>18:00</time></li>')}
+muell();setInterval(muell,60000);
+
+/* Hausgeräte kurz: Restzeit wie auf der Seite Geräte (Demo) */
+const T0=Date.now(),GER=[{id:'wm',p:'Baumwolle 40 °C',tot:130,rest:42},{id:'dr',p:'Baumwolle schranktrocken',tot:145,rest:85},{id:'sp',p:'Eco 50 °C',tot:195,rest:48}];
+function geraete(){const m=(Date.now()-T0)/60000;GER.forEach(d=>{const r=Math.max(0,d.rest-m);ring($('[data-gr="'+d.id+'"]'),1-r/d.tot,r>0?Math.ceil(r)+'′':'✓');
+  $('[data-gst="'+d.id+'"]').textContent=r>0?d.p+' · noch '+Math.ceil(r)+' min':'fertig'})}
+const WM={summary:()=>{const r=Math.max(0,42-(Date.now()-T0)/60000);return r>0?'Waschmaschine noch <b>'+Math.ceil(r)+' min</b>':'Waschmaschine <b>fertig</b>'}};
+geraete();setInterval(geraete,30000);
+summary(energy());pump();
+setInterval(()=>{summary(energy());pump()},4000);
+$$('[data-done]').forEach(r=>ring(r,1,'✓'));
+
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-acc]');if(a){const on=a.classList.toggle('on');const st=a.querySelector('.st');st.textContent=on?st.dataset.on:st.dataset.off;toast(a.dataset.acc+(on?' eingeschaltet':' ausgeschaltet'));return}
+  if(e.target.closest('[data-garage]')){toast('Garage: kein Torantrieb angeschlossen, nur Anzeige');return}
+  if(e.target.closest('[data-pump]')){toast('Zirkulationspumpe läuft per Script (Sonne/Gas/Ersatz)');return}
+  const sc=e.target.closest('.scene');if(sc){$$('.scene').forEach(x=>x.classList.toggle('on',x===sc));toast('Szene „'+sc.textContent.trim()+'“ ausgeführt')}
+});
+</script>
