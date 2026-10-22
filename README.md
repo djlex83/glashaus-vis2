@@ -22,12 +22,14 @@ Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhig
 | ![Kamera](screenshots/kamera.gif) | ![Skyline](screenshots/skyline.gif) |
 | **Hell und dunkel umschalten** | **Zimmer einrichten: Möbel ziehen und drehen** |
 | ![Hell und dunkel](screenshots/theme.gif) | ![Einrichten](screenshots/einrichten.gif) |
+| **Wetter im Hausbild: Sonne, Regen, Gewitter, Schnee, Nebel, Wind** | |
+| ![Wetter](screenshots/wetter.gif) | |
 
 ## Seiten
 
 | Seite | Inhalt |
 |---|---|
-| **Zuhause** (`index.html`) | Übersicht: Energie jetzt, Warmwasser, Szenen, Schalter, Hausgeräte, Meldungen, Müllabfuhr |
+| **Zuhause** (`index.html`) | Übersicht: Energie jetzt, Warmwasser, Szenen, Schalter, Hausgeräte, Meldungen, Wetter (zeichnet sich ins Hausbild), Müllabfuhr |
 | **Energie** | PV, Batterie, Netz, Jahres-Skyline in 3D, Wallboxen mit „Laden mit Sonne“ |
 | **Heizung** | Speicher, Zirkulation, Heizkreis, Räume |
 | **Geräte** | Waschmaschine, Trockner, Spülmaschine, Echos |

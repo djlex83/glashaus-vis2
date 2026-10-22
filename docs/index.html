@@ -337,6 +337,13 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @media (max-width:640px){body:not(.idle) .cam{left:12px;right:12px;flex-direction:column;align-items:stretch}body:not(.idle) .cam .cframe{width:100%}}
 @media (prefers-reduced-motion:reduce){.cam{transition:opacity .3s}}
 
+/* Wetter-Kachel */
+.wx-now{display:flex;align-items:baseline;gap:12px;margin:2px 0 4px}
+.wx-now b{font-size:44px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
+.wx-now span{font-size:16px;color:var(--fg-2)}
+.wx-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.wx-kinds button{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--track);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .3s,color .3s}
+.wx-kinds button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
 /* Müllabfuhr: Tonnen mit Countdown (Zuhause) und Kalender (Einfahrt) */
 .bins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .bin{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;gap:2px 12px;align-items:center;padding:14px;border-radius:var(--r-m);background:color-mix(in srgb,var(--fg) 3%,transparent);box-shadow:inset 0 0 0 1px var(--track);animation:rise .9s var(--ease) both;animation-delay:calc(var(--k,0)*70ms);transition:box-shadow .4s,background .4s}
@@ -445,6 +452,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
 <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V11M10 19V5M15 19v-6M20 19V8"/></symbol>
 <symbol id="i-window" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4.5" y="3.5" width="15" height="17" rx="1.5"/><path d="M12 3.5v17M4.5 12h15"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 18.5h10.2a4 4 0 0 0 .6-7.96A5.5 5.5 0 0 0 7.2 9.6 4.5 4.5 0 0 0 7 18.5Z"/></symbol>
 <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15"/><path d="M9.5 6.5v-2h5v2"/><path d="M6.5 6.5l1 13.5h9l1-13.5"/><path d="M10.2 10.5v6M13.8 10.5v6"/></symbol>
 <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></symbol>
 <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 16v-4l2-5h12l2 5v4z"/><path d="M4 12h16"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/></symbol>
@@ -571,7 +579,15 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
     </ul>
   </article>
 
-  <article class="glass tile s-12" id="muell" style="--i:5">
+  <article class="glass tile s-4" id="wetter" style="--i:5">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--cool)" data-wxico><svg><use href="#i-cloud"/></svg></span>Wetter</h2><span class="pill idle" data-wxsrc>Demo</span></div>
+    <div class="wx-now"><b data-wxt>–</b><span data-wxl>–</span></div>
+    <dl class="kv" data-wxkv></dl>
+    <div class="wx-kinds" role="group" aria-label="Wetter im Bild ausprobieren" data-wxkinds></div>
+    <p class="small muted" style="margin:10px 0 0">Die Hauszeichnung oben zeigt das Wetter mit. Live aus <code>0_userdata.0.Wetter.motiv</code>.</p>
+  </article>
+
+  <article class="glass tile s-8" id="muell" style="--i:6">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Müllabfuhr</h2><a class="pill info" href="einfahrt.html#tonnen">Kalender &amp; Gebühr</a></div>
     <p class="mhint" data-mhint></p>
     <div class="bins" data-bins></div>
@@ -592,6 +608,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
           <tr><td>Lüfter</td><td><code>suedwind-ambientika.0.BDB8947CAB05.*</code></td><td>fanSpeed, humidity</td></tr>
           <tr><td>Zirkulation</td><td><code>shelly.0.SHPLG-S#068CC2#1.Relay0.Switch</code></td><td>Steuerung macht das Script</td></tr>
           <tr><td>Hausgeräte</td><td colspan="2">siehe Ansicht Geräte</td></tr>
+          <tr><td>Wetter</td><td><code>0_userdata.0.Wetter.motiv</code> · <code>.nacht</code><br><code>.temperatur</code> · <code>.zustand</code> · <code>.tagMin</code> · <code>.tagMax</code> · <code>.regenHeute</code> · <code>.wind</code></td><td>eigenes Script, z. B. DWD-Daten über Bright Sky (ohne Schlüssel); Motiv: sonne, heiter, wolken, regen, gewitter, schnee, nebel, wind</td></tr>
           <tr><td>Müllabfuhr</td><td><code>0_userdata.0.Muell.termine</code><br><code>0_userdata.0.Muell.morgen</code></td><td>JSON der nächsten 60 Tage; „morgen“ leer = keine Abfuhr</td></tr>
           <tr><td>Batterie</td><td><code>bydhvs.0.State.*</code></td><td>SOC, Power</td></tr>
           <tr><td>Skyline (Energie, Heizung)</td><td>InfluxDB <code>192.168.0.76:8086</code></td><td>Tageswerte per <code>aggregateWindow(every: 1d)</code></td></tr>
@@ -692,6 +709,7 @@ window.GlasSculpture = function mount(opts) {
   function resize() {
     dpr = Math.min(2, devicePixelRatio || 1);
     const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;                       /* Seite (noch) unsichtbar: später erneut */
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     buf = g.createImageData(canvas.width, canvas.height);
   }
@@ -834,13 +852,73 @@ function kit(g, o) {
   const rnd = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
   return { L, rnd };
 }
+/* ================= Wetter im Motiv (gleicher Strichstil) =================
+   wx = { sky: 'sun'|'moon'|null, clouds: 0..3, rain, snow, storm, fog, wind, night }
+   Geometrie der Hausansicht: freie Himmelsflächen links/rechts und über dem Dach, Schneekanten. */
+const ZU_WX = { left: [-9, -4.6], right: [14.8, 21], roof: [-.5, 13.5], roofTop: 10.3, top: 13,
+  snow: [[[-.5, 6.2], [.6, 10.3], [12.4, 10.3], [13.5, 6.2]], [[8.4, 8.9], [11.8, 8.9]], [[11.9, 11.3], [12.4, 11.3]], [[-4.35, 3.15], [0, 3.15]], [[8.2, 3.9], [12.4, 3.9]], [[6.2, 2.45], [8, 2.45]]] };
+const WX = {
+  sonne: { label: "Sonnig", sky: "sun" }, heiter: { label: "Heiter", sky: "sun", clouds: 1 }, wolken: { label: "Bewölkt", clouds: 3 },
+  regen: { label: "Regen", clouds: 3, rain: 1 }, gewitter: { label: "Gewitter", clouds: 3, rain: 1, storm: 1 }, schnee: { label: "Schnee", clouds: 2, snow: 1 },
+  nebel: { label: "Nebel", fog: 1 }, wind: { label: "Windig", clouds: 2, wind: 1 },
+  sonne_nacht: { label: "Klar", sky: "moon", night: 1 }, heiter_nacht: { label: "Leicht bewölkt", sky: "moon", clouds: 1, night: 1 },
+};
+const wxKey = (k, night) => (night && WX[k + "_nacht"]) ? k + "_nacht" : WX[k] ? k : "heiter";
+const wxOf = (k, night) => { const b = WX[wxKey(k, night)]; return { ...b, night: b.night || !!night }; };
+function wxLayer(g, o, M, s, L, wx, phase, Z) {
+  const rnd = (() => { let q = 11; return () => ((q = (q * 16807) % 2147483647) / 2147483647); })();
+  const bg = o.dark ? "#111110" : "#ebe9e5", sun = o.dark ? "#f0b453" : "#d8921f", rainc = o.dark ? "#79b8e8" : "#3681bf";
+  const snowc = o.dark ? "#f4f1ea" : "#ffffff", snowEdge = o.dark ? "#cfd8e3" : "#9fb3c8";
+  const circ = (x, y, r, w, c, a, fill) => { const p = M(x, y); g.beginPath(); g.arc(p[0], p[1], r * s, 0, 7); if (fill) { g.globalAlpha = a; g.fillStyle = fill; g.fill(); } if (w) { g.globalAlpha = a; g.lineWidth = w; g.strokeStyle = c; g.stroke(); } g.globalAlpha = 1; };
+  const cloud = (x, y, w, dark) => {               /* Wolke: Bögen oben, gerade unten, mit Hintergrund gefüllt */
+    const p = M(x, y), W = w * s, H = W * .34; g.beginPath(); g.moveTo(p[0] - W / 2, p[1]);
+    g.arc(p[0] - W * .32, p[1] - H * .5, H * .62, Math.PI * .95, Math.PI * 1.75);
+    g.arc(p[0] - W * .03, p[1] - H * .8, H * .82, Math.PI * 1.15, Math.PI * 1.9);
+    g.arc(p[0] + W * .27, p[1] - H * .5, H * .66, Math.PI * 1.3, Math.PI * .05);
+    g.lineTo(p[0] + W / 2, p[1]); g.closePath();
+    g.fillStyle = dark ? (o.dark ? "#1c1c1b" : "#d9d6d0") : bg; g.fill();
+    g.lineWidth = 4; g.strokeStyle = o.ink; g.globalAlpha = .9; g.lineJoin = "round"; g.stroke(); g.globalAlpha = 1;
+    for (let i = 1; i < 3; i++) L([M(x - w * .3 + i * .5, y + .12), M(x - w * .3 + i * .5 + w * .25, y + .12)], 2, o.soft, .6);
+    return { x, y, w };
+  };
+  if (phase === "back") {
+    const sx = 17.9, sy = 10.4;
+    if (wx.sky === "sun") { circ(sx, sy, .78, 0, null, .95, sun);
+      for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283, r0 = 1.05, r1 = 1.45 + (i % 2) * .35; L([M(sx + Math.cos(a) * r0, sy + Math.sin(a) * r0), M(sx + Math.cos(a) * r1, sy + Math.sin(a) * r1)], 3.5, sun, .85); } }
+    if (wx.sky === "moon") { circ(sx, sy, .78, 0, null, .95, o.dark ? "#ece6da" : "#5b6474"); const p = M(sx + .38, sy + .22); g.beginPath(); g.arc(p[0], p[1], .7 * s, 0, 7); g.fillStyle = bg; g.fill(); }
+    if (wx.night) for (let i = 0; i < 34; i++) { const zone = rnd() < .5 ? Z.left : Z.right, x = zone[0] + rnd() * (zone[1] - zone[0]), y = 6.8 + rnd() * (Z.top - 6.8);
+      if (wx.sky === "moon" && Math.hypot(x - sx, y - sy) < 1.6) continue; const p = M(x, y), r = 1.6 + rnd() * 2.2; g.globalAlpha = .55 + rnd() * .4; g.fillStyle = o.ink; g.fillRect(p[0] - r / 2, p[1] - r / 2, r, r); g.globalAlpha = 1; }
+    const cl = [];
+    const spots = [[-6.4, 10.1, 4.4], [16.4, 10.7, 3.9], [4.2, 11.3, 2.8]];
+    spots.slice(0, wx.clouds || 0).forEach(([x, y, w]) => cl.push(cloud(x + (wx.wind ? .8 : 0), y, w, wx.rain || wx.storm)));
+    if (wx.rain) cl.forEach((c) => { const top = c.y - .25, bottom = c.y > 11 ? Z.roofTop + .25 : 0.2;
+      for (let i = 0; i < Math.round(c.w * 5); i++) { const x = c.x - c.w * .42 + rnd() * c.w * .84;
+        for (let y = top - rnd() * .6; y > bottom; y -= 1.1 + rnd() * .4) L([M(x + (top - y) * .18, y), M(x + (top - y) * .18 + .12, y - .5)], 2.2, rainc, .75); } });
+    if (wx.storm && cl[0]) { const c = cl[0], x = c.x + .4, y = c.y - .3;
+      L([M(x, y), M(x - .55, y - 1.6), M(x + .05, y - 1.55), M(x - .5, y - 3.3), M(x + .9, y - 1.2), M(x + .25, y - 1.25), M(x + .7, y)], 3, o.ink, 1, true, sun, .95); }
+    if (wx.snow) for (let i = 0; i < 70; i++) { const zone = [Z.left, Z.right, Z.roof][i % 3], x = zone[0] + rnd() * (zone[1] - zone[0]);
+      const y = zone === Z.roof ? Z.roofTop + .5 + rnd() * (Z.top - Z.roofTop - .7) : .6 + rnd() * 9.5, p = M(x, y), r = 4 + rnd() * 5;
+      g.globalAlpha = .85; g.strokeStyle = o.dark ? "#e9eef5" : "#7d8ea3"; g.lineWidth = 1.8;
+      for (let k = 0; k < 3; k++) { const a = k * Math.PI / 3; g.beginPath(); g.moveTo(p[0] - Math.cos(a) * r, p[1] - Math.sin(a) * r); g.lineTo(p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r); g.stroke(); } g.globalAlpha = 1; }
+    if (wx.wind) for (let i = 0; i < 6; i++) { const zone = i % 2 ? Z.left : Z.right, x = zone[0] + .3 + rnd() * (zone[1] - zone[0] - 3), y = 4.5 + rnd() * 5;
+      const p = M(x, y), q = M(x + 2.4, y); g.beginPath(); g.moveTo(p[0], p[1]); g.bezierCurveTo(p[0] + 40, p[1] - 14, q[0] - 50, q[1] + 16, q[0], q[1] - 10);
+      g.arc(q[0], q[1] - 22, 12, Math.PI / 2, -Math.PI * .6, true); g.lineWidth = 2.4; g.strokeStyle = o.soft; g.globalAlpha = .8; g.stroke(); g.globalAlpha = 1; }
+  } else {
+    if (wx.snow) { Z.snow.forEach((pl) => { L(pl.map(([x, y]) => M(x, y + .1)), 9, snowEdge, .9); L(pl.map(([x, y]) => M(x, y + .12)), 6, snowc, 1); });
+      L([M(-9, .1), M(21, .1)], 10, snowEdge, .8); L([M(-9, .12), M(21, .12)], 7, snowc, 1); }
+    if (wx.fog) for (let i = 0; i < 9; i++) { const y = .5 + i * .62, off = (i % 3) * 1.3; g.setLineDash([60 + i * 6, 22 + i * 3]);
+      L([M(-9 + off, y), M(21, y)], 5 - i * .3, o.soft, .5 - i * .035); g.setLineDash([]); }
+  }
+}
 const ART = {
   /* Zuhause: Südansicht des erfundenen Beispielhauses (Satteldach mit Gaube, PV, Carport links) */
-  zuhause(g, o, cx = 1000, s = 56, gy = 735) {
+  zuhause(g, o, cx = 1000, s = 56, gy = 735, wx = null) {
     const { L, rnd } = kit(g, o), M = (x, y) => [cx + (x - 6.5) * s, gy - y * s];
     const R = (x0, y0, x1, y1, w, c, a, f, fa) => L([M(x0, y0), M(x1, y0), M(x1, y1), M(x0, y1)], w, c, a, true, f, fa);
     const glass = o.dark ? "#8fb6d6" : "#5d8fb8", pv = o.dark ? "#4f74b0" : "#2b4a78", tile = o.dark ? "#f08a5d" : "#c4532c";
-    const win = (x0, x1, y0, y1, parts) => { R(x0, y0, x1, y1, 4, o.ink, .9, glass, .18); for (let i = 1; i < parts; i++) { const x = x0 + (x1 - x0) * i / parts; L([M(x, y0), M(x, y1)], 3, o.ink, .8); } };
+    const lit = wx && wx.night, warmw = o.dark ? "#f0b453" : "#d8921f";
+    if (wx) wxLayer(g, o, M, s, L, wx, "back", ZU_WX);
+    const win = (x0, x1, y0, y1, parts) => { R(x0, y0, x1, y1, 4, o.ink, .9, lit ? warmw : glass, lit ? .32 : .18); for (let i = 1; i < parts; i++) { const x = x0 + (x1 - x0) * i / parts; L([M(x, y0), M(x, y1)], 3, o.ink, .8); } };
     L([M(-9, 0), M(21, 0)], 5, o.ink, .75);
     for (let x = -8; x < 21; x += 1.1) L([M(x, -.45), M(x + .5, -.43)], 3, o.soft, .5);
     /* Satteldach, Traufe zur Straße: Ziegelschraffur, PV-Feld links, Gaube rechts, Schornstein */
@@ -868,6 +946,7 @@ const ART = {
     const tree = (x, r, h) => { L([M(x, 0), M(x, h)], 6, o.ink, .9); for (let i = 0; i < 46; i++) { const a = rnd() * 6.28, d = Math.sqrt(rnd()) * r, c = M(x + Math.cos(a) * d, h + 1.2 + Math.sin(a) * d * .9);
       g.beginPath(); g.arc(c[0], c[1], (.25 + rnd() * .35) * s, 0, 7); g.lineWidth = 2; g.strokeStyle = o.soft; g.globalAlpha = .55; g.stroke(); g.globalAlpha = 1; } };
     tree(-7.2, 1.9, 2.8); tree(17.4, 2.2, 3.0);
+    if (wx) wxLayer(g, o, M, s, L, wx, "front", ZU_WX);
     return { M, L, s };
   },
   /* Energie: PV-Dach, Sonne, Kabel zu Wechselrichter und BYD */
@@ -1026,11 +1105,14 @@ function planArt(g, o, fi) {
       L([M([mx0, my1]), M([mx1, my1])], 4, o.ink, .9); }
   }
 }
-function initSculpture(motiv) {
+function initSculpture(motiv, draw) {
   $(".hint").textContent = matchMedia("(hover: none), (pointer: coarse)").matches ? "Zeichnung berühren" : "Über die Zeichnung streichen";
-  const s = GlasSculpture({ stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(ART[motiv] || ART.haus), parallax: 0.3,
+  const so = { stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(draw || ART[motiv] || ART.haus), parallax: 0.3,
     band: () => { const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
-    bg: () => cssv("--bg"), dark: isDark });
+    bg: () => cssv("--bg"), dark: isDark };
+  const s = GlasSculpture(so);
+  /* Motiv austauschen (z. B. Wetter): neue Zeichnung, die Partikel blenden über */
+  s.setArt = (d) => { so.srcs = makeArt(d); s.retheme(); };
   new MutationObserver(() => s.retheme()).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
   matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => s.retheme());
   if (document.fonts) document.fonts.ready.then(() => s.place());
@@ -1543,7 +1625,22 @@ function tonneSvg(t) {
     : '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><rect class="lid" x="4" y="4" width="32" height="6" rx="2"/><rect class="lid" x="15" y="1.5" width="10" height="3" rx="1.5"/><path class="body" d="M6 11H34L31.5 41H8.5Z"/><path class="line" d="M15 16 15.6 36M20 16V36M25 16 24.4 36"/><circle class="wheel" cx="11" cy="42" r="3.4"/></svg>';
 }
 
-initSculpture('zuhause');
+/* Wetter (Demo-Werte; live aus 0_userdata.0.Wetter.*) bestimmt das Hausbild */
+const WXD={sonne:[18,'Sonnig',10,19,0,8],heiter:[14,'Heiter',8,15,0,12],wolken:[11,'Bewölkt',8,12,0,15],regen:[9,'Regen',7,10,6,18],gewitter:[17,'Gewitter',13,22,12,35],schnee:[-1,'Schneefall',-3,1,4,10],nebel:[4,'Nebel',2,9,0,3],wind:[10,'Windig',7,12,1,48]};
+const wxNight=()=>{const h=new Date().getHours();return h<7||h>=19};
+let WXK='auto';
+const wxCur=()=>WXK==='auto'?(wxNight()?'heiter':'heiter'):WXK;
+const wxDraw=()=>{const w=wxOf(wxCur(),wxNight());return (g,o)=>ART.zuhause(g,o,undefined,undefined,undefined,w)};
+initSculpture('zuhause',wxDraw());
+function wetter(swap){const k=wxCur(),d=WXD[k],w=wxOf(k,wxNight());
+  $('[data-wxt]').textContent=d[0]+' °C';$('[data-wxl]').textContent=w.label;
+  $('[data-wxkv]').innerHTML='<dt>Heute</dt><dd>'+d[2]+' bis '+d[3]+' °C</dd><dt>Regen heute</dt><dd>'+d[4]+' mm</dd><dt>Wind</dt><dd>'+d[5]+' km/h</dd>';
+  $('[data-wxico]').innerHTML='<svg><use href="#i-'+(w.sky==='sun'?'sun':w.sky==='moon'?'moon':'cloud')+'"/></svg>';
+  $('[data-wxico]').style.setProperty('--c',w.sky==='sun'?'var(--sun)':w.rain||w.snow?'var(--cool)':'var(--fg-2)');
+  $('[data-wxkinds]').innerHTML=['auto'].concat(Object.keys(WXD)).map(x=>'<button type="button" data-wx="'+x+'" aria-pressed="'+(x===WXK)+'">'+(x==='auto'?'Jetzt':WX[x].label)+'</button>').join('');
+  if(swap&&window.SCULPT&&SCULPT.setArt)SCULPT.setArt(wxDraw())}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;WXK=b.dataset.wx;wetter(true);if(typeof summary==='function')summary(energy());toast('Hausbild: '+(WXK==='auto'?'aktuelles Wetter':WX[WXK].label)+' (Demo)')});
+wetter(false);
 
 function wire(el,kw,rev){el.classList.toggle('idle',Math.abs(kw)<.05);el.classList.toggle('rev',!!rev);el.style.setProperty('--dur',Math.max(.35,1.6/Math.max(.2,Math.abs(kw)))+'s')}
 function energy(){const s=D[nowIdx()],j=1+(Math.random()-.5)*.06;
@@ -1566,7 +1663,8 @@ function pump(){const n=new Date(),m=n.getHours()*60+n.getMinutes();
   const p=$('[data-pump]');p.classList.toggle('on',run);p.classList.toggle('spin',run)}
 
 function summary(s){const mo=muellAm(new Date(Date.now()+864e5));
-  $('[data-summary]').innerHTML=(s.pv>.3?'Die Sonne liefert <b>'+de(s.pv,1)+' kW</b>. ':'')+'Batterie bei <b>'+Math.round(s.soc)+' %</b>, Garage <b>zu</b>, '+WM.summary()+'.'+(mo.length?' Morgen '+(mo.length>1?'kommen':'kommt')+' <b>'+mo.map(t=>t.der).join(' und ')+'</b>.':'')}
+  const wk=wxCur(),wd=WXD[wk];
+  $('[data-summary]').innerHTML='Draußen <b>'+wd[0]+' °C</b>, '+wxOf(wk,wxNight()).label.toLowerCase()+'. '+(s.pv>.3?'Die Sonne liefert <b>'+de(s.pv,1)+' kW</b>. ':'')+'Batterie bei <b>'+Math.round(s.soc)+' %</b>, Garage <b>zu</b>, '+WM.summary()+'.'+(mo.length?' Morgen '+(mo.length>1?'kommen':'kommt')+' <b>'+mo.map(t=>t.der).join(' und ')+'</b>.':'')}
 
 /* Müllabfuhr: Tonnen nach nächstem Termin sortiert, Hinweis am Vorabend */
 function muell(){const L=TONNEN.map(t=>({...t,d:muellNext(t.k)})).sort((a,b)=>(a.d||Infinity)-(b.d||Infinity));

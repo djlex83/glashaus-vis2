@@ -52,13 +52,73 @@ function kit(g, o) {
   const rnd = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
   return { L, rnd };
 }
+/* ================= Wetter im Motiv (gleicher Strichstil) =================
+   wx = { sky: 'sun'|'moon'|null, clouds: 0..3, rain, snow, storm, fog, wind, night }
+   Geometrie der Hausansicht: freie Himmelsflächen links/rechts und über dem Dach, Schneekanten. */
+const ZU_WX = { left: [-9, -4.6], right: [14.8, 21], roof: [-.5, 13.5], roofTop: 10.3, top: 13,
+  snow: [[[-.5, 6.2], [.6, 10.3], [12.4, 10.3], [13.5, 6.2]], [[8.4, 8.9], [11.8, 8.9]], [[11.9, 11.3], [12.4, 11.3]], [[-4.35, 3.15], [0, 3.15]], [[8.2, 3.9], [12.4, 3.9]], [[6.2, 2.45], [8, 2.45]]] };
+const WX = {
+  sonne: { label: "Sonnig", sky: "sun" }, heiter: { label: "Heiter", sky: "sun", clouds: 1 }, wolken: { label: "Bewölkt", clouds: 3 },
+  regen: { label: "Regen", clouds: 3, rain: 1 }, gewitter: { label: "Gewitter", clouds: 3, rain: 1, storm: 1 }, schnee: { label: "Schnee", clouds: 2, snow: 1 },
+  nebel: { label: "Nebel", fog: 1 }, wind: { label: "Windig", clouds: 2, wind: 1 },
+  sonne_nacht: { label: "Klar", sky: "moon", night: 1 }, heiter_nacht: { label: "Leicht bewölkt", sky: "moon", clouds: 1, night: 1 },
+};
+const wxKey = (k, night) => (night && WX[k + "_nacht"]) ? k + "_nacht" : WX[k] ? k : "heiter";
+const wxOf = (k, night) => { const b = WX[wxKey(k, night)]; return { ...b, night: b.night || !!night }; };
+function wxLayer(g, o, M, s, L, wx, phase, Z) {
+  const rnd = (() => { let q = 11; return () => ((q = (q * 16807) % 2147483647) / 2147483647); })();
+  const bg = o.dark ? "#111110" : "#ebe9e5", sun = o.dark ? "#f0b453" : "#d8921f", rainc = o.dark ? "#79b8e8" : "#3681bf";
+  const snowc = o.dark ? "#f4f1ea" : "#ffffff", snowEdge = o.dark ? "#cfd8e3" : "#9fb3c8";
+  const circ = (x, y, r, w, c, a, fill) => { const p = M(x, y); g.beginPath(); g.arc(p[0], p[1], r * s, 0, 7); if (fill) { g.globalAlpha = a; g.fillStyle = fill; g.fill(); } if (w) { g.globalAlpha = a; g.lineWidth = w; g.strokeStyle = c; g.stroke(); } g.globalAlpha = 1; };
+  const cloud = (x, y, w, dark) => {               /* Wolke: Bögen oben, gerade unten, mit Hintergrund gefüllt */
+    const p = M(x, y), W = w * s, H = W * .34; g.beginPath(); g.moveTo(p[0] - W / 2, p[1]);
+    g.arc(p[0] - W * .32, p[1] - H * .5, H * .62, Math.PI * .95, Math.PI * 1.75);
+    g.arc(p[0] - W * .03, p[1] - H * .8, H * .82, Math.PI * 1.15, Math.PI * 1.9);
+    g.arc(p[0] + W * .27, p[1] - H * .5, H * .66, Math.PI * 1.3, Math.PI * .05);
+    g.lineTo(p[0] + W / 2, p[1]); g.closePath();
+    g.fillStyle = dark ? (o.dark ? "#1c1c1b" : "#d9d6d0") : bg; g.fill();
+    g.lineWidth = 4; g.strokeStyle = o.ink; g.globalAlpha = .9; g.lineJoin = "round"; g.stroke(); g.globalAlpha = 1;
+    for (let i = 1; i < 3; i++) L([M(x - w * .3 + i * .5, y + .12), M(x - w * .3 + i * .5 + w * .25, y + .12)], 2, o.soft, .6);
+    return { x, y, w };
+  };
+  if (phase === "back") {
+    const sx = 17.9, sy = 10.4;
+    if (wx.sky === "sun") { circ(sx, sy, .78, 0, null, .95, sun);
+      for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283, r0 = 1.05, r1 = 1.45 + (i % 2) * .35; L([M(sx + Math.cos(a) * r0, sy + Math.sin(a) * r0), M(sx + Math.cos(a) * r1, sy + Math.sin(a) * r1)], 3.5, sun, .85); } }
+    if (wx.sky === "moon") { circ(sx, sy, .78, 0, null, .95, o.dark ? "#ece6da" : "#5b6474"); const p = M(sx + .38, sy + .22); g.beginPath(); g.arc(p[0], p[1], .7 * s, 0, 7); g.fillStyle = bg; g.fill(); }
+    if (wx.night) for (let i = 0; i < 34; i++) { const zone = rnd() < .5 ? Z.left : Z.right, x = zone[0] + rnd() * (zone[1] - zone[0]), y = 6.8 + rnd() * (Z.top - 6.8);
+      if (wx.sky === "moon" && Math.hypot(x - sx, y - sy) < 1.6) continue; const p = M(x, y), r = 1.6 + rnd() * 2.2; g.globalAlpha = .55 + rnd() * .4; g.fillStyle = o.ink; g.fillRect(p[0] - r / 2, p[1] - r / 2, r, r); g.globalAlpha = 1; }
+    const cl = [];
+    const spots = [[-6.4, 10.1, 4.4], [16.4, 10.7, 3.9], [4.2, 11.3, 2.8]];
+    spots.slice(0, wx.clouds || 0).forEach(([x, y, w]) => cl.push(cloud(x + (wx.wind ? .8 : 0), y, w, wx.rain || wx.storm)));
+    if (wx.rain) cl.forEach((c) => { const top = c.y - .25, bottom = c.y > 11 ? Z.roofTop + .25 : 0.2;
+      for (let i = 0; i < Math.round(c.w * 5); i++) { const x = c.x - c.w * .42 + rnd() * c.w * .84;
+        for (let y = top - rnd() * .6; y > bottom; y -= 1.1 + rnd() * .4) L([M(x + (top - y) * .18, y), M(x + (top - y) * .18 + .12, y - .5)], 2.2, rainc, .75); } });
+    if (wx.storm && cl[0]) { const c = cl[0], x = c.x + .4, y = c.y - .3;
+      L([M(x, y), M(x - .55, y - 1.6), M(x + .05, y - 1.55), M(x - .5, y - 3.3), M(x + .9, y - 1.2), M(x + .25, y - 1.25), M(x + .7, y)], 3, o.ink, 1, true, sun, .95); }
+    if (wx.snow) for (let i = 0; i < 70; i++) { const zone = [Z.left, Z.right, Z.roof][i % 3], x = zone[0] + rnd() * (zone[1] - zone[0]);
+      const y = zone === Z.roof ? Z.roofTop + .5 + rnd() * (Z.top - Z.roofTop - .7) : .6 + rnd() * 9.5, p = M(x, y), r = 4 + rnd() * 5;
+      g.globalAlpha = .85; g.strokeStyle = o.dark ? "#e9eef5" : "#7d8ea3"; g.lineWidth = 1.8;
+      for (let k = 0; k < 3; k++) { const a = k * Math.PI / 3; g.beginPath(); g.moveTo(p[0] - Math.cos(a) * r, p[1] - Math.sin(a) * r); g.lineTo(p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r); g.stroke(); } g.globalAlpha = 1; }
+    if (wx.wind) for (let i = 0; i < 6; i++) { const zone = i % 2 ? Z.left : Z.right, x = zone[0] + .3 + rnd() * (zone[1] - zone[0] - 3), y = 4.5 + rnd() * 5;
+      const p = M(x, y), q = M(x + 2.4, y); g.beginPath(); g.moveTo(p[0], p[1]); g.bezierCurveTo(p[0] + 40, p[1] - 14, q[0] - 50, q[1] + 16, q[0], q[1] - 10);
+      g.arc(q[0], q[1] - 22, 12, Math.PI / 2, -Math.PI * .6, true); g.lineWidth = 2.4; g.strokeStyle = o.soft; g.globalAlpha = .8; g.stroke(); g.globalAlpha = 1; }
+  } else {
+    if (wx.snow) { Z.snow.forEach((pl) => { L(pl.map(([x, y]) => M(x, y + .1)), 9, snowEdge, .9); L(pl.map(([x, y]) => M(x, y + .12)), 6, snowc, 1); });
+      L([M(-9, .1), M(21, .1)], 10, snowEdge, .8); L([M(-9, .12), M(21, .12)], 7, snowc, 1); }
+    if (wx.fog) for (let i = 0; i < 9; i++) { const y = .5 + i * .62, off = (i % 3) * 1.3; g.setLineDash([60 + i * 6, 22 + i * 3]);
+      L([M(-9 + off, y), M(21, y)], 5 - i * .3, o.soft, .5 - i * .035); g.setLineDash([]); }
+  }
+}
 const ART = {
   /* Zuhause: Südansicht des erfundenen Beispielhauses (Satteldach mit Gaube, PV, Carport links) */
-  zuhause(g, o, cx = 1000, s = 56, gy = 735) {
+  zuhause(g, o, cx = 1000, s = 56, gy = 735, wx = null) {
     const { L, rnd } = kit(g, o), M = (x, y) => [cx + (x - 6.5) * s, gy - y * s];
     const R = (x0, y0, x1, y1, w, c, a, f, fa) => L([M(x0, y0), M(x1, y0), M(x1, y1), M(x0, y1)], w, c, a, true, f, fa);
     const glass = o.dark ? "#8fb6d6" : "#5d8fb8", pv = o.dark ? "#4f74b0" : "#2b4a78", tile = o.dark ? "#f08a5d" : "#c4532c";
-    const win = (x0, x1, y0, y1, parts) => { R(x0, y0, x1, y1, 4, o.ink, .9, glass, .18); for (let i = 1; i < parts; i++) { const x = x0 + (x1 - x0) * i / parts; L([M(x, y0), M(x, y1)], 3, o.ink, .8); } };
+    const lit = wx && wx.night, warmw = o.dark ? "#f0b453" : "#d8921f";
+    if (wx) wxLayer(g, o, M, s, L, wx, "back", ZU_WX);
+    const win = (x0, x1, y0, y1, parts) => { R(x0, y0, x1, y1, 4, o.ink, .9, lit ? warmw : glass, lit ? .32 : .18); for (let i = 1; i < parts; i++) { const x = x0 + (x1 - x0) * i / parts; L([M(x, y0), M(x, y1)], 3, o.ink, .8); } };
     L([M(-9, 0), M(21, 0)], 5, o.ink, .75);
     for (let x = -8; x < 21; x += 1.1) L([M(x, -.45), M(x + .5, -.43)], 3, o.soft, .5);
     /* Satteldach, Traufe zur Straße: Ziegelschraffur, PV-Feld links, Gaube rechts, Schornstein */
@@ -86,6 +146,7 @@ const ART = {
     const tree = (x, r, h) => { L([M(x, 0), M(x, h)], 6, o.ink, .9); for (let i = 0; i < 46; i++) { const a = rnd() * 6.28, d = Math.sqrt(rnd()) * r, c = M(x + Math.cos(a) * d, h + 1.2 + Math.sin(a) * d * .9);
       g.beginPath(); g.arc(c[0], c[1], (.25 + rnd() * .35) * s, 0, 7); g.lineWidth = 2; g.strokeStyle = o.soft; g.globalAlpha = .55; g.stroke(); g.globalAlpha = 1; } };
     tree(-7.2, 1.9, 2.8); tree(17.4, 2.2, 3.0);
+    if (wx) wxLayer(g, o, M, s, L, wx, "front", ZU_WX);
     return { M, L, s };
   },
   /* Energie: PV-Dach, Sonne, Kabel zu Wechselrichter und BYD */
@@ -244,11 +305,14 @@ function planArt(g, o, fi) {
       L([M([mx0, my1]), M([mx1, my1])], 4, o.ink, .9); }
   }
 }
-function initSculpture(motiv) {
+function initSculpture(motiv, draw) {
   $(".hint").textContent = matchMedia("(hover: none), (pointer: coarse)").matches ? "Zeichnung berühren" : "Über die Zeichnung streichen";
-  const s = GlasSculpture({ stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(ART[motiv] || ART.haus), parallax: 0.3,
+  const so = { stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(draw || ART[motiv] || ART.haus), parallax: 0.3,
     band: () => { const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
-    bg: () => cssv("--bg"), dark: isDark });
+    bg: () => cssv("--bg"), dark: isDark };
+  const s = GlasSculpture(so);
+  /* Motiv austauschen (z. B. Wetter): neue Zeichnung, die Partikel blenden über */
+  s.setArt = (d) => { so.srcs = makeArt(d); s.retheme(); };
   new MutationObserver(() => s.retheme()).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
   matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => s.retheme());
   if (document.fonts) document.fonts.ready.then(() => s.place());

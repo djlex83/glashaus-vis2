@@ -52,7 +52,7 @@ Screenshots ohne Nachtmodus und mit fertig eingeblendeten Kacheln: Chrome headle
 
 **Animierte Vorschaubilder (GIFs)** für die README: `tools/record.mjs` steuert Chrome über das DevTools-Protokoll und nimmt per Screencast auf.
 1. Server für `docs/` auf Port 8766 starten.
-2. `node tools/record.mjs <szene> <ordner>` ausführen. Szenen: `partikel` (Maus durchs Motiv), `haus` (Modell drehen, aufklappen), `zimmer` (Lichtszenen), `kamera` (Auto kommt, Popup), `skyline` (3D drehen), `theme` (hell/dunkel), `einrichten` (Möbel ziehen und drehen). Für `einrichten` zuerst `probe` ausführen, im Screenshot die Koordinaten eines Möbelgriffs ablesen und als `x y zielX zielY` mitgeben.
+2. `node tools/record.mjs <szene> <ordner>` ausführen. Szenen: `partikel` (Maus durchs Motiv), `wetter` (alle Wetterbilder), `haus` (Modell drehen, aufklappen), `zimmer` (Lichtszenen), `kamera` (Auto kommt, Popup), `skyline` (3D drehen), `theme` (hell/dunkel), `einrichten` (Möbel ziehen und drehen). Für `einrichten` zuerst `probe` ausführen, im Screenshot die Koordinaten eines Möbelgriffs ablesen und als `x y zielX zielY` mitgeben.
 3. Mit dem ffmpeg-Befehl aus dem Dateikopf ein GIF machen (18 fps, 800 px breit, Ziel unter etwa 5 MB).
 4. Stichproben-Bilder aus dem Ordner ansehen, bevor das GIF verwendet wird: richtiger Ausschnitt, keine privaten Daten.
 Anderer Chrome-Pfad: Umgebungsvariable `CHROME`.
@@ -73,6 +73,7 @@ Forma-Look: Hintergrund #EBE9E5 / dunkel #111110, Schrift Geist, Akzent Instrume
   - Die Einrichtung speichert der Browser je Seite getrennt (`glashaus.zimmer.layout`). „Für Hausmodell kopieren“ (Zimmer) → „Einrichtung übernehmen“ (Haus); dauerhaft: JSON in `ZC` eintragen.
 - **Hausmodell** (haus.html): `roomKit` zeichnet aus `ZC` Fenster, Türen, Lampen, Melder, Heizkörper, Fußbodenheizung (ohne Möbel). Symbole in `DEV` mit Raum `r` und Position `uv:[u,v]` (oder `at` in Plankoordinaten). Prüfen: `DEV.filter(d=>!d.roof&&!(d.p&&isFinite(d.p[0])))` muss leer sein.
 - **Neues Gerät** immer an drei Stellen: `ZC` (Zimmer), `DEV` (Hausmodell), `INV` (Geräteliste auf der Haus-Seite).
+- **Wetter im Hausbild:** `wxLayer` (common.js) zeichnet in `ART.zuhause(g, o, cx, s, gy, wx)` Sonne, Mond und Sterne, Wolken, Regen, Blitz, Schnee, Nebel und Wind im gleichen Strichstil; nachts leuchten die Fenster warm. Vorgaben in `WX`, Auswahl über `wxOf(motiv, nacht)`. Freie Himmelsflächen und Schneekanten des Hauses stehen in `ZU_WX` – bei einem eigenen Haus dort anpassen. Die Zuhause-Kachel `#wetter` tauscht das Bild mit `SCULPT.setArt(draw)`; live aus `0_userdata.0.Wetter.motiv` (sonne, heiter, wolken, regen, gewitter, schnee, nebel, wind) und `.nacht`.
 - **Müllabfuhr:** `MUELL_RAW` (MMTT je Tonne) und `MUELL_Y` in common.js; Gebühren `GEB` in einfahrt.html (Jahresgebühr inkl. 12 Leerungen, je weitere Leerung).
 
 ## ioBroker anbinden

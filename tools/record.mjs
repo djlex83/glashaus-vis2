@@ -2,7 +2,7 @@
 // und zeichnet per Screencast mit ~60 Bildern/s auf. Braucht Node 22+ (fetch, WebSocket) und Google Chrome.
 // Vorher: python3 -m http.server 8766 --bind 127.0.0.1 --directory docs
 // Aufruf: node tools/record.mjs <szene> <ausgabeordner> [x y zielX zielY]
-//   Szenen: partikel, haus, zimmer, kamera, skyline, theme, probe (Screenshot im Einrichten-Modus), einrichten
+//   Szenen: partikel, wetter, haus, zimmer, kamera, skyline, theme, probe (Screenshot im Einrichten-Modus), einrichten
 // Danach GIF: ffmpeg -f concat -safe 0 -i <ordner>/list.txt -vf "fps=18,scale=800:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle" -loop 0 out.gif
 import { spawn } from "child_process"; import fs from "fs";
 const [scene, out] = process.argv.slice(2); fs.rmSync(out, { recursive: true, force: true }); fs.mkdirSync(out, { recursive: true });
@@ -75,6 +75,11 @@ if (scene === "partikel") {
   await start(); for (let i = 0; i < 30; i++) await frame();
   await js(`document.querySelector('[data-theme-toggle]').click()`); for (let i = 0; i < 45; i++) await frame();
   await js(`document.querySelector('[data-theme-toggle]').click()`); for (let i = 0; i < 40; i++) await frame();
+} else if (scene === "wetter") {
+  await go("http://127.0.0.1:8766/index.html", false);
+  await start(); for (let i = 0; i < 15; i++) await frame();
+  for (const k of ["sonne", "wolken", "regen", "gewitter", "schnee", "nebel", "wind", "heiter"]) {
+    await js(`document.querySelector('[data-wx="${k}"]').click()`); for (let i = 0; i < 32; i++) await frame(); }
 } else if (scene === "probe") {
   await go("http://127.0.0.1:8766/zimmer.html#leo", true);
   await js(`document.getElementById('room').scrollIntoView({block:'start'}); window.scrollBy(0,-12)`); await sleep(1500);

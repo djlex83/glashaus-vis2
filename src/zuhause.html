@@ -171,7 +171,15 @@
     </ul>
   </article>
 
-  <article class="glass tile s-12" id="muell" style="--i:5">
+  <article class="glass tile s-4" id="wetter" style="--i:5">
+    <div class="tile-h"><h2><span class="ico" style="--c:var(--cool)" data-wxico><svg><use href="#i-cloud"/></svg></span>Wetter</h2><span class="pill idle" data-wxsrc>Demo</span></div>
+    <div class="wx-now"><b data-wxt>–</b><span data-wxl>–</span></div>
+    <dl class="kv" data-wxkv></dl>
+    <div class="wx-kinds" role="group" aria-label="Wetter im Bild ausprobieren" data-wxkinds></div>
+    <p class="small muted" style="margin:10px 0 0">Die Hauszeichnung oben zeigt das Wetter mit. Live aus <code>0_userdata.0.Wetter.motiv</code>.</p>
+  </article>
+
+  <article class="glass tile s-8" id="muell" style="--i:6">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Müllabfuhr</h2><a class="pill info" href="__URL_EINFAHRT__#tonnen">Kalender &amp; Gebühr</a></div>
     <p class="mhint" data-mhint></p>
     <div class="bins" data-bins></div>
@@ -192,6 +200,7 @@
           <tr><td>Lüfter</td><td><code>suedwind-ambientika.0.BDB8947CAB05.*</code></td><td>fanSpeed, humidity</td></tr>
           <tr><td>Zirkulation</td><td><code>shelly.0.SHPLG-S#068CC2#1.Relay0.Switch</code></td><td>Steuerung macht das Script</td></tr>
           <tr><td>Hausgeräte</td><td colspan="2">siehe Ansicht Geräte</td></tr>
+          <tr><td>Wetter</td><td><code>0_userdata.0.Wetter.motiv</code> · <code>.nacht</code><br><code>.temperatur</code> · <code>.zustand</code> · <code>.tagMin</code> · <code>.tagMax</code> · <code>.regenHeute</code> · <code>.wind</code></td><td>eigenes Script, z. B. DWD-Daten über Bright Sky (ohne Schlüssel); Motiv: sonne, heiter, wolken, regen, gewitter, schnee, nebel, wind</td></tr>
           <tr><td>Müllabfuhr</td><td><code>0_userdata.0.Muell.termine</code><br><code>0_userdata.0.Muell.morgen</code></td><td>JSON der nächsten 60 Tage; „morgen“ leer = keine Abfuhr</td></tr>
           <tr><td>Batterie</td><td><code>bydhvs.0.State.*</code></td><td>SOC, Power</td></tr>
           <tr><td>Skyline (Energie, Heizung)</td><td>InfluxDB <code>192.168.0.76:8086</code></td><td>Tageswerte per <code>aggregateWindow(every: 1d)</code></td></tr>
@@ -249,7 +258,22 @@
 </script>
 <script>
 /*COMMON_JS*/
-initSculpture('zuhause');
+/* Wetter (Demo-Werte; live aus 0_userdata.0.Wetter.*) bestimmt das Hausbild */
+const WXD={sonne:[18,'Sonnig',10,19,0,8],heiter:[14,'Heiter',8,15,0,12],wolken:[11,'Bewölkt',8,12,0,15],regen:[9,'Regen',7,10,6,18],gewitter:[17,'Gewitter',13,22,12,35],schnee:[-1,'Schneefall',-3,1,4,10],nebel:[4,'Nebel',2,9,0,3],wind:[10,'Windig',7,12,1,48]};
+const wxNight=()=>{const h=new Date().getHours();return h<7||h>=19};
+let WXK='auto';
+const wxCur=()=>WXK==='auto'?(wxNight()?'heiter':'heiter'):WXK;
+const wxDraw=()=>{const w=wxOf(wxCur(),wxNight());return (g,o)=>ART.zuhause(g,o,undefined,undefined,undefined,w)};
+initSculpture('zuhause',wxDraw());
+function wetter(swap){const k=wxCur(),d=WXD[k],w=wxOf(k,wxNight());
+  $('[data-wxt]').textContent=d[0]+' °C';$('[data-wxl]').textContent=w.label;
+  $('[data-wxkv]').innerHTML='<dt>Heute</dt><dd>'+d[2]+' bis '+d[3]+' °C</dd><dt>Regen heute</dt><dd>'+d[4]+' mm</dd><dt>Wind</dt><dd>'+d[5]+' km/h</dd>';
+  $('[data-wxico]').innerHTML='<svg><use href="#i-'+(w.sky==='sun'?'sun':w.sky==='moon'?'moon':'cloud')+'"/></svg>';
+  $('[data-wxico]').style.setProperty('--c',w.sky==='sun'?'var(--sun)':w.rain||w.snow?'var(--cool)':'var(--fg-2)');
+  $('[data-wxkinds]').innerHTML=['auto'].concat(Object.keys(WXD)).map(x=>'<button type="button" data-wx="'+x+'" aria-pressed="'+(x===WXK)+'">'+(x==='auto'?'Jetzt':WX[x].label)+'</button>').join('');
+  if(swap&&window.SCULPT&&SCULPT.setArt)SCULPT.setArt(wxDraw())}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;WXK=b.dataset.wx;wetter(true);if(typeof summary==='function')summary(energy());toast('Hausbild: '+(WXK==='auto'?'aktuelles Wetter':WX[WXK].label)+' (Demo)')});
+wetter(false);
 
 function wire(el,kw,rev){el.classList.toggle('idle',Math.abs(kw)<.05);el.classList.toggle('rev',!!rev);el.style.setProperty('--dur',Math.max(.35,1.6/Math.max(.2,Math.abs(kw)))+'s')}
 function energy(){const s=D[nowIdx()],j=1+(Math.random()-.5)*.06;
@@ -272,7 +296,8 @@ function pump(){const n=new Date(),m=n.getHours()*60+n.getMinutes();
   const p=$('[data-pump]');p.classList.toggle('on',run);p.classList.toggle('spin',run)}
 
 function summary(s){const mo=muellAm(new Date(Date.now()+864e5));
-  $('[data-summary]').innerHTML=(s.pv>.3?'Die Sonne liefert <b>'+de(s.pv,1)+' kW</b>. ':'')+'Batterie bei <b>'+Math.round(s.soc)+' %</b>, Garage <b>zu</b>, '+WM.summary()+'.'+(mo.length?' Morgen '+(mo.length>1?'kommen':'kommt')+' <b>'+mo.map(t=>t.der).join(' und ')+'</b>.':'')}
+  const wk=wxCur(),wd=WXD[wk];
+  $('[data-summary]').innerHTML='Draußen <b>'+wd[0]+' °C</b>, '+wxOf(wk,wxNight()).label.toLowerCase()+'. '+(s.pv>.3?'Die Sonne liefert <b>'+de(s.pv,1)+' kW</b>. ':'')+'Batterie bei <b>'+Math.round(s.soc)+' %</b>, Garage <b>zu</b>, '+WM.summary()+'.'+(mo.length?' Morgen '+(mo.length>1?'kommen':'kommt')+' <b>'+mo.map(t=>t.der).join(' und ')+'</b>.':'')}
 
 /* Müllabfuhr: Tonnen nach nächstem Termin sortiert, Hinweis am Vorabend */
 function muell(){const L=TONNEN.map(t=>({...t,d:muellNext(t.k)})).sort((a,b)=>(a.d||Infinity)-(b.d||Infinity));

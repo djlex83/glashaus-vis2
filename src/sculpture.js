@@ -45,6 +45,7 @@ window.GlasSculpture = function mount(opts) {
   function resize() {
     dpr = Math.min(2, devicePixelRatio || 1);
     const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;                       /* Seite (noch) unsichtbar: später erneut */
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     buf = g.createImageData(canvas.width, canvas.height);
   }

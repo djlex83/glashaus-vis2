@@ -22,6 +22,8 @@ A dashboard design for a smart home running ioBroker: frosted-glass tiles, calm 
 | ![Camera](screenshots/kamera.gif) | ![Skyline](screenshots/skyline.gif) |
 | **Switch light and dark** | **Room edit mode: drag and rotate furniture** |
 | ![Light and dark](screenshots/theme.gif) | ![Edit mode](screenshots/einrichten.gif) |
+| **Weather in the house drawing: sun, rain, thunderstorm, snow, fog, wind** | |
+| ![Weather](screenshots/wetter.gif) | |
 
 ## Pages
 
@@ -29,7 +31,7 @@ The user interface is in German. Page names in brackets.
 
 | Page | Content |
 |---|---|
-| **Home** (Zuhause, `index.html`) | Overview: energy now, hot water, scenes, switches, appliances, notifications, waste collection |
+| **Home** (Zuhause, `index.html`) | Overview: energy now, hot water, scenes, switches, appliances, notifications, weather (drawn into the house picture), waste collection |
 | **Energy** (Energie) | PV, battery, grid, 3D yearly skyline, wallboxes with solar charging |
 | **Heating** (Heizung) | Hot-water tank, circulation pump, heating circuit, rooms |
 | **Appliances** (Geräte) | Washing machine, dryer, dishwasher, Echo speakers |
