@@ -27,6 +27,8 @@ function themeIcon() { const d = isDark(), b = $("[data-theme-toggle]"); if (!b)
 $("[data-theme-toggle]")?.addEventListener("click", () => { root.dataset.theme = isDark() ? "light" : "dark"; themeIcon(); });
 themeIcon();
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", themeIcon);
+/* Sprachumschalter DE | EN: gleiche Stelle (#zimmer …) in der anderen Sprache öffnen */
+$$("[data-lang]").forEach((a) => a.addEventListener("click", () => { a.href = a.href.split("#")[0] + location.hash; }));
 
 /* Skulptur */
 /* Motive für die Partikel-Engine: Linienzeichnungen, im Browser gezeichnet (transparent, je Design hell/dunkel) */

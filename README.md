@@ -7,7 +7,8 @@
 [![Ohne Abhängigkeiten](https://img.shields.io/badge/Abh%C3%A4ngigkeiten-keine-6760c4)](#schnellstart)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-bf7a14)](LICENSE)
 
-**Live-Demo:** [Zuhause](https://djlex83.github.io/glashaus-vis2/) · [Energie](https://djlex83.github.io/glashaus-vis2/energie.html) · [Heizung](https://djlex83.github.io/glashaus-vis2/heizung.html) · [Geräte](https://djlex83.github.io/glashaus-vis2/geraete.html) · [Einfahrt](https://djlex83.github.io/glashaus-vis2/einfahrt.html) · [Haus](https://djlex83.github.io/glashaus-vis2/haus.html) · [Zimmer](https://djlex83.github.io/glashaus-vis2/zimmer.html)
+**Live-Demo:** [Zuhause](https://djlex83.github.io/glashaus-vis2/) · [Energie](https://djlex83.github.io/glashaus-vis2/energie.html) · [Heizung](https://djlex83.github.io/glashaus-vis2/heizung.html) · [Geräte](https://djlex83.github.io/glashaus-vis2/geraete.html) · [Einfahrt](https://djlex83.github.io/glashaus-vis2/einfahrt.html) · [Haus](https://djlex83.github.io/glashaus-vis2/haus.html) · [Zimmer](https://djlex83.github.io/glashaus-vis2/zimmer.html)  
+Englische Oberfläche: [https://djlex83.github.io/glashaus-vis2/en/](https://djlex83.github.io/glashaus-vis2/en/) · Umschalter **DE | EN** in der Navigation jeder Seite.
 
 Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhige Typografie und je Seite eine Linienzeichnung im Hintergrund, die bei Berührung in Partikel zerfließt. Jede Seite ist eine einzelne HTML-Datei ohne Build-Werkzeuge und ohne Framework. Sie läuft im Browser, auf einem Wand-Tablet oder als Vorlage für VIS 2.
 
@@ -48,7 +49,7 @@ Hell und dunkel folgen dem System, oben rechts lässt es sich umschalten. Auf de
 ## Schnellstart
 
 ```bash
-python3 build.py                                   # baut alle Seiten nach docs/
+python3 build.py                                   # baut alle Seiten nach docs/ (Deutsch) und docs/en/ (Englisch)
 python3 -m http.server 8765 --directory docs       # dann http://localhost:8765 öffnen
 bash .claude/skills/glashaus/check.sh              # Syntax und Platzhalter prüfen
 ```
@@ -58,7 +59,8 @@ bash .claude/skills/glashaus/check.sh              # Syntax und Platzhalter prü
 ## Aufbau
 
 ```
-build.py            setzt src/ zu eigenständigen Seiten in docs/ zusammen
+build.py            setzt src/ zu eigenständigen Seiten in docs/ zusammen, übersetzt nach docs/en/
+src/i18n/en.json    englisches Wörterbuch für build.py
 src/base.css        Design-Tokens (hell/dunkel), Glas, 12-Spalten-Raster, Tablet, Popups
 src/sprite.html     SVG-Icons (#i-…)
 src/common.js       Helfer, Linienmotive je Seite (ART), Tablet-Modus, Kamera-Szene,

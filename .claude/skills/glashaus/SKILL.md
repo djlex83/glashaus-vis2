@@ -5,7 +5,7 @@ description: Am Glashaus-Dashboard (Design-Entwurf für ioBroker VIS 2) weiterar
 
 # Glashaus
 
-Design-Dashboard für ioBroker VIS 2. Jede Seite ist eine eigenständige HTML-Datei ohne Framework und ohne Build-Werkzeuge außer `build.py`. Oberflächentexte sind Deutsch.
+Design-Dashboard für ioBroker VIS 2. Jede Seite ist eine eigenständige HTML-Datei ohne Framework und ohne Build-Werkzeuge außer `build.py`. Oberflächentexte werden auf Deutsch geschrieben; die englische Fassung entsteht beim Bauen (siehe „Übersetzen“).
 
 ## Regeln
 
@@ -17,7 +17,8 @@ Design-Dashboard für ioBroker VIS 2. Jede Seite ist eine eigenständige HTML-Da
 ## Aufbau
 
 ```
-build.py          setzt src/ zu Seiten in docs/ zusammen (zuhause → index.html)
+build.py          setzt src/ zu Seiten in docs/ zusammen (zuhause → index.html), Englisch nach docs/en/
+src/i18n/en.json  englisches Wörterbuch (raw, text, phrases, pages)
 src/base.css      Design-Tokens (hell/dunkel), Glas, Raster s-1…s-12, Tablet, Anruf- und Kamera-Popup
 src/sprite.html   SVG-Icons (#i-…)
 src/common.js     Helfer ($, $$, de, tween, ring, toast), ART-Motive je Seite, initSculpture, initTablet,
@@ -29,15 +30,15 @@ src/rooms.js      Zimmer-Konfiguration ZC + Speichern/Laden der Einrichtung, fü
 src/<seite>.html  zuhause, energie, heizung, geraete, einfahrt, haus, zimmer
 ```
 
-Markierungen in den Seiten, die `build.py` ersetzt: `/*BASE_CSS*/`, `<!--SPRITE-->`, `/*COMMON_JS*/`, `/*SCULPTURE_JS*/`, `/*SKYLINE_JS*/`, `/*ROOMS_JS*/`, Links `__URL_<SEITE>__`. Achtung: Ein Kommentar in einer eingesetzten Datei darf weder `*/` noch eine dieser Markierungen enthalten.
+Markierungen in den Seiten, die `build.py` ersetzt: `<!--LANG-->` (Sprachumschalter DE | EN in der Navigation), `/*BASE_CSS*/`, `<!--SPRITE-->`, `/*COMMON_JS*/`, `/*SCULPTURE_JS*/`, `/*SKYLINE_JS*/`, `/*ROOMS_JS*/`, Links `__URL_<SEITE>__`. Achtung: Ein Kommentar in einer eingesetzten Datei darf weder `*/` noch eine dieser Markierungen enthalten.
 
 Seiten nach System: **Zuhause** = nur Übersicht · **Energie** = PV, Batterie, Wallboxen · **Heizung** = Speicher, Zirkulation, Heizkreis, Räume · **Geräte** = Waschmaschine, Trockner, Spülmaschine, Echos · **Einfahrt** = Kamera, Autos, Fahrtenbuch, Garage, Besucher, Tonnen · **Haus** = 3D-Modell + Geräteliste · **Zimmer** = Räume in 3D mit Einrichten-Modus. Neue Funktionen gehören auf die Seite ihres Systems; Zuhause zeigt höchstens eine Zusammenfassung.
 
 ## Ändern, bauen, prüfen
 
 1. Immer `src/` bearbeiten, nie `docs/`.
-2. Bauen: `python3 build.py` (alle) oder `python3 build.py haus zimmer`. Änderungen an `common.js`, `base.css`, `sprite.html`, `sculpture.js` betreffen alle Seiten.
-3. Syntax und Platzhalter: `bash .claude/skills/glashaus/check.sh`. Findet keine Laufzeitfehler.
+2. Bauen: `python3 build.py` (alle Seiten, Deutsch und Englisch) oder `python3 build.py haus zimmer`; nur eine Sprache mit `--lang de|en`. Änderungen an `common.js`, `base.css`, `sprite.html`, `sculpture.js` betreffen alle Seiten.
+3. Syntax und Platzhalter: `bash .claude/skills/glashaus/check.sh` (prüft `docs/` und `docs/en/`). Findet keine Laufzeitfehler.
 4. Vorschau: `python3 -m http.server 8765 --bind 127.0.0.1 --directory docs` im Hintergrund, Browser auf 1280×900.
    - Nach jedem Build Cache umgehen: `?v=<zahl>` anhängen.
    - Kacheln erscheinen oft erst nach einmal Scrollen und kurzem Warten. Zuverlässig: `el.scrollIntoView()` per JavaScript, dann Screenshot.
@@ -56,6 +57,26 @@ Screenshots ohne Nachtmodus und mit fertig eingeblendeten Kacheln: Chrome headle
 3. Mit dem ffmpeg-Befehl aus dem Dateikopf ein GIF machen (18 fps, 800 px breit, Ziel unter etwa 5 MB).
 4. Stichproben-Bilder aus dem Ordner ansehen, bevor das GIF verwendet wird: richtiger Ausschnitt, keine privaten Daten.
 Anderer Chrome-Pfad: Umgebungsvariable `CHROME`.
+
+## Übersetzen (Englisch)
+
+Quelle ist immer der deutsche Text in `src/`. `build.py --lang en` übersetzt beim Bauen nach `docs/en/` mit `src/i18n/en.json`; `<html lang>`, Beschreibung und `og:description` setzt `build.py` je Sprache. Der Übersetzer zerlegt jede Seite: Text zwischen Tags, Text-Attribute (`title`, `aria-label`, `placeholder`, `data-…`), Inhalt jedes JS-String- und Template-Literals (darin wieder Text zwischen Tags). CSS, Kommentare, Regex, ids, Klassen und Code bleiben unberührt.
+
+Abschnitte in `en.json`, in dieser Reihenfolge angewendet:
+- `raw`: exakte Ersetzung im zusammengesetzten Quelltext, vor allem anderen. Für Wortstellung (`'vor '+m+' min'` → `m+' min ago'`), Datumsformate (`'.'`-Datum → `/`, Wochentag-Arrays), Euro-Formate und Status, die zugleich **Schlüssel** sind (nur die Anzeige übersetzen, z. B. `p.textContent=({'lädt':'charging',…})[st]`).
+- `text`: ganzes Textstück → Übersetzung (Leerraum am Rand bleibt, innen wird er zusammengefasst). Der Normalfall. `pages.<seite>` überschreibt einzelne Stücke nur für eine Seite.
+- `phrases`: Teilstück in sonst unübersetzten Stücken, nur ganze Wörter, längste zuerst. Sparsam verwenden.
+- Reine Zahlen im Markup (`12,5`, `· 22,6 °C`, `2,38 €`) wandelt `build.py` selbst um; `de()` und `toLocale…('de-DE')` werden über `"de-DE": "en-GB"` englisch.
+
+**Neuen Text einbauen:**
+1. Deutsch in `src/` schreiben, `python3 build.py --lang en --missing` ausführen. Es listet Stücke, die noch deutsch aussehen (`[seite:text|attr|js] Stück`), und Einträge in `en.json`, die nicht mehr vorkommen.
+2. Für jedes Stück einen Eintrag in `text` anlegen, Schlüssel **genau** wie ausgegeben (inklusive `· `, `: `, Entities wie `&amp;`, Backslash-Escapes). In JS-Strings mit `'` kein gerades Apostroph in der Übersetzung, sondern `’`.
+3. Wird ein Satz im Code zusammengesetzt (`'Fertig um '+zeit`), die Stücke einzeln übersetzen; passt die Wortstellung nicht, einen `raw`-Eintrag für den ganzen Ausdruck.
+4. Kleine deutsche Wörter, die im Code als Schlüssel dienen (`'zu'`, `'offen'`, `'lädt'`, `'sonne'`, Raum-ids, Motive wie `'zuhause'`), **nie** in `text` aufnehmen, sonst bricht die Logik oder CSS wie `.wb[data-s="lädt"]`. Vorher mit `grep -n "'wort'" src/*` prüfen; Anzeige dann über `raw`.
+5. Datenpunkte (`0_userdata.0.…`, `zigbee.0.…`), Marken- und Gerätenamen bleiben unverändert.
+6. Neu bauen, `check.sh`, die englische Seite im Browser öffnen (Konsole prüfen, nach deutschen Wörtern wie der, die, und, mit, Uhr, heute suchen) und ungenutzte Einträge löschen.
+
+Englische Begriffe einheitlich halten: Zuhause → Home, Geräte → Appliances, Einfahrt → Driveway, Zimmer → Rooms, Einrichten → Furnish, „In VIS 2 übernehmen“ → “Use in VIS 2”, Datenpunkt → Datapoint, Fahrtenbuch → Logbook, Müllabfuhr → Bin collection, Kombi/Kleinwagen/Elektroauto → Estate/Small car/Electric car.
 
 ## Design
 

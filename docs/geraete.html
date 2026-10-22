@@ -7,6 +7,8 @@
 <meta property="og:description" content="Design-Dashboard für ioBroker VIS 2: Milchglas-Kacheln, Partikel-Motive, 3D-Hausmodell, Zimmer, Energie-Skyline und Tablet-Modus. Demo mit erfundenem Beispielhaus.">
 <meta property="og:image" content="https://djlex83.github.io/glashaus-vis2/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" hreflang="de" href="https://djlex83.github.io/glashaus-vis2/geraete.html">
+<link rel="alternate" hreflang="en" href="https://djlex83.github.io/glashaus-vis2/en/geraete.html">
 <title>Glashaus Geräte</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,6 +84,8 @@ a{color:inherit}
 .links a{text-decoration:none;font-size:13.5px;opacity:.68;transition:opacity .2s}
 .links a:hover,.links a[aria-current]{opacity:1}
 .links a[aria-current]{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
+.lang{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.04em}.lang span{opacity:.3}
+.links .lang a{opacity:.5}.links .lang a[aria-current]{opacity:1;font-weight:600;text-decoration:none}
 .circ{display:inline-grid;place-items:center;width:36px;height:36px;padding:0;border-radius:50%;cursor:pointer;background:transparent;border:1px solid color-mix(in srgb,var(--fg) 22%,transparent);transition:background .25s,color .25s}
 .circ:hover{background:var(--fg);color:var(--bg)}
 .circ svg{width:16px;height:16px}
@@ -541,6 +545,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
     <li><a href="einfahrt.html">Einfahrt</a></li>
     <li><a href="haus.html">Haus</a></li>
     <li><a href="zimmer.html">Zimmer</a></li>
+    <li class="lang"><a href="geraete.html" hreflang="de" lang="de" data-lang aria-current="true">DE</a><span aria-hidden="true">|</span><a href="en/geraete.html" hreflang="en" lang="en" data-lang>EN</a></li>
     <li><button class="circ" type="button" data-theme-toggle aria-label="Dunkles Design"><svg><use href="#i-moon"/></svg></button></li>
     <li><span class="outline" data-clock>07:16</span></li>
   </ul>
@@ -829,6 +834,8 @@ function themeIcon() { const d = isDark(), b = $("[data-theme-toggle]"); if (!b)
 $("[data-theme-toggle]")?.addEventListener("click", () => { root.dataset.theme = isDark() ? "light" : "dark"; themeIcon(); });
 themeIcon();
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", themeIcon);
+/* Sprachumschalter DE | EN: gleiche Stelle (#zimmer …) in der anderen Sprache öffnen */
+$$("[data-lang]").forEach((a) => a.addEventListener("click", () => { a.href = a.href.split("#")[0] + location.hash; }));
 
 /* Skulptur */
 /* Motive für die Partikel-Engine: Linienzeichnungen, im Browser gezeichnet (transparent, je Design hell/dunkel) */
