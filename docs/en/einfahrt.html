@@ -187,6 +187,10 @@ pre.css{margin:0 0 10px;max-height:320px;overflow:auto;font-family:var(--mono);f
 .foot a:hover{color:var(--fg)}
 
 /* Skyline */
+.sk-cmp{display:flex;flex-wrap:wrap;gap:6px 18px;margin:-6px 2px 14px;font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.sk-cmp[hidden]{display:none}
+.sk-cmp b{color:var(--fg);font-weight:550;margin-right:4px}
+.sk-cmp em{font-style:normal;margin-left:4px}.sk-cmp em.up{color:var(--sk-accent,var(--ok))}.sk-cmp em.dn{color:var(--fg-2)}
 .sk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;margin-bottom:16px}
 .sk-title{margin:0;font-size:15.5px;font-weight:450}
 .sk-title b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -248,6 +252,31 @@ body.night .screen{color:var(--fg-2)}
 .sclock{font-weight:300;font-size:clamp(84px,17vw,224px);line-height:.84;letter-spacing:-.065em;font-variant-numeric:tabular-nums}
 .sdate{font-family:var(--serif);font-style:italic;font-size:clamp(26px,3.4vw,46px);margin-top:12px;letter-spacing:-.01em}
 .schips{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+/* Standby-Kacheln: wichtigste Werte, Antippen öffnet die Seite */
+/* Uhr links unten, Kacheln rechts daneben; erst auf schmalen Bildschirmen darunter */
+.screen-in{flex-wrap:nowrap}
+.stiles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;width:min(480px,44vw)}
+@media (min-width:1600px){.stiles{grid-template-columns:repeat(3,minmax(150px,1fr));width:min(720px,46vw)}}
+@media (max-width:900px){.screen-in{flex-wrap:wrap}.stiles{width:100%}}
+.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:2px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
+.stile:active{transform:scale(.97)}
+.stile[hidden]{display:none}
+.stile svg{grid-row:1/4;width:24px;height:24px;color:var(--c,var(--fg-2))}
+.stile small{font-size:12.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stile b{font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.night .stile:not([data-night]){display:none}
+.stile .sbins{grid-row:1/4;display:flex;align-items:flex-end;gap:2px}
+.stile .sbins i{display:block}
+.stile svg.tonne{width:24px;height:28px;overflow:visible;transform-origin:50% 100%}
+.stile.soon svg.tonne{width:32px;height:37px}
+.stile.soon{grid-column:1/-1;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.stile.soon svg{width:30px;height:30px;color:var(--c)}
+.stile.soon b{font-size:28px}
+body.night .stile.soon{color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.stile.soon svg{animation:binwob 2.4s ease-in-out infinite}}
+@keyframes binwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-8deg)}86%{transform:rotate(6deg)}94%{transform:rotate(-3deg)}}
+body.night .stile{color:var(--fg-2)}
+@media (max-width:640px){.stiles{width:100%}.stile b{font-size:20px}}
 .schip{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 18px;border-radius:99px;font-size:15px;font-variant-numeric:tabular-nums;color:var(--fg)}
 body.night .schip{color:var(--fg-2)}
 .schip svg{width:19px;height:19px;color:var(--c,var(--fg-2))}
@@ -341,10 +370,47 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @media (max-width:640px){body:not(.idle) .cam{left:12px;right:12px;flex-direction:column;align-items:stretch}body:not(.idle) .cam .cframe{width:100%}}
 @media (prefers-reduced-motion:reduce){.cam{transition:opacity .3s}}
 
+/* Live-Bild im Bewegungs-Popup */
+.cam .cframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cam .cframe img[hidden],.cam .cframe canvas[hidden]{display:none}
+/* Batterien */
+.batts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+.batt{display:grid;grid-template-columns:minmax(0,1fr) 120px 64px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.batt b{font-weight:550;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.batt small{color:var(--fg-3);font-size:12px}
+.batt .bar{height:8px;border-radius:5px;background:var(--track);overflow:hidden}
+.batt .bar i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s var(--ease)}
+.batt .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg-2)}
+.batt.low .v{color:var(--c);font-weight:600}
+.batt.off{opacity:.55}
+@media (max-width:900px){.batts{grid-template-columns:minmax(0,1fr)}}
+/* Unwetter-Band unter der Navigation */
+.warnband{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 16px;border-radius:var(--r-m);background:color-mix(in srgb,var(--crit) 16%,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--crit) 60%,transparent);font-size:14px;animation:rise .7s var(--ease) both}
+.warnband b{font-weight:600}
+.warnband .ico{--c:var(--crit);flex:none}
 /* Wetter-Kachel */
 .wx-now{display:flex;align-items:baseline;gap:12px;margin:2px 0 4px}
 .wx-now b{font-size:44px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
 .wx-now span{font-size:16px;color:var(--fg-2)}
+.wx-now small{font-size:12.5px;color:var(--fg-2);margin-left:auto}
+/* Wetter über die volle Breite: oben jetzt + Werte, darunter 24 Stunden und 7 Tage (Open-Meteo) */
+.wx-top{display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:12px 40px;align-items:start}
+.wx-top .wx-now{flex-wrap:wrap}
+.wx-kv{grid-template-columns:repeat(3,max-content minmax(0,1fr));gap:9px 14px;align-self:center}
+.wx-kv dd{text-align:left}
+.wx-hours{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin:18px 0 8px;font-variant-numeric:tabular-nums}
+.wx-h{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--fg-2);min-width:0}
+.wx-h b{font-size:12.5px;font-weight:500;color:var(--fg)}
+.wx-h.n b{color:var(--fg-2)}
+.wx-h.m span{visibility:hidden}
+.wx-h i{display:block;width:6px;height:30px;border-radius:3px;background:linear-gradient(to top,var(--cool) calc(var(--p)*1%),color-mix(in srgb,var(--fg) 10%,transparent) 0)}
+.wx-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px;font-size:13px}
+.wx-days div{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 5%,transparent);min-width:0}
+.wx-days div.today{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 25%,transparent)}
+.wx-days b{font-weight:550}.wx-days span{color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx-days em{font-style:normal;font-variant-numeric:tabular-nums;font-size:15px}.wx-days small{color:var(--fg-2)}.wx-days small.wet{color:var(--cool)}
+@media (max-width:1000px){.wx-top{grid-template-columns:1fr}.wx-kv{grid-template-columns:repeat(2,max-content minmax(0,1fr))}.wx-days{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.wx-kv{grid-template-columns:minmax(0,1fr) auto}.wx-kv dd{text-align:right}.wx-hours{grid-template-columns:repeat(12,1fr)}.wx-h:nth-child(2n){display:none}.wx-h.m span{visibility:visible}.wx-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .wx-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .wx-kinds button{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--track);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .3s,color .3s}
 .wx-kinds button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
@@ -368,6 +434,16 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .mhint b{color:var(--fg);font-weight:550}
 @media (max-width:900px){.bins{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.bin,.bin.soon svg.tonne{animation:none}}
+
+/* Jahres-Skylines: + / − weitere Jahre */
+.sec-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.skyctl{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-2)}
+.skyctl .circ{width:30px;height:30px;font-size:17px;line-height:1}
+.skyctl .circ:disabled{opacity:.3;cursor:default;background:transparent;color:inherit}
+.skyctl span{min-width:56px;text-align:center}
+
+/* Im Live-Betrieb (NAS/Tablet) nur echte Bedienung: Test- und Demo-Knöpfe, Entwickler-Abschnitte aus */
+html.live .demo-only{display:none!important}
 
 .code{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;background:var(--track);color:var(--fg-2);word-break:break-all}
 /* Garage */
@@ -446,7 +522,18 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .cal .wd{font-size:11.5px;color:var(--fg-3);text-align:center;padding-bottom:2px}
 .cal .c{min-height:64px;border-radius:12px;padding:7px 7px 6px;background:color-mix(in srgb,var(--fg) 3%,transparent);display:flex;flex-direction:column;gap:3px;animation:rise .8s var(--ease) both;animation-delay:calc(var(--k)*12ms)}
 .cal .c>b{font-size:12.5px;font-weight:500;color:var(--fg-2);font-variant-numeric:tabular-nums}
-.cal .c.past{opacity:.38}
+.cal .c.past{opacity:.55}
+.cal .c.out{opacity:.25}
+.cal i.ok::before{content:"✓ ";font-weight:700}
+.cal i.ok small{font-weight:500;opacity:.85;margin-left:3px}
+.cal i.miss{background:transparent;color:var(--fg-3);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 70%,transparent);text-decoration:line-through}
+.cal i.extra{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.calnav{display:flex;align-items:center;gap:8px;margin:-4px 0 12px}
+.calnav b{font-size:15px;font-weight:550;min-width:150px;text-align:center}
+.calnav .circ{width:32px;height:32px}
+.calnav .btn{margin-left:auto;height:32px;padding:0 12px;font-size:13px}
+.calsum{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--fg-2);margin:12px 0 0}
+.calsum b{color:var(--fg);font-weight:550}
 .cal .c.today{box-shadow:inset 0 0 0 1.5px var(--fg)}
 .cal .c.today>b{color:var(--fg);font-weight:650}
 .cal .c.m1>b::after{content:attr(data-m);margin-left:4px;color:var(--fg-3);font-weight:400}
@@ -456,6 +543,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .leer button{width:26px;height:26px;border-radius:8px;border:0;cursor:pointer;font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums;background:var(--track);color:var(--fg-3);transition:background .3s,color .3s,transform .4s var(--spring)}
 .leer button[aria-pressed="true"]{background:var(--bin-rest);color:var(--bg)}
 .leer button:active{transform:scale(.9)}
+.leer button:disabled{cursor:default}.leer button.x{box-shadow:inset 0 0 0 1.5px var(--fg)}
 .lrow{display:flex;align-items:center;gap:14px;margin-bottom:6px}
 .lrow .nm{font-weight:550;font-size:15px}
 .lrow .st{font-size:12.5px;color:var(--fg-2)}
@@ -627,14 +715,16 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
   </div>
   <article class="glass tile s-8" style="--i:7">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Collection calendar</h2><span class="pill" data-tnext>–</span></div>
+    <div class="calnav"><button class="circ" type="button" data-calp aria-label="Previous month">‹</button><b data-calm>–</b><button class="circ" type="button" data-caln aria-label="Next month">›</button><button class="btn" type="button" data-cal0>Today</button></div>
     <div class="cal" data-cal></div>
+    <div class="calsum" data-calsum></div>
     <p class="small muted" style="margin:12px 0 0" data-psm></p>
   </article>
 
   <article class="glass tile s-4" style="--i:8">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-rest)"><svg><use href="#i-chart"/></svg></span>General waste fee</h2><span class="small muted" data-gjahr></span></div>
     <div class="lrow"><div class="ring" data-lring style="--c:var(--bin-rest)"></div><div><div class="nm" data-lnum>–</div><div class="st">12 collections are included in the annual fee</div></div></div>
-    <p class="small muted" style="margin:8px 0 4px">Put out (tap to change)</p>
+    <p class="small muted" style="margin:8px 0 4px" data-leerhint>Put out (tap to change)</p>
     <div class="leer" data-leer></div>
     <div class="tsize"><span>General waste <small class="muted">litres</small></span><span class="zw" data-size="rest"></span></div>
     <div class="tsize"><span>Food waste <small class="muted">litres</small></span><span class="zw" data-size="bio"></span></div>
@@ -1269,6 +1359,14 @@ function camScene(cv, opt = {}) {
   };
 }
 
+/* Standby-Kacheln: [Schlüssel, Icon, Farbe, Ziel-Seite(#Anker), auch nachts] */
+const STILES = [
+  ["pv", "sun", "--sun", "energie", false], ["batt", "byd", "--batt", "energie", true], ["home", "home", "--home", "energie", false],
+  ["ww", "drop", "--heat", "heizung", false], ["out", "thermo", "--cool", "zuhause", true], ["gar", "garage", "--ok", "einfahrt", true],
+  ["muell", "trash", "--fg-2", "einfahrt#tonnen", false],
+  ["wm", "washer", "--cool", "geraete", false], ["dr", "dryer", "--cool", "geraete", false], ["sp", "dish", "--cool", "geraete", false],
+];
+
 /* Wand-Tablet: Bildschirmschoner, Nachtmodus 22–06 Uhr, Alarm-Banner, Display wach halten */
 function initTablet() {
   const KEY = "glashaus.tablet";
@@ -1281,11 +1379,9 @@ function initTablet() {
     '<div class="tint" aria-hidden="true"></div>' +
     '<div class="screen" aria-hidden="true"><span class="shint" data-shint></span><div class="screen-in">' +
     '<div><div class="sclock" data-clock>00:00</div><div class="sdate" data-date></div></div>' +
-    '<div class="schips">' +
-    '<span class="schip glass" style="--c:var(--cool)"><svg><use href="#i-thermo"/></svg><span>9.4 °C outside</span></span>' +
-    '<span class="schip glass" data-sgar style="--c:var(--ok)"><svg><use href="#i-garage"/></svg><span>Garage closed</span></span>' +
-    '<span class="schip glass" style="--c:var(--batt)"><svg><use href="#i-byd"/></svg><span data-ssoc>Battery –</span></span>' +
-    "</div></div></div>" +
+    '<div class="schips"><div class="stiles">' + STILES.map(([k, ico, c, go, night]) =>
+      '<button class="stile glass" type="button" data-st="' + k + '" data-go="' + go + '"' + (night ? " data-night" : "") + ' style="--c:var(' + c + ')"><svg><use href="#i-' + ico + '"/></svg><small></small><b>–</b><small></small></button>').join("") +
+    "</div></div></div></div>" +
     '<div class="alarm glass" role="alert" aria-live="assertive"><span class="ico"><svg><use href="#i-bell"/></svg></span>' +
     '<div><b data-at></b><small data-ad></small></div><button class="btn" type="button" data-ack>Acknowledge</button></div>');
 
@@ -1295,9 +1391,9 @@ function initTablet() {
     '<div class="tcfg">' +
     '<div><h3>Screensaver</h3><div class="segs" data-seg="saver"><button type="button" data-v="30">30 s</button><button type="button" data-v="60">1 min</button><button type="button" data-v="300">5 min</button><button type="button" data-v="0">Off</button></div>' +
     '<div class="btns"><button class="btn" type="button" data-saver-now>Show now</button></div>' +
-    "<p>Left untouched, only the sculpture and clock remain. <b>Tap</b> opens the dashboard, <b>Swipe</b> plays with the shape.</p></div>" +
+    "<p>Left untouched, standby shows the clock and the key values. <b>Tap a tile</b> to open its page, otherwise a tap opens the dashboard, <b>Swipe</b> plays with the shape.</p></div>" +
     '<div><h3>Night mode</h3><div class="segs" data-seg="night"><button type="button" data-v="auto">22–06</button><button type="button" data-v="on">Always</button><button type="button" data-v="off">Off</button></div>' +
-    "<p>Dark and dimmed. After just <b>20 seconds</b> only clock, outdoor temperature, garage and battery remain.</p></div>" +
+    "<p>Dark and dimmed. After just <b>20 seconds</b> only clock, outdoor temperature, garage, battery and, the day before collection, the bin remain.</p></div>" +
     '<div><h3>Test alarm</h3><div class="btns"><button class="btn" type="button" data-alarm="info">Info</button><button class="btn" type="button" data-alarm="warn">Warning</button><button class="btn" type="button" data-alarm="crit">Critical</button></div>' +
     '<p>Levels as in the PV monitoring script. Critical turns the page red and keeps the display awake. <span data-wl></span></p>' +
     '<h3 style="margin-top:18px">Test call</h3><div class="btns"><button class="btn" type="button" data-calltest="oma">Grandpa calling</button><button class="btn" type="button" data-calltest="fremd">Unknown number</button></div>' +
@@ -1331,14 +1427,41 @@ function initTablet() {
 
   /* Bildschirmschoner */
   let idle = false, last = Date.now(), crit = false;
+  /* Standby-Kacheln: die wichtigsten Werte (Demo), Antippen öffnet die passende Seite */
+  const kw = (v) => de(Math.abs(v), Math.abs(v) < 10 ? 1 : 0) + " kW";
+  const tile = (k, top, val, sub, c) => { const b = $('[data-st="' + k + '"]'); if (!b) return; const sm = b.querySelectorAll("small");
+    sm[0].textContent = top; b.querySelector("b").textContent = val; sm[1].textContent = sub || ""; if (c) b.style.setProperty("--c", "var(" + c + ")"); };
   const status = () => {
-    $("[data-ssoc]").textContent = "Battery " + Math.round(D[nowIdx()].soc) + " %";
-    const g = window.GH_GARAGE || "zu", gc = $("[data-sgar]");
-    gc.style.setProperty("--c", g === "zu" ? "var(--ok)" : "var(--warn)");
-    gc.querySelector("span").textContent = "Garage " + ({ zu: "closed", offen: "open", oeffnet: "opening", schliesst: "closing" }[g] || g);
+    const e = D[nowIdx()];
+    tile("pv", "From the roof", e.pv < 0.05 ? "0 kW" : kw(e.pv), "today " + de(e.gen, 1) + " kWh", e.pv < 0.05 ? "--fg-2" : "--sun");
+    tile("batt", "Battery", Math.round(e.soc) + " %", e.batt > 0.05 ? "charging " + kw(e.batt) : e.batt < -0.05 ? "discharging " + kw(e.batt) : "ruht");
+    tile("home", "House", kw(e.home), e.grid > 0.05 ? "exporting " + kw(e.grid) : e.grid < -0.05 ? "Grid " + kw(e.grid) : "Grid idle", e.grid < -0.05 ? "--grid" : "--home");
+    tile("ww", "Hot water", "52 °C", "Tank top", "--heat");
+    tile("out", "Outdoor", "9.4 °C", "↓ 7°  ↑ 14° · Fair");
+    const g = window.GH_GARAGE || "zu";
+    tile("gar", "Garage", { zu: "closed", offen: "open", oeffnet: "opening", schliesst: "closing" }[g] || g, "Door", g === "zu" ? "--ok" : "--warn");
+    /* Müll: am Vortag und am Abfuhrtag vormittags groß hervorheben (auch im Nachtmodus), Symbol = Tonnen in ihren Farben */
+    const nx = TONNEN.map((x) => ({ x, d: muellNext(x.k) })).filter((o) => o.d).sort((a, b) => a.d - b.d)[0], mb = $('[data-st="muell"]');
+    if (nx) { const n = tageBis(nx.d), ts = muellAm(nx.d), all = ts.map((x) => x.n).join(", "), soon = n <= 1;
+      if (soon) tile("muell", n === 0 ? "Collection today" : "Collection tomorrow", all, n === 0 ? "Is the bin out?" : "put it out this evening");
+      else tile("muell", "Bins " + (n <= 2 ? inTagen(n) : fmtTag(nx.d)), all, "");
+      mb.style.setProperty("--c", soon ? ts[0].c : "var(--fg-2)"); mb.classList.toggle("soon", soon); mb.toggleAttribute("data-night", soon);
+      const key = ts.map((x) => x.k).join(); if (mb.dataset.bins !== key) { mb.dataset.bins = key;
+        mb.firstElementChild.outerHTML = '<span class="sbins">' + ts.map((x) => '<i style="--c:' + x.c + '">' + tonneSvg(x) + "</i>").join("") + "</span>"; } }
+    /* Hausgeräte: je Gerät eine Kachel, solange es läuft (Demo: Waschmaschine) */
+    const bis = new Date(Date.now() + 42 * 6e4).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    tile("wm", "Washing machine", "42 min left", "Cotton · 40 °C · until " + bis, "--cool");
+    ["dr", "sp"].forEach((k) => { $('[data-st="' + k + '"]').hidden = true; });
   };
+  /* Kachel antippen: passende Seite öffnen (Zuhause = nur aufwachen) */
+  const goTo = (page, hash) => { const a = $$(".nav .links a").find((x) => new RegExp("(^|/)" + (page === "zuhause" ? "index" : page) + "\\.html").test(x.getAttribute("href") || ""));
+    if (page === "zuhause" || !a || window.top !== window) { exit(); if (hash) $(hash)?.scrollIntoView({ block: "start" }); return; }
+    location.href = a.href.split("#")[0] + (hash || ""); };
   function enter() {
     if (idle || crit) return;
+    /* Standby ist immer die Zuhause-Seite: von anderen Seiten dorthin wechseln */
+    const home = $(".nav a.brand"), cur = $('.nav [aria-current="page"]');
+    if (cur && home && !/^#?$/.test(home.getAttribute("href") || "") && window.top === window && /^https?:/.test(home.href)) { location.href = home.href.split("#")[0] + "#standby"; return; }
     idle = true; scrollTo(0, 0); status(); clock();
     body.classList.add("idle"); $(".screen").setAttribute("aria-hidden", "false");
     SCULPT.place(); SCULPT.setAmbient(true, night ? 0.45 : 0.7);
@@ -1355,8 +1478,10 @@ function initTablet() {
   let down = null;
   const scr = $(".screen");
   scr.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
-  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return; if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) exit(); down = null; });
+  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return;
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
+  if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
   setInterval(() => {
     applyNight();
     if (idle) { status(); return; }
@@ -1527,9 +1652,11 @@ function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>>
 const YEAR = (function () {
   const today = new Date(), endMs = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   const r = rng(21), Y = { endMs, PV: [], USE: [], AUT: [], EXP: [], IMP: [] };
+  /* Demo-Tage ab 1. Januar vor drei Jahren, damit „+“ in der Jahres-Skyline Vorjahre zeigen kann */
+  const N = Math.round((endMs - Date.UTC(today.getFullYear() - 3, 0, 1)) / 864e5);
   let cloud = 0.5;
-  for (let i = 0; i < 371; i++) {
-    const ms = endMs - (370 - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
+  for (let i = 0; i <= N; i++) {
+    const ms = endMs - (N - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
     const doy = (ms - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5, s = (1 - Math.cos(2 * Math.PI * (doy - 172) / 365)) / 2;
     cloud = cloud * 0.55 + r() * 0.45;
     const w = Math.min(1, Math.max(0.05, 1.12 - cloud * 1.15));
@@ -1659,6 +1786,26 @@ function tonneSvg(t) {
     ? '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><path class="lid" d="M15 9 20 13 25 9 23 6 20 8 17 6Z"/><path class="body" d="M14 12Q20 9 26 12L33 38Q34 44 20 44 6 44 7 38Z"/><path class="line" d="M14 22Q20 25 27 21M11 32Q20 36 30 31"/></svg>'
     : '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><rect class="lid" x="4" y="4" width="32" height="6" rx="2"/><rect class="lid" x="15" y="1.5" width="10" height="3" rx="1.5"/><path class="body" d="M6 11H34L31.5 41H8.5Z"/><path class="line" d="M15 16 15.6 36M20 16V36M25 16 24.4 36"/><circle class="wheel" cx="11" cy="42" r="3.4"/></svg>';
 }
+
+/* Jahres-Skyline über mehrere Jahre: „+“ / „−“ (im Abschnittskopf, [data-skyctl]) legen je 12 Monate früher als weiteren
+   Streifen ins selbe Diagramm (Monat neben Monat), höchstens bis zum ersten Datum mit Werten. o = { key, first: "YYYY-MM-DD", build(el, st) → Skyline },
+   st = { n, lbl() }; die Anzahl merkt sich jede Seite im Browser */
+function skyStack(o) {
+  const ctl = $("[data-skyctl]"), K = "glashaus.skyjahre." + o.key;
+  const max = Math.max(1, Math.ceil((YEAR.endMs - Date.parse(o.first)) / (365.25 * 864e5) - 0.02));
+  const st = { n: 1, lbl: () => "in the last 12 months" };
+  try { st.n = Math.min(max, Math.max(1, +localStorage.getItem(K) || 1)); } catch (e) {}
+  const sky = o.build($("#sky"), st);
+  ctl.innerHTML = '<button class="circ" type="button" data-skym aria-label="Compare one year less">−</button><span data-skyn></span><button class="circ" type="button" data-skyp aria-label="Compare one more year">+</button>';
+  const sync = () => { $("[data-skyn]", ctl).textContent = st.n + (st.n > 1 ? " Jahre" : " Jahr"); $("[data-skym]", ctl).disabled = st.n <= 1; $("[data-skyp]", ctl).disabled = st.n >= max; try { localStorage.setItem(K, st.n); } catch (e) {} };
+  $("[data-skyp]", ctl).addEventListener("click", () => { if (st.n < max) { st.n++; sky.setYears(st.n); sync(); } });
+  $("[data-skym]", ctl).addEventListener("click", () => { if (st.n > 1) { st.n--; sky.setYears(st.n); sync(); } });
+  sync();
+}
+
+/* Version (README „Versionen“) – erscheint in der Fußzeile */
+const GLASHAUS_VERSION = "1.1.0";
+document.addEventListener("DOMContentLoaded", () => { const f = document.querySelector(".foot span"); if (f) f.textContent += " · v" + GLASHAUS_VERSION; });
 
 initSculpture('einfahrt');
 
@@ -1806,16 +1953,45 @@ const saveMV = () => { try { localStorage.setItem(MK, JSON.stringify(MV)); } cat
 const eur = v => '€' + de(v, 2);
 const restKosten = (L, n) => GEB.rest[L][0] + Math.max(0, n - 12) * GEB.rest[L][1];
 
+/* Leerungen (Chip am Behälter). Im echten Haus kommen sie aus dem Portal des Entsorgers ({rest,bio}: ["2026-10-20 06:58", …]),
+   in der Demo: Restmüll laut „rausgestellt“, Biotonne an jedem vergangenen Termin. Zuordnung: Leerung am Abfuhrtag oder bis 2 Tage danach. */
+const PORTAL = { rest: null, bio: null };
+const portalDemo = () => ({ rest: MV.raus.map(d => d + ' 09:30'), bio: MUELL.bio.filter(d => tageBis(d) < 0).map(d => iso(d) + ' 10:15') });
+const leerAll = () => { const D = portalDemo(); return { rest: PORTAL.rest || (false ? [] : D.rest), bio: PORTAL.bio || (false ? [] : D.bio) }; };
+function leerMatch(k) {
+  /* je Abfuhrtermin die passende Leerung; übrig gebliebene Leerungen ohne Termin als „extra“ */
+  const E = (leerAll()[k] || []).map(x => ({ d: tag12(new Date(x.slice(0, 10) + 'T12:00')), t: x.slice(11, 16), used: false })), hit = new Map();
+  MUELL[k].forEach(d => { const e = E.find(x => !x.used && x.d - tag12(d) >= 0 && x.d - tag12(d) <= 2 * 864e5); if (e) { e.used = true; hit.set(+tag12(d), e); } });
+  return { hit, extra: E.filter(x => !x.used), all: E };
+}
+let calOff = 0;
 function tonnenKal() {
-  const now = new Date(), mo = tag12(now); mo.setDate(mo.getDate() - (mo.getDay() + 6) % 7);
+  const now = new Date(), first = new Date(now.getFullYear(), now.getMonth() + calOff, 1, 12), mo = new Date(first); mo.setDate(1 - (first.getDay() + 6) % 7);
+  const hasPortal = !!(PORTAL.rest || PORTAL.bio) || !false, M = { rest: leerMatch('rest'), bio: leerMatch('bio') };
+  /* Nach der letzten Leerung im Portal (plus 2 Tage) ist unklar, ob geleert wurde: dort nichts durchstreichen */
+  const lastAny = ['rest', 'bio'].flatMap(k => leerAll()[k]).sort().pop(), bis = false && lastAny ? +tag12(new Date(lastAny.slice(0, 10) + 'T12:00')) + 2 * 864e5 : Infinity;
+  $('[data-calm]').textContent = first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  $('[data-calp]').disabled = first.getFullYear() <= MUELL_Y && first.getMonth() === 0; $('[data-caln]').disabled = first.getFullYear() >= MUELL_Y && first.getMonth() === 11; $('[data-cal0]').hidden = !calOff;
   let h = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(w => '<span class="wd">' + w + '</span>').join('');
   for (let i = 0; i < 42; i++) {
     const d = new Date(mo); d.setDate(mo.getDate() + i);
-    const n = tageBis(d), ts = muellAm(d), psm = MUELL.psm.some(x => +x === +tag12(d));
-    h += '<div class="c' + (n < 0 ? ' past' : '') + (n === 0 ? ' today' : '') + (d.getDate() === 1 || i === 0 ? ' m1' : '') + '" style="--k:' + i + '"><b data-m="' + d.toLocaleDateString('en-GB', { month: 'short' }) + '">' + d.getDate() + '</b>' +
-      ts.map(t => '<i' + (t.k === 'gelb' ? ' class="y"' : '') + ' style="--c:' + t.c + '">' + t.kurz + '</i>').join('') + (psm ? '<i style="--c:var(--crit)">Hazardous waste</i>' : '') + '</div>';
+    const n = tageBis(d), ts = muellAm(d), psm = MUELL.psm.some(x => +x === +tag12(d)), out = d.getMonth() !== first.getMonth();
+    const chip = t => { const m = M[t.k], e = m && m.hit.get(+tag12(d));
+ if (m && hasPortal && n < 0 && (e || +tag12(d) <= bis)) return e ? '<i class="ok' + (t.k === 'gelb' ? ' y' : '') + '" style="--c:' + t.c + '" title="' + t.n + ' geleert ' + e.t + ' Uhr' + (+e.d !== +tag12(d) ? ' (' + fmtTag(e.d) + ')' : '') + '">' + t.kurz + '<small>' + e.t + '</small></i>'
+        : '<i class="miss" style="--c:' + t.c + '" title="' + t.n + ': not emptied (not put out)">' + t.kurz + '</i>';
+      return '<i' + (t.k === 'gelb' ? ' class="y"' : '') + ' style="--c:' + t.c + '">' + t.kurz + '</i>'; };
+    const extra = ['rest', 'bio'].flatMap(k => M[k].extra.filter(e => +e.d === +tag12(d)).map(e => { const t = TONNEN.find(x => x.k === k);
+      return '<i class="ok extra" style="--c:' + t.c + '" title="' + t.n + ' geleert ' + e.t + ' (no collection date in the calendar)">' + t.kurz + '<small>' + e.t + '</small></i>'; }));
+    h += '<div class="c' + (n < 0 ? ' past' : '') + (n === 0 ? ' today' : '') + (out ? ' out' : '') + '" style="--k:' + i + '"><b>' + d.getDate() + '</b>' +
+      ts.map(chip).join('') + extra.join('') + (psm ? '<i style="--c:var(--crit)">Hazardous waste</i>' : '') + '</div>';
   }
   $('[data-cal]').innerHTML = h;
+  /* Monat in Zahlen: Leerungen laut Portal */
+  const inM = e => e.d.getMonth() === first.getMonth() && e.d.getFullYear() === first.getFullYear();
+  const st = ['rest', 'bio'].map(k => { const t = TONNEN.find(x => x.k === k), geleert = M[k].all.filter(inM).length, termine = MUELL[k].filter(d => d.getMonth() === first.getMonth() && tageBis(d) < 0).length;
+    return '<span><i class="dot" style="--c:' + t.c + '"></i> ' + t.n + ': <b>' + geleert + '</b> von ' + termine + ' Terminen geleert</span>'; });
+  const last = ['rest', 'bio'].flatMap(k => leerAll()[k]).sort().pop();
+  $('[data-calsum]').innerHTML = (hasPortal ? st.join('') + '<span>✓ = geleert laut Chip' + (false ? ' · Portal zuletzt ' + (last ? fmtTag(new Date(last.slice(0, 10) + 'T12:00')) : '–') : ' (Demo)') + ' · struck through = not put out' + (bis < Infinity && bis < +tag12(new Date()) ? ' · no portal data after that yet' : '') + '</span>' : '<span>Collections from the portal appear once data is available.</span>');
   $('[data-tlegend]').innerHTML = TONNEN.map(t => '<span title="' + t.takt + '"><i class="dot" style="--c:' + t.c + '"></i>' + t.n + '</span>').join('');
   const L = TONNEN.map(t => ({ ...t, d: muellNext(t.k) })).filter(t => t.d).sort((a, b) => a.d - b.d), nx = L[0];
   const tp = $('[data-tnext]');
@@ -1827,12 +2003,17 @@ function tonnenKal() {
 }
 
 function tonnenGeb() {
-  const vorbei = MUELL.rest.filter(d => tageBis(d) < 0), m = vorbei.filter(d => MV.raus.includes(iso(d))).length;
+  /* mit Portal-Daten: echte Leerungen zählen (auch ohne Termin), Größen aus dem Portal; sonst „rausgestellt“ von Hand */
+  const vorbei = MUELL.rest.filter(d => tageBis(d) < 0), P = PORTAL.rest, RM = P ? leerMatch('rest') : null;
+  const m = P ? RM.all.filter(e => e.d.getFullYear() === MUELL_Y).length : vorbei.filter(d => MV.raus.includes(iso(d))).length;
   const hoch = vorbei.length ? Math.round(m / vorbei.length * MUELL.rest.length) : 0;
   $('[data-gjahr]').textContent = MUELL_Y;
   ring($('[data-lring]'), m / 12, m + '/12');
   $('[data-lnum]').textContent = m + ' collections so far' + (m > 12 ? ' · ' + (m - 12) + ' extra' : '');
-  $('[data-leer]').innerHTML = vorbei.map(d => '<button type="button" data-raus="' + iso(d) + '" aria-pressed="' + MV.raus.includes(iso(d)) + '" title="' + fmtTag(d) + '">' + d.getDate() + '</button>').join('');
+  $('[data-leer]').innerHTML = vorbei.map(d => { const on = P ? RM.hit.has(+tag12(d)) : MV.raus.includes(iso(d));
+    return '<button type="button" data-raus="' + iso(d) + '" aria-pressed="' + on + '" title="' + fmtTag(d) + (P ? (on ? ' · geleert ' + RM.hit.get(+tag12(d)).t + ' Uhr' : ' · not emptied') : '') + '"' + (P ? ' disabled' : '') + '>' + d.getDate() + '</button>'; }).join('') +
+    (P ? RM.extra.map(e => '<button type="button" aria-pressed="true" class="x" title="' + fmtTag(e.d) + ' · geleert ' + e.t + ' (no collection date)" disabled>' + e.d.getDate() + '</button>').join('') : '');
+  $('[data-leerhint]').textContent = P ? 'Emptied according to the bin chip (waste company portal)' : 'Put out (tap to change)';
   [['rest', [40, 60, 80, 120, 240]], ['bio', [60, 120, 240]]].forEach(([k, sz]) => {
     $('[data-size="' + k + '"]').innerHTML = sz.map(l => '<button type="button" data-l="' + l + '" aria-pressed="' + (MV[k] === l) + '" style="--c:var(--bin-' + k + ')">' + l + '</button>').join(''); });
   const L = MV.rest, rest = restKosten(L, hoch), bio = GEB.bio[MV.bio];
@@ -1848,6 +2029,9 @@ function tonnenGeb() {
   else { tip.className = 'tip'; tip.innerHTML = 'The ' + L + '-litre bin is right: no other size would be cheaper for this amount.'; }
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('[data-calp]')) { calOff--; tonnenKal(); return; }
+  if (e.target.closest('[data-caln]')) { calOff++; tonnenKal(); return; }
+  if (e.target.closest('[data-cal0]')) { calOff = 0; tonnenKal(); return; }
   const r = e.target.closest('[data-raus]');
   if (r) { const d = r.dataset.raus; MV.raus = MV.raus.includes(d) ? MV.raus.filter(x => x !== d) : MV.raus.concat(d).sort(); saveMV(); tonnenGeb(); toast(MV.raus.includes(d) ? 'General waste ' + fmtTag(new Date(d + 'T12:00')) + ' put out' : 'Collection removed'); return; }
   const s = e.target.closest('[data-size] button');

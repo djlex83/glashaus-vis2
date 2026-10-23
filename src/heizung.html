@@ -212,7 +212,7 @@
   </article>
 
   <div class="s-12" id="jahr">
-    <div class="sec-h"><h2>Das Jahr in <span class="it">Wärme.</span></h2><span class="small">Tageswerte der letzten 12 Monate</span></div>
+    <div class="sec-h"><h2>Das Jahr in <span class="it">Wärme.</span></h2><div class="sec-r"><span class="small">Tageswerte der letzten 12 Monate</span><span class="skyctl" data-skyctl></span></div></div>
   </div>
   <article class="glass tile s-12" style="--i:2"><div id="sky"></div></article>
 
@@ -312,12 +312,13 @@ setInterval(pump,1000);setInterval(()=>{solar();timeline()},60000);
 const r2=rng(5),HOT=[],BURN=[],CIRC=[];
 YEAR.PV.forEach(d=>{const sun=d.value/64,top=Math.min(74,41+sun*40+(r2()-.5)*3),b=top>=50?0:Math.max(0,Math.round((50-top)/3+r2()*1.5));
   HOT.push({date:d.date,value:Math.round(top)});BURN.push({date:d.date,value:b});CIRC.push({date:d.date,value:(top>=50?32:16)*9-Math.round(r2()*18)})});
-GlasSkyline($('#sky'),{endMs:YEAR.endMs,locale:'de-DE',weekStart:1,datasets:[
+/* „+“ / „−“ legt Vorjahre als Streifen ins selbe Diagramm */
+skyStack({key:'heizung',first:HOT[0].date,build:(el,st)=>GlasSkyline(el,{endMs:YEAR.endMs,years:st.n,locale:'de-DE',weekStart:1,datasets:[
   {label:'Speicher max',unit:'°C',decimals:0,totalLabel:'Ø Tageshöchstwert',totalUnit:'°C',totalIsMean:true,streakLabel:'über 55 °C',streakTest:v=>v>=55,data:HOT,palette:PAL.sun,
    title:(s,nf)=>'<b>Ø '+nf.format(s.total/371)+' °C</b> Speicher-Höchstwert pro Tag'},
   {label:'Brenner',unit:'Ladungen',decimals:0,totalLabel:'Brennerladungen',totalUnit:'Ladungen',streakLabel:'ohne Brenner',streakTest:v=>v===0,data:BURN,palette:PAL.violet,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' Ladungen</b> durch den Gasbrenner'},
   {label:'Zirkulation',unit:'min',decimals:0,totalLabel:'Laufzeit',totalUnit:'min',streakLabel:'Sonnenmodus',streakTest:v=>v>200,data:CIRC,palette:PAL.blue,
    title:(s,nf)=>'<b>'+nf.format(Math.round(s.total/60))+' h</b> Laufzeit der Zirkulationspumpe'}
-]});
+]})});
 </script>

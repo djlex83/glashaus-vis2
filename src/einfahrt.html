@@ -83,7 +83,18 @@
 .cal .wd{font-size:11.5px;color:var(--fg-3);text-align:center;padding-bottom:2px}
 .cal .c{min-height:64px;border-radius:12px;padding:7px 7px 6px;background:color-mix(in srgb,var(--fg) 3%,transparent);display:flex;flex-direction:column;gap:3px;animation:rise .8s var(--ease) both;animation-delay:calc(var(--k)*12ms)}
 .cal .c>b{font-size:12.5px;font-weight:500;color:var(--fg-2);font-variant-numeric:tabular-nums}
-.cal .c.past{opacity:.38}
+.cal .c.past{opacity:.55}
+.cal .c.out{opacity:.25}
+.cal i.ok::before{content:"✓ ";font-weight:700}
+.cal i.ok small{font-weight:500;opacity:.85;margin-left:3px}
+.cal i.miss{background:transparent;color:var(--fg-3);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 70%,transparent);text-decoration:line-through}
+.cal i.extra{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.calnav{display:flex;align-items:center;gap:8px;margin:-4px 0 12px}
+.calnav b{font-size:15px;font-weight:550;min-width:150px;text-align:center}
+.calnav .circ{width:32px;height:32px}
+.calnav .btn{margin-left:auto;height:32px;padding:0 12px;font-size:13px}
+.calsum{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--fg-2);margin:12px 0 0}
+.calsum b{color:var(--fg);font-weight:550}
 .cal .c.today{box-shadow:inset 0 0 0 1.5px var(--fg)}
 .cal .c.today>b{color:var(--fg);font-weight:650}
 .cal .c.m1>b::after{content:attr(data-m);margin-left:4px;color:var(--fg-3);font-weight:400}
@@ -93,6 +104,7 @@
 .leer button{width:26px;height:26px;border-radius:8px;border:0;cursor:pointer;font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums;background:var(--track);color:var(--fg-3);transition:background .3s,color .3s,transform .4s var(--spring)}
 .leer button[aria-pressed="true"]{background:var(--bin-rest);color:var(--bg)}
 .leer button:active{transform:scale(.9)}
+.leer button:disabled{cursor:default}.leer button.x{box-shadow:inset 0 0 0 1.5px var(--fg)}
 .lrow{display:flex;align-items:center;gap:14px;margin-bottom:6px}
 .lrow .nm{font-weight:550;font-size:15px}
 .lrow .st{font-size:12.5px;color:var(--fg-2)}
@@ -215,14 +227,16 @@
   </div>
   <article class="glass tile s-8" style="--i:7">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Abfuhrkalender</h2><span class="pill" data-tnext>–</span></div>
+    <div class="calnav"><button class="circ" type="button" data-calp aria-label="Monat zurück">‹</button><b data-calm>–</b><button class="circ" type="button" data-caln aria-label="Monat vor">›</button><button class="btn" type="button" data-cal0>Heute</button></div>
     <div class="cal" data-cal></div>
+    <div class="calsum" data-calsum></div>
     <p class="small muted" style="margin:12px 0 0" data-psm></p>
   </article>
 
   <article class="glass tile s-4" style="--i:8">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-rest)"><svg><use href="#i-chart"/></svg></span>Restmüll-Gebühr</h2><span class="small muted" data-gjahr></span></div>
     <div class="lrow"><div class="ring" data-lring style="--c:var(--bin-rest)"></div><div><div class="nm" data-lnum>–</div><div class="st">12 Leerungen sind in der Jahresgebühr enthalten</div></div></div>
-    <p class="small muted" style="margin:8px 0 4px">Rausgestellt (antippen zum Ändern)</p>
+    <p class="small muted" style="margin:8px 0 4px" data-leerhint>Rausgestellt (antippen zum Ändern)</p>
     <div class="leer" data-leer></div>
     <div class="tsize"><span>Restmüll <small class="muted">Liter</small></span><span class="zw" data-size="rest"></span></div>
     <div class="tsize"><span>Biotonne <small class="muted">Liter</small></span><span class="zw" data-size="bio"></span></div>
@@ -433,16 +447,45 @@ const saveMV = () => { try { localStorage.setItem(MK, JSON.stringify(MV)); } cat
 const eur = v => de(v, 2) + ' €';
 const restKosten = (L, n) => GEB.rest[L][0] + Math.max(0, n - 12) * GEB.rest[L][1];
 
+/* Leerungen (Chip am Behälter). Im echten Haus kommen sie aus dem Portal des Entsorgers ({rest,bio}: ["2026-10-20 06:58", …]),
+   in der Demo: Restmüll laut „rausgestellt“, Biotonne an jedem vergangenen Termin. Zuordnung: Leerung am Abfuhrtag oder bis 2 Tage danach. */
+const PORTAL = { rest: null, bio: null };
+const portalDemo = () => ({ rest: MV.raus.map(d => d + ' 09:30'), bio: MUELL.bio.filter(d => tageBis(d) < 0).map(d => iso(d) + ' 10:15') });
+const leerAll = () => { const D = portalDemo(); return { rest: PORTAL.rest || (false ? [] : D.rest), bio: PORTAL.bio || (false ? [] : D.bio) }; };
+function leerMatch(k) {
+  /* je Abfuhrtermin die passende Leerung; übrig gebliebene Leerungen ohne Termin als „extra“ */
+  const E = (leerAll()[k] || []).map(x => ({ d: tag12(new Date(x.slice(0, 10) + 'T12:00')), t: x.slice(11, 16), used: false })), hit = new Map();
+  MUELL[k].forEach(d => { const e = E.find(x => !x.used && x.d - tag12(d) >= 0 && x.d - tag12(d) <= 2 * 864e5); if (e) { e.used = true; hit.set(+tag12(d), e); } });
+  return { hit, extra: E.filter(x => !x.used), all: E };
+}
+let calOff = 0;
 function tonnenKal() {
-  const now = new Date(), mo = tag12(now); mo.setDate(mo.getDate() - (mo.getDay() + 6) % 7);
+  const now = new Date(), first = new Date(now.getFullYear(), now.getMonth() + calOff, 1, 12), mo = new Date(first); mo.setDate(1 - (first.getDay() + 6) % 7);
+  const hasPortal = !!(PORTAL.rest || PORTAL.bio) || !false, M = { rest: leerMatch('rest'), bio: leerMatch('bio') };
+  /* Nach der letzten Leerung im Portal (plus 2 Tage) ist unklar, ob geleert wurde: dort nichts durchstreichen */
+  const lastAny = ['rest', 'bio'].flatMap(k => leerAll()[k]).sort().pop(), bis = false && lastAny ? +tag12(new Date(lastAny.slice(0, 10) + 'T12:00')) + 2 * 864e5 : Infinity;
+  $('[data-calm]').textContent = first.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  $('[data-calp]').disabled = first.getFullYear() <= MUELL_Y && first.getMonth() === 0; $('[data-caln]').disabled = first.getFullYear() >= MUELL_Y && first.getMonth() === 11; $('[data-cal0]').hidden = !calOff;
   let h = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(w => '<span class="wd">' + w + '</span>').join('');
   for (let i = 0; i < 42; i++) {
     const d = new Date(mo); d.setDate(mo.getDate() + i);
-    const n = tageBis(d), ts = muellAm(d), psm = MUELL.psm.some(x => +x === +tag12(d));
-    h += '<div class="c' + (n < 0 ? ' past' : '') + (n === 0 ? ' today' : '') + (d.getDate() === 1 || i === 0 ? ' m1' : '') + '" style="--k:' + i + '"><b data-m="' + d.toLocaleDateString('de-DE', { month: 'short' }) + '">' + d.getDate() + '</b>' +
-      ts.map(t => '<i' + (t.k === 'gelb' ? ' class="y"' : '') + ' style="--c:' + t.c + '">' + t.kurz + '</i>').join('') + (psm ? '<i style="--c:var(--crit)">Problemstoffe</i>' : '') + '</div>';
+    const n = tageBis(d), ts = muellAm(d), psm = MUELL.psm.some(x => +x === +tag12(d)), out = d.getMonth() !== first.getMonth();
+    const chip = t => { const m = M[t.k], e = m && m.hit.get(+tag12(d));
+ if (m && hasPortal && n < 0 && (e || +tag12(d) <= bis)) return e ? '<i class="ok' + (t.k === 'gelb' ? ' y' : '') + '" style="--c:' + t.c + '" title="' + t.n + ' geleert ' + e.t + ' Uhr' + (+e.d !== +tag12(d) ? ' (' + fmtTag(e.d) + ')' : '') + '">' + t.kurz + '<small>' + e.t + '</small></i>'
+        : '<i class="miss" style="--c:' + t.c + '" title="' + t.n + ': keine Leerung (nicht rausgestellt)">' + t.kurz + '</i>';
+      return '<i' + (t.k === 'gelb' ? ' class="y"' : '') + ' style="--c:' + t.c + '">' + t.kurz + '</i>'; };
+    const extra = ['rest', 'bio'].flatMap(k => M[k].extra.filter(e => +e.d === +tag12(d)).map(e => { const t = TONNEN.find(x => x.k === k);
+      return '<i class="ok extra" style="--c:' + t.c + '" title="' + t.n + ' geleert ' + e.t + ' Uhr (ohne Abfuhrtermin im Kalender)">' + t.kurz + '<small>' + e.t + '</small></i>'; }));
+    h += '<div class="c' + (n < 0 ? ' past' : '') + (n === 0 ? ' today' : '') + (out ? ' out' : '') + '" style="--k:' + i + '"><b>' + d.getDate() + '</b>' +
+      ts.map(chip).join('') + extra.join('') + (psm ? '<i style="--c:var(--crit)">Problemstoffe</i>' : '') + '</div>';
   }
   $('[data-cal]').innerHTML = h;
+  /* Monat in Zahlen: Leerungen laut Portal */
+  const inM = e => e.d.getMonth() === first.getMonth() && e.d.getFullYear() === first.getFullYear();
+  const st = ['rest', 'bio'].map(k => { const t = TONNEN.find(x => x.k === k), geleert = M[k].all.filter(inM).length, termine = MUELL[k].filter(d => d.getMonth() === first.getMonth() && tageBis(d) < 0).length;
+    return '<span><i class="dot" style="--c:' + t.c + '"></i> ' + t.n + ': <b>' + geleert + '</b> von ' + termine + ' Terminen geleert</span>'; });
+  const last = ['rest', 'bio'].flatMap(k => leerAll()[k]).sort().pop();
+  $('[data-calsum]').innerHTML = (hasPortal ? st.join('') + '<span>✓ = geleert laut Chip' + (false ? ' · Portal zuletzt ' + (last ? fmtTag(new Date(last.slice(0, 10) + 'T12:00')) : '–') : ' (Demo)') + ' · durchgestrichen = nicht rausgestellt' + (bis < Infinity && bis < +tag12(new Date()) ? ' · danach meldet das Portal noch nichts' : '') + '</span>' : '<span>Leerungen laut Portal folgen, sobald Daten vorliegen.</span>');
   $('[data-tlegend]').innerHTML = TONNEN.map(t => '<span title="' + t.takt + '"><i class="dot" style="--c:' + t.c + '"></i>' + t.n + '</span>').join('');
   const L = TONNEN.map(t => ({ ...t, d: muellNext(t.k) })).filter(t => t.d).sort((a, b) => a.d - b.d), nx = L[0];
   const tp = $('[data-tnext]');
@@ -454,12 +497,17 @@ function tonnenKal() {
 }
 
 function tonnenGeb() {
-  const vorbei = MUELL.rest.filter(d => tageBis(d) < 0), m = vorbei.filter(d => MV.raus.includes(iso(d))).length;
+  /* mit Portal-Daten: echte Leerungen zählen (auch ohne Termin), Größen aus dem Portal; sonst „rausgestellt“ von Hand */
+  const vorbei = MUELL.rest.filter(d => tageBis(d) < 0), P = PORTAL.rest, RM = P ? leerMatch('rest') : null;
+  const m = P ? RM.all.filter(e => e.d.getFullYear() === MUELL_Y).length : vorbei.filter(d => MV.raus.includes(iso(d))).length;
   const hoch = vorbei.length ? Math.round(m / vorbei.length * MUELL.rest.length) : 0;
   $('[data-gjahr]').textContent = MUELL_Y;
   ring($('[data-lring]'), m / 12, m + '/12');
   $('[data-lnum]').textContent = m + ' Leerungen bisher' + (m > 12 ? ' · ' + (m - 12) + ' extra' : '');
-  $('[data-leer]').innerHTML = vorbei.map(d => '<button type="button" data-raus="' + iso(d) + '" aria-pressed="' + MV.raus.includes(iso(d)) + '" title="' + fmtTag(d) + '">' + d.getDate() + '</button>').join('');
+  $('[data-leer]').innerHTML = vorbei.map(d => { const on = P ? RM.hit.has(+tag12(d)) : MV.raus.includes(iso(d));
+    return '<button type="button" data-raus="' + iso(d) + '" aria-pressed="' + on + '" title="' + fmtTag(d) + (P ? (on ? ' · geleert ' + RM.hit.get(+tag12(d)).t + ' Uhr' : ' · nicht geleert') : '') + '"' + (P ? ' disabled' : '') + '>' + d.getDate() + '</button>'; }).join('') +
+    (P ? RM.extra.map(e => '<button type="button" aria-pressed="true" class="x" title="' + fmtTag(e.d) + ' · geleert ' + e.t + ' Uhr (ohne Termin)" disabled>' + e.d.getDate() + '</button>').join('') : '');
+  $('[data-leerhint]').textContent = P ? 'Geleert laut Chip (Portal des Entsorgers)' : 'Rausgestellt (antippen zum Ändern)';
   [['rest', [40, 60, 80, 120, 240]], ['bio', [60, 120, 240]]].forEach(([k, sz]) => {
     $('[data-size="' + k + '"]').innerHTML = sz.map(l => '<button type="button" data-l="' + l + '" aria-pressed="' + (MV[k] === l) + '" style="--c:var(--bin-' + k + ')">' + l + '</button>').join(''); });
   const L = MV.rest, rest = restKosten(L, hoch), bio = GEB.bio[MV.bio];
@@ -475,6 +523,9 @@ function tonnenGeb() {
   else { tip.className = 'tip'; tip.innerHTML = 'Die ' + L + '-L-Tonne passt: Eine andere Größe wäre bei dieser Menge nicht günstiger.'; }
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('[data-calp]')) { calOff--; tonnenKal(); return; }
+  if (e.target.closest('[data-caln]')) { calOff++; tonnenKal(); return; }
+  if (e.target.closest('[data-cal0]')) { calOff = 0; tonnenKal(); return; }
   const r = e.target.closest('[data-raus]');
   if (r) { const d = r.dataset.raus; MV.raus = MV.raus.includes(d) ? MV.raus.filter(x => x !== d) : MV.raus.concat(d).sort(); saveMV(); tonnenGeb(); toast(MV.raus.includes(d) ? 'Restmüll ' + fmtTag(new Date(d + 'T12:00')) + ' rausgestellt' : 'Leerung entfernt'); return; }
   const s = e.target.closest('[data-size] button');

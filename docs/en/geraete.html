@@ -187,6 +187,10 @@ pre.css{margin:0 0 10px;max-height:320px;overflow:auto;font-family:var(--mono);f
 .foot a:hover{color:var(--fg)}
 
 /* Skyline */
+.sk-cmp{display:flex;flex-wrap:wrap;gap:6px 18px;margin:-6px 2px 14px;font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.sk-cmp[hidden]{display:none}
+.sk-cmp b{color:var(--fg);font-weight:550;margin-right:4px}
+.sk-cmp em{font-style:normal;margin-left:4px}.sk-cmp em.up{color:var(--sk-accent,var(--ok))}.sk-cmp em.dn{color:var(--fg-2)}
 .sk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;margin-bottom:16px}
 .sk-title{margin:0;font-size:15.5px;font-weight:450}
 .sk-title b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -248,6 +252,31 @@ body.night .screen{color:var(--fg-2)}
 .sclock{font-weight:300;font-size:clamp(84px,17vw,224px);line-height:.84;letter-spacing:-.065em;font-variant-numeric:tabular-nums}
 .sdate{font-family:var(--serif);font-style:italic;font-size:clamp(26px,3.4vw,46px);margin-top:12px;letter-spacing:-.01em}
 .schips{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+/* Standby-Kacheln: wichtigste Werte, Antippen öffnet die Seite */
+/* Uhr links unten, Kacheln rechts daneben; erst auf schmalen Bildschirmen darunter */
+.screen-in{flex-wrap:nowrap}
+.stiles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;width:min(480px,44vw)}
+@media (min-width:1600px){.stiles{grid-template-columns:repeat(3,minmax(150px,1fr));width:min(720px,46vw)}}
+@media (max-width:900px){.screen-in{flex-wrap:wrap}.stiles{width:100%}}
+.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:2px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
+.stile:active{transform:scale(.97)}
+.stile[hidden]{display:none}
+.stile svg{grid-row:1/4;width:24px;height:24px;color:var(--c,var(--fg-2))}
+.stile small{font-size:12.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stile b{font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.night .stile:not([data-night]){display:none}
+.stile .sbins{grid-row:1/4;display:flex;align-items:flex-end;gap:2px}
+.stile .sbins i{display:block}
+.stile svg.tonne{width:24px;height:28px;overflow:visible;transform-origin:50% 100%}
+.stile.soon svg.tonne{width:32px;height:37px}
+.stile.soon{grid-column:1/-1;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.stile.soon svg{width:30px;height:30px;color:var(--c)}
+.stile.soon b{font-size:28px}
+body.night .stile.soon{color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.stile.soon svg{animation:binwob 2.4s ease-in-out infinite}}
+@keyframes binwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-8deg)}86%{transform:rotate(6deg)}94%{transform:rotate(-3deg)}}
+body.night .stile{color:var(--fg-2)}
+@media (max-width:640px){.stiles{width:100%}.stile b{font-size:20px}}
 .schip{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 18px;border-radius:99px;font-size:15px;font-variant-numeric:tabular-nums;color:var(--fg)}
 body.night .schip{color:var(--fg-2)}
 .schip svg{width:19px;height:19px;color:var(--c,var(--fg-2))}
@@ -341,10 +370,47 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @media (max-width:640px){body:not(.idle) .cam{left:12px;right:12px;flex-direction:column;align-items:stretch}body:not(.idle) .cam .cframe{width:100%}}
 @media (prefers-reduced-motion:reduce){.cam{transition:opacity .3s}}
 
+/* Live-Bild im Bewegungs-Popup */
+.cam .cframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cam .cframe img[hidden],.cam .cframe canvas[hidden]{display:none}
+/* Batterien */
+.batts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+.batt{display:grid;grid-template-columns:minmax(0,1fr) 120px 64px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.batt b{font-weight:550;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.batt small{color:var(--fg-3);font-size:12px}
+.batt .bar{height:8px;border-radius:5px;background:var(--track);overflow:hidden}
+.batt .bar i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s var(--ease)}
+.batt .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg-2)}
+.batt.low .v{color:var(--c);font-weight:600}
+.batt.off{opacity:.55}
+@media (max-width:900px){.batts{grid-template-columns:minmax(0,1fr)}}
+/* Unwetter-Band unter der Navigation */
+.warnband{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 16px;border-radius:var(--r-m);background:color-mix(in srgb,var(--crit) 16%,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--crit) 60%,transparent);font-size:14px;animation:rise .7s var(--ease) both}
+.warnband b{font-weight:600}
+.warnband .ico{--c:var(--crit);flex:none}
 /* Wetter-Kachel */
 .wx-now{display:flex;align-items:baseline;gap:12px;margin:2px 0 4px}
 .wx-now b{font-size:44px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
 .wx-now span{font-size:16px;color:var(--fg-2)}
+.wx-now small{font-size:12.5px;color:var(--fg-2);margin-left:auto}
+/* Wetter über die volle Breite: oben jetzt + Werte, darunter 24 Stunden und 7 Tage (Open-Meteo) */
+.wx-top{display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:12px 40px;align-items:start}
+.wx-top .wx-now{flex-wrap:wrap}
+.wx-kv{grid-template-columns:repeat(3,max-content minmax(0,1fr));gap:9px 14px;align-self:center}
+.wx-kv dd{text-align:left}
+.wx-hours{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin:18px 0 8px;font-variant-numeric:tabular-nums}
+.wx-h{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--fg-2);min-width:0}
+.wx-h b{font-size:12.5px;font-weight:500;color:var(--fg)}
+.wx-h.n b{color:var(--fg-2)}
+.wx-h.m span{visibility:hidden}
+.wx-h i{display:block;width:6px;height:30px;border-radius:3px;background:linear-gradient(to top,var(--cool) calc(var(--p)*1%),color-mix(in srgb,var(--fg) 10%,transparent) 0)}
+.wx-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px;font-size:13px}
+.wx-days div{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 5%,transparent);min-width:0}
+.wx-days div.today{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 25%,transparent)}
+.wx-days b{font-weight:550}.wx-days span{color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx-days em{font-style:normal;font-variant-numeric:tabular-nums;font-size:15px}.wx-days small{color:var(--fg-2)}.wx-days small.wet{color:var(--cool)}
+@media (max-width:1000px){.wx-top{grid-template-columns:1fr}.wx-kv{grid-template-columns:repeat(2,max-content minmax(0,1fr))}.wx-days{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.wx-kv{grid-template-columns:minmax(0,1fr) auto}.wx-kv dd{text-align:right}.wx-hours{grid-template-columns:repeat(12,1fr)}.wx-h:nth-child(2n){display:none}.wx-h.m span{visibility:visible}.wx-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .wx-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .wx-kinds button{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--track);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .3s,color .3s}
 .wx-kinds button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
@@ -368,6 +434,16 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .mhint b{color:var(--fg);font-weight:550}
 @media (max-width:900px){.bins{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.bin,.bin.soon svg.tonne{animation:none}}
+
+/* Jahres-Skylines: + / − weitere Jahre */
+.sec-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.skyctl{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-2)}
+.skyctl .circ{width:30px;height:30px;font-size:17px;line-height:1}
+.skyctl .circ:disabled{opacity:.3;cursor:default;background:transparent;color:inherit}
+.skyctl span{min-width:56px;text-align:center}
+
+/* Im Live-Betrieb (NAS/Tablet) nur echte Bedienung: Test- und Demo-Knöpfe, Entwickler-Abschnitte aus */
+html.live .demo-only{display:none!important}
 
 .slider{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;margin:0}
 .slider::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fg) var(--p,50%),var(--track) var(--p,50%))}
@@ -398,7 +474,9 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @keyframes bob{to{transform:translateY(-2.5px)}}
 .wm .knob{transition:transform 1.2s var(--spring);transform-box:fill-box;transform-origin:center}
 .wm .door{transition:transform 1.4s var(--spring);transform-box:view-box;transform-origin:20px 178px}
-.wm[data-state="open"] .door{transform:scaleX(.18) skewY(-6deg)}
+.wm[data-state="open"] .door{transform:scaleX(-.17) skewY(7deg)}
+.wm[data-state="open"] .door .glass{fill:rgba(150,165,180,.55)}
+.wm-fig svg{overflow:visible}
 .wm[data-state="done"] .ringglow{opacity:1;animation:rglow 2s ease-in-out infinite}
 .wm .ringglow{opacity:0;transition:opacity .6s}
 @keyframes rglow{50%{opacity:.35}}
@@ -432,6 +510,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 /* Trockner · Bosch WTX87M Serie 8 */
 :root{--dr-body:#f6f6f4;--dr-body2:#e3e4e2;--dr-chrome1:#ffffff;--dr-chrome2:#9da1a6}
 .dr .door{transform-origin:24px 152px}
+.dr[data-state="open"] #drlaundry{opacity:0;transition:opacity .8s .6s}
 .dr .warm{transition:opacity 1.6s,fill 1.6s}
 .dr .steam circle{animation:steam 3.2s ease-in infinite}
 @keyframes steam{0%{transform:translateY(0);opacity:0}25%{opacity:.7}100%{transform:translateY(-46px);opacity:0}}
@@ -1243,6 +1322,14 @@ function camScene(cv, opt = {}) {
   };
 }
 
+/* Standby-Kacheln: [Schlüssel, Icon, Farbe, Ziel-Seite(#Anker), auch nachts] */
+const STILES = [
+  ["pv", "sun", "--sun", "energie", false], ["batt", "byd", "--batt", "energie", true], ["home", "home", "--home", "energie", false],
+  ["ww", "drop", "--heat", "heizung", false], ["out", "thermo", "--cool", "zuhause", true], ["gar", "garage", "--ok", "einfahrt", true],
+  ["muell", "trash", "--fg-2", "einfahrt#tonnen", false],
+  ["wm", "washer", "--cool", "geraete", false], ["dr", "dryer", "--cool", "geraete", false], ["sp", "dish", "--cool", "geraete", false],
+];
+
 /* Wand-Tablet: Bildschirmschoner, Nachtmodus 22–06 Uhr, Alarm-Banner, Display wach halten */
 function initTablet() {
   const KEY = "glashaus.tablet";
@@ -1255,11 +1342,9 @@ function initTablet() {
     '<div class="tint" aria-hidden="true"></div>' +
     '<div class="screen" aria-hidden="true"><span class="shint" data-shint></span><div class="screen-in">' +
     '<div><div class="sclock" data-clock>00:00</div><div class="sdate" data-date></div></div>' +
-    '<div class="schips">' +
-    '<span class="schip glass" style="--c:var(--cool)"><svg><use href="#i-thermo"/></svg><span>9.4 °C outside</span></span>' +
-    '<span class="schip glass" data-sgar style="--c:var(--ok)"><svg><use href="#i-garage"/></svg><span>Garage closed</span></span>' +
-    '<span class="schip glass" style="--c:var(--batt)"><svg><use href="#i-byd"/></svg><span data-ssoc>Battery –</span></span>' +
-    "</div></div></div>" +
+    '<div class="schips"><div class="stiles">' + STILES.map(([k, ico, c, go, night]) =>
+      '<button class="stile glass" type="button" data-st="' + k + '" data-go="' + go + '"' + (night ? " data-night" : "") + ' style="--c:var(' + c + ')"><svg><use href="#i-' + ico + '"/></svg><small></small><b>–</b><small></small></button>').join("") +
+    "</div></div></div></div>" +
     '<div class="alarm glass" role="alert" aria-live="assertive"><span class="ico"><svg><use href="#i-bell"/></svg></span>' +
     '<div><b data-at></b><small data-ad></small></div><button class="btn" type="button" data-ack>Acknowledge</button></div>');
 
@@ -1269,9 +1354,9 @@ function initTablet() {
     '<div class="tcfg">' +
     '<div><h3>Screensaver</h3><div class="segs" data-seg="saver"><button type="button" data-v="30">30 s</button><button type="button" data-v="60">1 min</button><button type="button" data-v="300">5 min</button><button type="button" data-v="0">Off</button></div>' +
     '<div class="btns"><button class="btn" type="button" data-saver-now>Show now</button></div>' +
-    "<p>Left untouched, only the sculpture and clock remain. <b>Tap</b> opens the dashboard, <b>Swipe</b> plays with the shape.</p></div>" +
+    "<p>Left untouched, standby shows the clock and the key values. <b>Tap a tile</b> to open its page, otherwise a tap opens the dashboard, <b>Swipe</b> plays with the shape.</p></div>" +
     '<div><h3>Night mode</h3><div class="segs" data-seg="night"><button type="button" data-v="auto">22–06</button><button type="button" data-v="on">Always</button><button type="button" data-v="off">Off</button></div>' +
-    "<p>Dark and dimmed. After just <b>20 seconds</b> only clock, outdoor temperature, garage and battery remain.</p></div>" +
+    "<p>Dark and dimmed. After just <b>20 seconds</b> only clock, outdoor temperature, garage, battery and, the day before collection, the bin remain.</p></div>" +
     '<div><h3>Test alarm</h3><div class="btns"><button class="btn" type="button" data-alarm="info">Info</button><button class="btn" type="button" data-alarm="warn">Warning</button><button class="btn" type="button" data-alarm="crit">Critical</button></div>' +
     '<p>Levels as in the PV monitoring script. Critical turns the page red and keeps the display awake. <span data-wl></span></p>' +
     '<h3 style="margin-top:18px">Test call</h3><div class="btns"><button class="btn" type="button" data-calltest="oma">Grandpa calling</button><button class="btn" type="button" data-calltest="fremd">Unknown number</button></div>' +
@@ -1305,14 +1390,41 @@ function initTablet() {
 
   /* Bildschirmschoner */
   let idle = false, last = Date.now(), crit = false;
+  /* Standby-Kacheln: die wichtigsten Werte (Demo), Antippen öffnet die passende Seite */
+  const kw = (v) => de(Math.abs(v), Math.abs(v) < 10 ? 1 : 0) + " kW";
+  const tile = (k, top, val, sub, c) => { const b = $('[data-st="' + k + '"]'); if (!b) return; const sm = b.querySelectorAll("small");
+    sm[0].textContent = top; b.querySelector("b").textContent = val; sm[1].textContent = sub || ""; if (c) b.style.setProperty("--c", "var(" + c + ")"); };
   const status = () => {
-    $("[data-ssoc]").textContent = "Battery " + Math.round(D[nowIdx()].soc) + " %";
-    const g = window.GH_GARAGE || "zu", gc = $("[data-sgar]");
-    gc.style.setProperty("--c", g === "zu" ? "var(--ok)" : "var(--warn)");
-    gc.querySelector("span").textContent = "Garage " + ({ zu: "closed", offen: "open", oeffnet: "opening", schliesst: "closing" }[g] || g);
+    const e = D[nowIdx()];
+    tile("pv", "From the roof", e.pv < 0.05 ? "0 kW" : kw(e.pv), "today " + de(e.gen, 1) + " kWh", e.pv < 0.05 ? "--fg-2" : "--sun");
+    tile("batt", "Battery", Math.round(e.soc) + " %", e.batt > 0.05 ? "charging " + kw(e.batt) : e.batt < -0.05 ? "discharging " + kw(e.batt) : "ruht");
+    tile("home", "House", kw(e.home), e.grid > 0.05 ? "exporting " + kw(e.grid) : e.grid < -0.05 ? "Grid " + kw(e.grid) : "Grid idle", e.grid < -0.05 ? "--grid" : "--home");
+    tile("ww", "Hot water", "52 °C", "Tank top", "--heat");
+    tile("out", "Outdoor", "9.4 °C", "↓ 7°  ↑ 14° · Fair");
+    const g = window.GH_GARAGE || "zu";
+    tile("gar", "Garage", { zu: "closed", offen: "open", oeffnet: "opening", schliesst: "closing" }[g] || g, "Door", g === "zu" ? "--ok" : "--warn");
+    /* Müll: am Vortag und am Abfuhrtag vormittags groß hervorheben (auch im Nachtmodus), Symbol = Tonnen in ihren Farben */
+    const nx = TONNEN.map((x) => ({ x, d: muellNext(x.k) })).filter((o) => o.d).sort((a, b) => a.d - b.d)[0], mb = $('[data-st="muell"]');
+    if (nx) { const n = tageBis(nx.d), ts = muellAm(nx.d), all = ts.map((x) => x.n).join(", "), soon = n <= 1;
+      if (soon) tile("muell", n === 0 ? "Collection today" : "Collection tomorrow", all, n === 0 ? "Is the bin out?" : "put it out this evening");
+      else tile("muell", "Bins " + (n <= 2 ? inTagen(n) : fmtTag(nx.d)), all, "");
+      mb.style.setProperty("--c", soon ? ts[0].c : "var(--fg-2)"); mb.classList.toggle("soon", soon); mb.toggleAttribute("data-night", soon);
+      const key = ts.map((x) => x.k).join(); if (mb.dataset.bins !== key) { mb.dataset.bins = key;
+        mb.firstElementChild.outerHTML = '<span class="sbins">' + ts.map((x) => '<i style="--c:' + x.c + '">' + tonneSvg(x) + "</i>").join("") + "</span>"; } }
+    /* Hausgeräte: je Gerät eine Kachel, solange es läuft (Demo: Waschmaschine) */
+    const bis = new Date(Date.now() + 42 * 6e4).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    tile("wm", "Washing machine", "42 min left", "Cotton · 40 °C · until " + bis, "--cool");
+    ["dr", "sp"].forEach((k) => { $('[data-st="' + k + '"]').hidden = true; });
   };
+  /* Kachel antippen: passende Seite öffnen (Zuhause = nur aufwachen) */
+  const goTo = (page, hash) => { const a = $$(".nav .links a").find((x) => new RegExp("(^|/)" + (page === "zuhause" ? "index" : page) + "\\.html").test(x.getAttribute("href") || ""));
+    if (page === "zuhause" || !a || window.top !== window) { exit(); if (hash) $(hash)?.scrollIntoView({ block: "start" }); return; }
+    location.href = a.href.split("#")[0] + (hash || ""); };
   function enter() {
     if (idle || crit) return;
+    /* Standby ist immer die Zuhause-Seite: von anderen Seiten dorthin wechseln */
+    const home = $(".nav a.brand"), cur = $('.nav [aria-current="page"]');
+    if (cur && home && !/^#?$/.test(home.getAttribute("href") || "") && window.top === window && /^https?:/.test(home.href)) { location.href = home.href.split("#")[0] + "#standby"; return; }
     idle = true; scrollTo(0, 0); status(); clock();
     body.classList.add("idle"); $(".screen").setAttribute("aria-hidden", "false");
     SCULPT.place(); SCULPT.setAmbient(true, night ? 0.45 : 0.7);
@@ -1329,8 +1441,10 @@ function initTablet() {
   let down = null;
   const scr = $(".screen");
   scr.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
-  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return; if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) exit(); down = null; });
+  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return;
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
+  if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
   setInterval(() => {
     applyNight();
     if (idle) { status(); return; }
@@ -1501,9 +1615,11 @@ function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>>
 const YEAR = (function () {
   const today = new Date(), endMs = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   const r = rng(21), Y = { endMs, PV: [], USE: [], AUT: [], EXP: [], IMP: [] };
+  /* Demo-Tage ab 1. Januar vor drei Jahren, damit „+“ in der Jahres-Skyline Vorjahre zeigen kann */
+  const N = Math.round((endMs - Date.UTC(today.getFullYear() - 3, 0, 1)) / 864e5);
   let cloud = 0.5;
-  for (let i = 0; i < 371; i++) {
-    const ms = endMs - (370 - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
+  for (let i = 0; i <= N; i++) {
+    const ms = endMs - (N - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
     const doy = (ms - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5, s = (1 - Math.cos(2 * Math.PI * (doy - 172) / 365)) / 2;
     cloud = cloud * 0.55 + r() * 0.45;
     const w = Math.min(1, Math.max(0.05, 1.12 - cloud * 1.15));
@@ -1634,6 +1750,26 @@ function tonneSvg(t) {
     : '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><rect class="lid" x="4" y="4" width="32" height="6" rx="2"/><rect class="lid" x="15" y="1.5" width="10" height="3" rx="1.5"/><path class="body" d="M6 11H34L31.5 41H8.5Z"/><path class="line" d="M15 16 15.6 36M20 16V36M25 16 24.4 36"/><circle class="wheel" cx="11" cy="42" r="3.4"/></svg>';
 }
 
+/* Jahres-Skyline über mehrere Jahre: „+“ / „−“ (im Abschnittskopf, [data-skyctl]) legen je 12 Monate früher als weiteren
+   Streifen ins selbe Diagramm (Monat neben Monat), höchstens bis zum ersten Datum mit Werten. o = { key, first: "YYYY-MM-DD", build(el, st) → Skyline },
+   st = { n, lbl() }; die Anzahl merkt sich jede Seite im Browser */
+function skyStack(o) {
+  const ctl = $("[data-skyctl]"), K = "glashaus.skyjahre." + o.key;
+  const max = Math.max(1, Math.ceil((YEAR.endMs - Date.parse(o.first)) / (365.25 * 864e5) - 0.02));
+  const st = { n: 1, lbl: () => "in the last 12 months" };
+  try { st.n = Math.min(max, Math.max(1, +localStorage.getItem(K) || 1)); } catch (e) {}
+  const sky = o.build($("#sky"), st);
+  ctl.innerHTML = '<button class="circ" type="button" data-skym aria-label="Compare one year less">−</button><span data-skyn></span><button class="circ" type="button" data-skyp aria-label="Compare one more year">+</button>';
+  const sync = () => { $("[data-skyn]", ctl).textContent = st.n + (st.n > 1 ? " Jahre" : " Jahr"); $("[data-skym]", ctl).disabled = st.n <= 1; $("[data-skyp]", ctl).disabled = st.n >= max; try { localStorage.setItem(K, st.n); } catch (e) {} };
+  $("[data-skyp]", ctl).addEventListener("click", () => { if (st.n < max) { st.n++; sky.setYears(st.n); sync(); } });
+  $("[data-skym]", ctl).addEventListener("click", () => { if (st.n > 1) { st.n--; sky.setYears(st.n); sync(); } });
+  sync();
+}
+
+/* Version (README „Versionen“) – erscheint in der Fußzeile */
+const GLASHAUS_VERSION = "1.1.0";
+document.addEventListener("DOMContentLoaded", () => { const f = document.querySelector(".foot span"); if (f) f.textContent += " · v" + GLASHAUS_VERSION; });
+
 initSculpture('geraete');
 const setP=el=>el.style.setProperty('--p',(el.value-el.min)/(el.max-el.min)*100+'%');
 $$('.slider').forEach(setP);document.addEventListener('input',e=>{if(e.target.classList.contains('slider'))setP(e.target)});
@@ -1670,9 +1806,8 @@ const WM=(function(){
     '<text x="190" y="9" font-size="3" fill="#7c7f84" text-anchor="end" data-dclock>12:00</text></g>'+
     '<circle cx="207" cy="11" r="3.2" fill="none" stroke="#c9cbce" stroke-width=".8"/><path d="M205.6 21.5l3 2-3 2z" fill="#c9cbce"/>'+
     '<circle cx="185" cy="283" r="17" fill="none" stroke="rgba(255,255,255,.1)"/>'+
-    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="92" fill="#232427" stroke="var(--wm-ring)" stroke-width="1.8"/>'+
-    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="92" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
-    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+6)+'" fill="#151618"/>'+
+    /* Öffnung mit Trommel bleibt im Gehäuse, die Tür schwenkt am linken Scharnier auf */
+    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+12)+'" fill="#1d1e21"/><circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+6)+'" fill="#151618"/>'+
     '<g clip-path="url(#wmC)"><rect x="'+(CX-RG)+'" y="'+(CY-RG)+'" width="'+2*RG+'" height="'+2*RG+'" fill="var(--wm-glass)"/>'+
       '<g id="wmdrum"><circle cx="'+CX+'" cy="'+CY+'" r="66" fill="#1b1c1f"/><g fill="#0d0e10">'+holes+'</g><circle cx="'+CX+'" cy="'+CY+'" r="14" fill="#232427"/>'+
         lift+'<g transform="rotate(120 '+CX+' '+CY+')">'+lift+'</g><g transform="rotate(240 '+CX+' '+CY+')">'+lift+'</g></g>'+
@@ -1680,6 +1815,10 @@ const WM=(function(){
       '<g class="water" id="wmwater" style="transform:translateY('+(CY+RG+4)+'px)"><g class="foam" id="wmfoam">'+foam+'</g>'+
         '<path class="wave wave2" d="'+wave+'" fill="rgba(120,175,225,.28)"/><path class="wave" d="'+wave+'" fill="rgba(140,190,235,.32)"/></g>'+
       '<circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="url(#wmG)"/>'+
+      '</g>'+
+    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="85" fill="none" stroke="#232427" stroke-width="14"/><circle cx="'+CX+'" cy="'+CY+'" r="92" fill="none" stroke="var(--wm-ring)" stroke-width="1.8"/>'+
+    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="92" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
+    '<g clip-path="url(#wmC)"><circle class="glass" cx="'+CX+'" cy="'+CY+'" r="'+(RG+6)+'" fill="rgba(150,170,190,.05)"/>'+
       '<path d="M'+(CX-52)+','+(CY-34)+' A62,62 0 0 1 '+(CX+14)+','+(CY-62)+'" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="5" stroke-linecap="round"/></g></g>';
   /* Phasenleiste */
   $('[data-phases]').innerHTML=PH.map(([n,m],i)=>'<div class="ph" data-i="'+i+'" style="flex:'+m+'"><i></i><span>'+n+'</span></div>').join('')+'<div class="ph" data-i="3" style="flex:12"><i></i><span>Done</span></div>';
@@ -1783,14 +1922,18 @@ const DR=(function(){
     '<text x="144" y="17" font-size="2.6" fill="#9a9da1" font-family="var(--font)">cupboard dry</text><rect x="144" y="18.5" width="17" height=".6" fill="#e33"/>'+
     '<text x="144" y="32" font-size="2.6" fill="#9a9da1" font-family="var(--font)">Signal · Anti-crease</text>'+
     '<text x="207" y="28" font-size="9" font-weight="500" fill="#fff" text-anchor="end" font-family="var(--font)" data-ddisp>1:25</text>'+
-    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="86" fill="url(#drC)" stroke="rgba(0,0,0,.12)"/><circle cx="'+CX+'" cy="'+CY+'" r="77" fill="#d9dbdd"/>'+
-    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="86" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
-    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+3)+'" fill="#55595e"/>'+
+    /* Öffnung mit Trommel bleibt im Gehäuse, die Tür (Chromring + Glas) schwenkt am linken Scharnier auf */
+    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+9)+'" fill="#cfd1d4" stroke="rgba(0,0,0,.14)"/><circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+3)+'" fill="#55595e"/>'+
     '<g clip-path="url(#drClip)"><g id="drdrum"><circle cx="'+CX+'" cy="'+CY+'" r="66" fill="url(#drD)"/><g fill="#6f7479" opacity=".55">'+holes+'</g>'+ribs+
       '<circle cx="'+CX+'" cy="'+CY+'" r="12" fill="url(#drC)" stroke="#8a8e93" stroke-width=".8"/><circle cx="'+CX+'" cy="'+CY+'" r="4.5" fill="#6d7176"/></g>'+
       '<rect class="warm" id="drwarm" x="'+(CX-RG)+'" y="'+(CY-RG)+'" width="'+2*RG+'" height="'+2*RG+'" fill="url(#drW)" style="--c:#ff9a4a"/>'+
       '<g id="drlaundry">'+laundry+'</g><g class="steam" id="drsteam">'+steam+'</g>'+
-      '<circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="url(#drG)"/><circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="rgba(70,74,80,.18)"/>'+
+      '<circle cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="url(#drG)"/></g>'+
+    '<g class="door"><circle cx="'+CX+'" cy="'+CY+'" r="77.5" fill="none" stroke="url(#drC)" stroke-width="17"/><circle cx="'+CX+'" cy="'+CY+'" r="73" fill="none" stroke="#d9dbdd" stroke-width="8"/>'+
+    '<circle cx="'+CX+'" cy="'+CY+'" r="86" fill="none" stroke="rgba(0,0,0,.14)"/>'+
+    '<circle class="ringglow" cx="'+CX+'" cy="'+CY+'" r="86" fill="none" stroke="var(--ok)" stroke-width="4" style="filter:drop-shadow(0 0 6px var(--ok))"/>'+
+    '<circle cx="'+CX+'" cy="'+CY+'" r="'+(RG+1.5)+'" fill="none" stroke="#55595e" stroke-width="3"/>'+
+    '<g clip-path="url(#drClip)"><circle class="glass" cx="'+CX+'" cy="'+CY+'" r="'+RG+'" fill="rgba(70,74,80,.18)"/>'+
       '<path d="M'+(CX-50)+','+(CY-30)+' A60,60 0 0 1 '+(CX+10)+','+(CY-60)+'" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>'+
       '<line x1="'+(CX-40)+'" y1="'+(CY+30)+'" x2="'+(CX+40)+'" y2="'+(CY+30)+'" stroke="#fff" stroke-opacity=".5" stroke-width=".7"/>'+
       '<text x="'+CX+'" y="'+(CY+43)+'" font-size="9.5" fill="#fff" fill-opacity=".92" text-anchor="middle" font-family="var(--font)">AutoClean</text></g></g>'+
@@ -1880,8 +2023,8 @@ const SP=(function(){
     '<rect x="'+(X0-6)+'" y="12" width="'+(X1-X0+12)+'" height="236" rx="3" fill="#d4d6d9"/>'+
     '<g clip-path="url(#spC)"><rect x="'+X0+'" y="16" width="'+(X1-X0)+'" height="226" fill="url(#spT)"/>'+
       '<rect class="heat" id="spheat" x="'+X0+'" y="16" width="'+(X1-X0)+'" height="226" fill="url(#spH)" style="opacity:0"/>'+
-      '<g class="dishes"><rect x="26" y="24" width="168" height="15" rx="2" fill="none" stroke="#8d9298" stroke-width="1.2"/>'+cutlery+
-        rack(70,116)+glasses+rack(150,226)+plates+'<g class="drops" id="spdrops">'+drops+'</g></g>'+
+      '<rect x="26" y="24" width="168" height="15" rx="2" fill="none" stroke="#8d9298" stroke-width="1.2"/>'+rack(70,116)+rack(150,226)+
+      '<g class="dishes">'+cutlery+glasses+plates+'<g class="drops" id="spdrops">'+drops+'</g></g>'+
       '<g id="sparm1"><rect x="40" y="124" width="140" height="4" rx="2" fill="#7f868d"/></g>'+
       '<g id="sparm2"><rect x="30" y="230" width="160" height="5" rx="2.5" fill="#7f868d"/></g>'+
       '<circle cx="110" cy="126" r="4" fill="#5f666d"/><circle cx="110" cy="232.5" r="5" fill="#5f666d"/>'+

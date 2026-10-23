@@ -170,6 +170,10 @@ pre.css{margin:0 0 10px;max-height:320px;overflow:auto;font-family:var(--mono);f
 .foot a:hover{color:var(--fg)}
 
 /* Skyline */
+.sk-cmp{display:flex;flex-wrap:wrap;gap:6px 18px;margin:-6px 2px 14px;font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.sk-cmp[hidden]{display:none}
+.sk-cmp b{color:var(--fg);font-weight:550;margin-right:4px}
+.sk-cmp em{font-style:normal;margin-left:4px}.sk-cmp em.up{color:var(--sk-accent,var(--ok))}.sk-cmp em.dn{color:var(--fg-2)}
 .sk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;margin-bottom:16px}
 .sk-title{margin:0;font-size:15.5px;font-weight:450}
 .sk-title b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -231,6 +235,31 @@ body.night .screen{color:var(--fg-2)}
 .sclock{font-weight:300;font-size:clamp(84px,17vw,224px);line-height:.84;letter-spacing:-.065em;font-variant-numeric:tabular-nums}
 .sdate{font-family:var(--serif);font-style:italic;font-size:clamp(26px,3.4vw,46px);margin-top:12px;letter-spacing:-.01em}
 .schips{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+/* Standby-Kacheln: wichtigste Werte, Antippen öffnet die Seite */
+/* Uhr links unten, Kacheln rechts daneben; erst auf schmalen Bildschirmen darunter */
+.screen-in{flex-wrap:nowrap}
+.stiles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;width:min(480px,44vw)}
+@media (min-width:1600px){.stiles{grid-template-columns:repeat(3,minmax(150px,1fr));width:min(720px,46vw)}}
+@media (max-width:900px){.screen-in{flex-wrap:wrap}.stiles{width:100%}}
+.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:2px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
+.stile:active{transform:scale(.97)}
+.stile[hidden]{display:none}
+.stile svg{grid-row:1/4;width:24px;height:24px;color:var(--c,var(--fg-2))}
+.stile small{font-size:12.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stile b{font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.night .stile:not([data-night]){display:none}
+.stile .sbins{grid-row:1/4;display:flex;align-items:flex-end;gap:2px}
+.stile .sbins i{display:block}
+.stile svg.tonne{width:24px;height:28px;overflow:visible;transform-origin:50% 100%}
+.stile.soon svg.tonne{width:32px;height:37px}
+.stile.soon{grid-column:1/-1;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.stile.soon svg{width:30px;height:30px;color:var(--c)}
+.stile.soon b{font-size:28px}
+body.night .stile.soon{color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.stile.soon svg{animation:binwob 2.4s ease-in-out infinite}}
+@keyframes binwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-8deg)}86%{transform:rotate(6deg)}94%{transform:rotate(-3deg)}}
+body.night .stile{color:var(--fg-2)}
+@media (max-width:640px){.stiles{width:100%}.stile b{font-size:20px}}
 .schip{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 18px;border-radius:99px;font-size:15px;font-variant-numeric:tabular-nums;color:var(--fg)}
 body.night .schip{color:var(--fg-2)}
 .schip svg{width:19px;height:19px;color:var(--c,var(--fg-2))}
@@ -324,10 +353,47 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @media (max-width:640px){body:not(.idle) .cam{left:12px;right:12px;flex-direction:column;align-items:stretch}body:not(.idle) .cam .cframe{width:100%}}
 @media (prefers-reduced-motion:reduce){.cam{transition:opacity .3s}}
 
+/* Live-Bild im Bewegungs-Popup */
+.cam .cframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cam .cframe img[hidden],.cam .cframe canvas[hidden]{display:none}
+/* Batterien */
+.batts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+.batt{display:grid;grid-template-columns:minmax(0,1fr) 120px 64px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.batt b{font-weight:550;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.batt small{color:var(--fg-3);font-size:12px}
+.batt .bar{height:8px;border-radius:5px;background:var(--track);overflow:hidden}
+.batt .bar i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s var(--ease)}
+.batt .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg-2)}
+.batt.low .v{color:var(--c);font-weight:600}
+.batt.off{opacity:.55}
+@media (max-width:900px){.batts{grid-template-columns:minmax(0,1fr)}}
+/* Unwetter-Band unter der Navigation */
+.warnband{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 16px;border-radius:var(--r-m);background:color-mix(in srgb,var(--crit) 16%,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--crit) 60%,transparent);font-size:14px;animation:rise .7s var(--ease) both}
+.warnband b{font-weight:600}
+.warnband .ico{--c:var(--crit);flex:none}
 /* Wetter-Kachel */
 .wx-now{display:flex;align-items:baseline;gap:12px;margin:2px 0 4px}
 .wx-now b{font-size:44px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
 .wx-now span{font-size:16px;color:var(--fg-2)}
+.wx-now small{font-size:12.5px;color:var(--fg-2);margin-left:auto}
+/* Wetter über die volle Breite: oben jetzt + Werte, darunter 24 Stunden und 7 Tage (Open-Meteo) */
+.wx-top{display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:12px 40px;align-items:start}
+.wx-top .wx-now{flex-wrap:wrap}
+.wx-kv{grid-template-columns:repeat(3,max-content minmax(0,1fr));gap:9px 14px;align-self:center}
+.wx-kv dd{text-align:left}
+.wx-hours{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin:18px 0 8px;font-variant-numeric:tabular-nums}
+.wx-h{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--fg-2);min-width:0}
+.wx-h b{font-size:12.5px;font-weight:500;color:var(--fg)}
+.wx-h.n b{color:var(--fg-2)}
+.wx-h.m span{visibility:hidden}
+.wx-h i{display:block;width:6px;height:30px;border-radius:3px;background:linear-gradient(to top,var(--cool) calc(var(--p)*1%),color-mix(in srgb,var(--fg) 10%,transparent) 0)}
+.wx-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px;font-size:13px}
+.wx-days div{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 5%,transparent);min-width:0}
+.wx-days div.today{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 25%,transparent)}
+.wx-days b{font-weight:550}.wx-days span{color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx-days em{font-style:normal;font-variant-numeric:tabular-nums;font-size:15px}.wx-days small{color:var(--fg-2)}.wx-days small.wet{color:var(--cool)}
+@media (max-width:1000px){.wx-top{grid-template-columns:1fr}.wx-kv{grid-template-columns:repeat(2,max-content minmax(0,1fr))}.wx-days{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.wx-kv{grid-template-columns:minmax(0,1fr) auto}.wx-kv dd{text-align:right}.wx-hours{grid-template-columns:repeat(12,1fr)}.wx-h:nth-child(2n){display:none}.wx-h.m span{visibility:visible}.wx-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .wx-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .wx-kinds button{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--track);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .3s,color .3s}
 .wx-kinds button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
@@ -351,3 +417,13 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .mhint b{color:var(--fg);font-weight:550}
 @media (max-width:900px){.bins{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.bin,.bin.soon svg.tonne{animation:none}}
+
+/* Jahres-Skylines: + / − weitere Jahre */
+.sec-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.skyctl{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-2)}
+.skyctl .circ{width:30px;height:30px;font-size:17px;line-height:1}
+.skyctl .circ:disabled{opacity:.3;cursor:default;background:transparent;color:inherit}
+.skyctl span{min-width:56px;text-align:center}
+
+/* Im Live-Betrieb (NAS/Tablet) nur echte Bedienung: Test- und Demo-Knöpfe, Entwickler-Abschnitte aus */
+html.live .demo-only{display:none!important}

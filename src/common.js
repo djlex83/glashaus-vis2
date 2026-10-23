@@ -436,6 +436,14 @@ function camScene(cv, opt = {}) {
   };
 }
 
+/* Standby-Kacheln: [Schlüssel, Icon, Farbe, Ziel-Seite(#Anker), auch nachts] */
+const STILES = [
+  ["pv", "sun", "--sun", "energie", false], ["batt", "byd", "--batt", "energie", true], ["home", "home", "--home", "energie", false],
+  ["ww", "drop", "--heat", "heizung", false], ["out", "thermo", "--cool", "zuhause", true], ["gar", "garage", "--ok", "einfahrt", true],
+  ["muell", "trash", "--fg-2", "einfahrt#tonnen", false],
+  ["wm", "washer", "--cool", "geraete", false], ["dr", "dryer", "--cool", "geraete", false], ["sp", "dish", "--cool", "geraete", false],
+];
+
 /* Wand-Tablet: Bildschirmschoner, Nachtmodus 22–06 Uhr, Alarm-Banner, Display wach halten */
 function initTablet() {
   const KEY = "glashaus.tablet";
@@ -448,11 +456,9 @@ function initTablet() {
     '<div class="tint" aria-hidden="true"></div>' +
     '<div class="screen" aria-hidden="true"><span class="shint" data-shint></span><div class="screen-in">' +
     '<div><div class="sclock" data-clock>00:00</div><div class="sdate" data-date></div></div>' +
-    '<div class="schips">' +
-    '<span class="schip glass" style="--c:var(--cool)"><svg><use href="#i-thermo"/></svg><span>9,4 °C außen</span></span>' +
-    '<span class="schip glass" data-sgar style="--c:var(--ok)"><svg><use href="#i-garage"/></svg><span>Garage zu</span></span>' +
-    '<span class="schip glass" style="--c:var(--batt)"><svg><use href="#i-byd"/></svg><span data-ssoc>Batterie –</span></span>' +
-    "</div></div></div>" +
+    '<div class="schips"><div class="stiles">' + STILES.map(([k, ico, c, go, night]) =>
+      '<button class="stile glass" type="button" data-st="' + k + '" data-go="' + go + '"' + (night ? " data-night" : "") + ' style="--c:var(' + c + ')"><svg><use href="#i-' + ico + '"/></svg><small></small><b>–</b><small></small></button>').join("") +
+    "</div></div></div></div>" +
     '<div class="alarm glass" role="alert" aria-live="assertive"><span class="ico"><svg><use href="#i-bell"/></svg></span>' +
     '<div><b data-at></b><small data-ad></small></div><button class="btn" type="button" data-ack>Quittieren</button></div>');
 
@@ -462,9 +468,9 @@ function initTablet() {
     '<div class="tcfg">' +
     '<div><h3>Bildschirmschoner</h3><div class="segs" data-seg="saver"><button type="button" data-v="30">30 s</button><button type="button" data-v="60">1 min</button><button type="button" data-v="300">5 min</button><button type="button" data-v="0">Aus</button></div>' +
     '<div class="btns"><button class="btn" type="button" data-saver-now>Jetzt zeigen</button></div>' +
-    "<p>Ohne Berührung bleibt nur die Skulptur mit Uhr. <b>Antippen</b> öffnet das Dashboard, <b>Wischen</b> spielt mit der Form.</p></div>" +
+    "<p>Ohne Berührung zeigt der Standby Uhr und die wichtigsten Werte. <b>Eine Kachel antippen</b> öffnet ihre Seite, sonst öffnet Antippen das Dashboard, <b>Wischen</b> spielt mit der Form.</p></div>" +
     '<div><h3>Nachtmodus</h3><div class="segs" data-seg="night"><button type="button" data-v="auto">22–06 Uhr</button><button type="button" data-v="on">Immer</button><button type="button" data-v="off">Aus</button></div>' +
-    "<p>Dunkel und gedimmt. Schon nach <b>20 Sekunden</b> nur noch Uhr, Außentemperatur, Garage und Batterie.</p></div>" +
+    "<p>Dunkel und gedimmt. Schon nach <b>20 Sekunden</b> nur noch Uhr, Außentemperatur, Garage, Batterie und am Vortag der Abfuhr die Mülltonne.</p></div>" +
     '<div><h3>Alarm testen</h3><div class="btns"><button class="btn" type="button" data-alarm="info">Info</button><button class="btn" type="button" data-alarm="warn">Warnung</button><button class="btn" type="button" data-alarm="crit">Kritisch</button></div>' +
     '<p>Stufen wie im PV-Überwachungsscript. Kritisch färbt die Seite rot und hält das Display wach. <span data-wl></span></p>' +
     '<h3 style="margin-top:18px">Anruf testen</h3><div class="btns"><button class="btn" type="button" data-calltest="oma">Opa ruft an</button><button class="btn" type="button" data-calltest="fremd">Unbekannte Nummer</button></div>' +
@@ -498,14 +504,41 @@ function initTablet() {
 
   /* Bildschirmschoner */
   let idle = false, last = Date.now(), crit = false;
+  /* Standby-Kacheln: die wichtigsten Werte (Demo), Antippen öffnet die passende Seite */
+  const kw = (v) => de(Math.abs(v), Math.abs(v) < 10 ? 1 : 0) + " kW";
+  const tile = (k, top, val, sub, c) => { const b = $('[data-st="' + k + '"]'); if (!b) return; const sm = b.querySelectorAll("small");
+    sm[0].textContent = top; b.querySelector("b").textContent = val; sm[1].textContent = sub || ""; if (c) b.style.setProperty("--c", "var(" + c + ")"); };
   const status = () => {
-    $("[data-ssoc]").textContent = "Batterie " + Math.round(D[nowIdx()].soc) + " %";
-    const g = window.GH_GARAGE || "zu", gc = $("[data-sgar]");
-    gc.style.setProperty("--c", g === "zu" ? "var(--ok)" : "var(--warn)");
-    gc.querySelector("span").textContent = "Garage " + ({ zu: "zu", offen: "offen", oeffnet: "öffnet", schliesst: "schließt" }[g] || g);
+    const e = D[nowIdx()];
+    tile("pv", "Vom Dach", e.pv < 0.05 ? "0 kW" : kw(e.pv), "heute " + de(e.gen, 1) + " kWh", e.pv < 0.05 ? "--fg-2" : "--sun");
+    tile("batt", "Batterie", Math.round(e.soc) + " %", e.batt > 0.05 ? "lädt " + kw(e.batt) : e.batt < -0.05 ? "entlädt " + kw(e.batt) : "ruht");
+    tile("home", "Haus", kw(e.home), e.grid > 0.05 ? "speist " + kw(e.grid) + " ein" : e.grid < -0.05 ? "Netz " + kw(e.grid) : "Netz ruht", e.grid < -0.05 ? "--grid" : "--home");
+    tile("ww", "Warmwasser", "52 °C", "Speicher oben", "--heat");
+    tile("out", "Außen", "9,4 °C", "↓ 7°  ↑ 14° · Heiter");
+    const g = window.GH_GARAGE || "zu";
+    tile("gar", "Garage", { zu: "zu", offen: "offen", oeffnet: "öffnet", schliesst: "schließt" }[g] || g, "Tor", g === "zu" ? "--ok" : "--warn");
+    /* Müll: am Vortag und am Abfuhrtag vormittags groß hervorheben (auch im Nachtmodus), Symbol = Tonnen in ihren Farben */
+    const nx = TONNEN.map((x) => ({ x, d: muellNext(x.k) })).filter((o) => o.d).sort((a, b) => a.d - b.d)[0], mb = $('[data-st="muell"]');
+    if (nx) { const n = tageBis(nx.d), ts = muellAm(nx.d), all = ts.map((x) => x.n).join(", "), soon = n <= 1;
+      if (soon) tile("muell", n === 0 ? "Heute Abfuhr" : "Morgen Abfuhr", all, n === 0 ? "Tonne steht draußen?" : "heute Abend rausstellen");
+      else tile("muell", "Müll " + (n <= 2 ? inTagen(n) : fmtTag(nx.d)), all, "");
+      mb.style.setProperty("--c", soon ? ts[0].c : "var(--fg-2)"); mb.classList.toggle("soon", soon); mb.toggleAttribute("data-night", soon);
+      const key = ts.map((x) => x.k).join(); if (mb.dataset.bins !== key) { mb.dataset.bins = key;
+        mb.firstElementChild.outerHTML = '<span class="sbins">' + ts.map((x) => '<i style="--c:' + x.c + '">' + tonneSvg(x) + "</i>").join("") + "</span>"; } }
+    /* Hausgeräte: je Gerät eine Kachel, solange es läuft (Demo: Waschmaschine) */
+    const bis = new Date(Date.now() + 42 * 6e4).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    tile("wm", "Waschmaschine", "noch 42 min", "Baumwolle · 40 °C · bis " + bis, "--cool");
+    ["dr", "sp"].forEach((k) => { $('[data-st="' + k + '"]').hidden = true; });
   };
+  /* Kachel antippen: passende Seite öffnen (Zuhause = nur aufwachen) */
+  const goTo = (page, hash) => { const a = $$(".nav .links a").find((x) => new RegExp("(^|/)" + (page === "zuhause" ? "index" : page) + "\\.html").test(x.getAttribute("href") || ""));
+    if (page === "zuhause" || !a || window.top !== window) { exit(); if (hash) $(hash)?.scrollIntoView({ block: "start" }); return; }
+    location.href = a.href.split("#")[0] + (hash || ""); };
   function enter() {
     if (idle || crit) return;
+    /* Standby ist immer die Zuhause-Seite: von anderen Seiten dorthin wechseln */
+    const home = $(".nav a.brand"), cur = $('.nav [aria-current="page"]');
+    if (cur && home && !/^#?$/.test(home.getAttribute("href") || "") && window.top === window && /^https?:/.test(home.href)) { location.href = home.href.split("#")[0] + "#standby"; return; }
     idle = true; scrollTo(0, 0); status(); clock();
     body.classList.add("idle"); $(".screen").setAttribute("aria-hidden", "false");
     SCULPT.place(); SCULPT.setAmbient(true, night ? 0.45 : 0.7);
@@ -522,8 +555,10 @@ function initTablet() {
   let down = null;
   const scr = $(".screen");
   scr.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
-  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return; if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) exit(); down = null; });
+  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return;
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
+  if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
   setInterval(() => {
     applyNight();
     if (idle) { status(); return; }
@@ -694,9 +729,11 @@ function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>>
 const YEAR = (function () {
   const today = new Date(), endMs = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   const r = rng(21), Y = { endMs, PV: [], USE: [], AUT: [], EXP: [], IMP: [] };
+  /* Demo-Tage ab 1. Januar vor drei Jahren, damit „+“ in der Jahres-Skyline Vorjahre zeigen kann */
+  const N = Math.round((endMs - Date.UTC(today.getFullYear() - 3, 0, 1)) / 864e5);
   let cloud = 0.5;
-  for (let i = 0; i < 371; i++) {
-    const ms = endMs - (370 - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
+  for (let i = 0; i <= N; i++) {
+    const ms = endMs - (N - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
     const doy = (ms - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5, s = (1 - Math.cos(2 * Math.PI * (doy - 172) / 365)) / 2;
     cloud = cloud * 0.55 + r() * 0.45;
     const w = Math.min(1, Math.max(0.05, 1.12 - cloud * 1.15));
@@ -826,3 +863,23 @@ function tonneSvg(t) {
     ? '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><path class="lid" d="M15 9 20 13 25 9 23 6 20 8 17 6Z"/><path class="body" d="M14 12Q20 9 26 12L33 38Q34 44 20 44 6 44 7 38Z"/><path class="line" d="M14 22Q20 25 27 21M11 32Q20 36 30 31"/></svg>'
     : '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><rect class="lid" x="4" y="4" width="32" height="6" rx="2"/><rect class="lid" x="15" y="1.5" width="10" height="3" rx="1.5"/><path class="body" d="M6 11H34L31.5 41H8.5Z"/><path class="line" d="M15 16 15.6 36M20 16V36M25 16 24.4 36"/><circle class="wheel" cx="11" cy="42" r="3.4"/></svg>';
 }
+
+/* Jahres-Skyline über mehrere Jahre: „+“ / „−“ (im Abschnittskopf, [data-skyctl]) legen je 12 Monate früher als weiteren
+   Streifen ins selbe Diagramm (Monat neben Monat), höchstens bis zum ersten Datum mit Werten. o = { key, first: "YYYY-MM-DD", build(el, st) → Skyline },
+   st = { n, lbl() }; die Anzahl merkt sich jede Seite im Browser */
+function skyStack(o) {
+  const ctl = $("[data-skyctl]"), K = "glashaus.skyjahre." + o.key;
+  const max = Math.max(1, Math.ceil((YEAR.endMs - Date.parse(o.first)) / (365.25 * 864e5) - 0.02));
+  const st = { n: 1, lbl: () => "in den letzten 12 Monaten" };
+  try { st.n = Math.min(max, Math.max(1, +localStorage.getItem(K) || 1)); } catch (e) {}
+  const sky = o.build($("#sky"), st);
+  ctl.innerHTML = '<button class="circ" type="button" data-skym aria-label="Ein Jahr weniger vergleichen">−</button><span data-skyn></span><button class="circ" type="button" data-skyp aria-label="Ein Jahr mehr vergleichen">+</button>';
+  const sync = () => { $("[data-skyn]", ctl).textContent = st.n + (st.n > 1 ? " Jahre" : " Jahr"); $("[data-skym]", ctl).disabled = st.n <= 1; $("[data-skyp]", ctl).disabled = st.n >= max; try { localStorage.setItem(K, st.n); } catch (e) {} };
+  $("[data-skyp]", ctl).addEventListener("click", () => { if (st.n < max) { st.n++; sky.setYears(st.n); sync(); } });
+  $("[data-skym]", ctl).addEventListener("click", () => { if (st.n > 1) { st.n--; sky.setYears(st.n); sync(); } });
+  sync();
+}
+
+/* Version (README „Versionen“) – erscheint in der Fußzeile */
+const GLASHAUS_VERSION = "1.1.0";
+document.addEventListener("DOMContentLoaded", () => { const f = document.querySelector(".foot span"); if (f) f.textContent += " · v" + GLASHAUS_VERSION; });

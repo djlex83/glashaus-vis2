@@ -172,15 +172,16 @@
     </ul>
   </article>
 
-  <article class="glass tile s-4" id="wetter" style="--i:5">
+  <article class="glass tile s-12" id="wetter" style="--i:5">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--cool)" data-wxico><svg><use href="#i-cloud"/></svg></span>Wetter</h2><span class="pill idle" data-wxsrc>Demo</span></div>
-    <div class="wx-now"><b data-wxt>–</b><span data-wxl>–</span></div>
-    <dl class="kv" data-wxkv></dl>
+    <div class="wx-top"><div class="wx-now"><b data-wxt>–</b><span data-wxl>–</span><small data-wxfeel></small></div><dl class="kv wx-kv" data-wxkv></dl></div>
+    <div class="wx-hours" data-wxhours aria-label="Die nächsten 24 Stunden"></div>
+    <div class="wx-days" data-wxdays aria-label="Die nächsten 7 Tage"></div>
     <div class="wx-kinds" role="group" aria-label="Wetter im Bild ausprobieren" data-wxkinds></div>
     <p class="small muted" style="margin:10px 0 0">Die Hauszeichnung oben zeigt das Wetter mit. Live aus <code>0_userdata.0.Wetter.motiv</code>.</p>
   </article>
 
-  <article class="glass tile s-8" id="muell" style="--i:6">
+  <article class="glass tile s-12" id="muell" style="--i:6">
     <div class="tile-h"><h2><span class="ico" style="--c:var(--bin-bio)"><svg><use href="#i-trash"/></svg></span>Müllabfuhr</h2><a class="pill info" href="__URL_EINFAHRT__#tonnen">Kalender &amp; Gebühr</a></div>
     <p class="mhint" data-mhint></p>
     <div class="bins" data-bins></div>
@@ -268,12 +269,26 @@ const wxDraw=()=>{const w=wxOf(wxCur(),wxNight());return (g,o)=>ART.zuhause(g,o,
 initSculpture('zuhause',wxDraw());
 function wetter(swap){const k=wxCur(),d=WXD[k],w=wxOf(k,wxNight());
   $('[data-wxt]').textContent=d[0]+' °C';$('[data-wxl]').textContent=w.label;
-  $('[data-wxkv]').innerHTML='<dt>Heute</dt><dd>'+d[2]+' bis '+d[3]+' °C</dd><dt>Regen heute</dt><dd>'+d[4]+' mm</dd><dt>Wind</dt><dd>'+d[5]+' km/h</dd>';
+  wxMore(d);
   $('[data-wxico]').innerHTML='<svg><use href="#i-'+(w.sky==='sun'?'sun':w.sky==='moon'?'moon':'cloud')+'"/></svg>';
   $('[data-wxico]').style.setProperty('--c',w.sky==='sun'?'var(--sun)':w.rain||w.snow?'var(--cool)':'var(--fg-2)');
   $('[data-wxkinds]').innerHTML=['auto'].concat(Object.keys(WXD)).map(x=>'<button type="button" data-wx="'+x+'" aria-pressed="'+(x===WXK)+'">'+(x==='auto'?'Jetzt':WX[x].label)+'</button>').join('');
   if(swap&&window.SCULPT&&SCULPT.setArt)SCULPT.setArt(wxDraw())}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(!b)return;WXK=b.dataset.wx;wetter(true);if(typeof summary==='function')summary(energy());toast('Hausbild: '+(WXK==='auto'?'aktuelles Wetter':WX[WXK].label)+' (Demo)')});
+/* Mehr Wetter (Demo; im echten Haus aus Open-Meteo): gefühlt, 24 Stunden, Werte, 7 Tage */
+const wxDemoH=()=>{const t0=new Date();t0.setMinutes(0,0,0);return Array.from({length:24},(_,i)=>{const t=t0.getTime()+i*36e5,h=new Date(t).getHours();
+  return{t,temp:Math.round((10+4.5*Math.sin((h-9)/24*2*Math.PI))*10)/10,regenP:[0,0,10,20,50,70,40,10][Math.floor(i/3)],tag:h>=8&&h<18}})};
+const wxDemoT=()=>[0,1,2,3,4,5,6].map(i=>{const d=new Date(Date.now()+i*864e5);return{datum:d.toISOString().slice(0,10),text:['Teils bewölkt','Schauer','Regen','Überwiegend klar','Klar','Bedeckt','Leichter Regen'][i],min:[7,6,8,5,4,7,8][i],max:[14,13,12,16,17,15,13][i],regenP:[20,80,90,10,0,30,60][i]}});
+function wxMore(d){
+  const H=wxDemoH(),T=wxDemoT(),wd=['So','Mo','Di','Mi','Do','Fr','Sa'];
+  $('[data-wxfeel]').textContent='gefühlt '+Math.round(d[0]-2)+' °C';
+  $('[data-wxhours]').innerHTML=H.slice(0,24).map((h,i)=>{const hr=new Date(h.t).getHours();
+    return '<div class="wx-h'+(h.tag?'':' n')+(i%3?' m':'')+'" title="'+String(hr).padStart(2,'0')+' Uhr · '+de(h.temp,1)+' °C · Regen '+(h.regenP||0)+' %"><b>'+Math.round(h.temp)+'°</b><i style="--p:'+(h.regenP||0)+'"></i><span>'+(i===0?'jetzt':String(hr).padStart(2,'0'))+'</span></div>'}).join('');
+  const kv=[['Heute',d[2]+' bis '+d[3]+' °C · Regen 20 %'],['Wind',d[5]+' km/h SW · Böen '+(d[5]+12)],['Feuchte · Druck','68 % · 1014 hPa'],['UV heute','2,8 · niedrig'],['Sonne','07:53 bis 18:18'],['Luft · Pollen','Gut · keine']];
+  $('[data-wxkv]').innerHTML=kv.map(([a,b])=>'<dt>'+a+'</dt><dd>'+b+'</dd>').join('');
+  $('[data-wxdays]').innerHTML=T.slice(0,7).map((t,i)=>{const dt=new Date(t.datum+'T12:00');
+    return '<div'+(i?'':' class="today"')+'><b>'+(i?wd[dt.getDay()]:'Heute')+'</b><span>'+t.text+'</span><em>'+Math.round(t.min)+'° / '+Math.round(t.max)+'°</em><small'+(t.regenP>=50?' class="wet"':'')+'>Regen '+t.regenP+' %</small></div>'}).join('');
+}
 wetter(false);
 
 function wire(el,kw,rev){el.classList.toggle('idle',Math.abs(kw)<.05);el.classList.toggle('rev',!!rev);el.style.setProperty('--dur',Math.max(.35,1.6/Math.max(.2,Math.abs(kw)))+'s')}

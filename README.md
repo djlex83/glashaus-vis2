@@ -30,11 +30,11 @@ Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhig
 
 | Seite | Inhalt |
 |---|---|
-| **Zuhause** (`index.html`) | Übersicht: Energie jetzt, Warmwasser, Szenen, Schalter, Hausgeräte, Meldungen, Wetter (zeichnet sich ins Hausbild), Müllabfuhr |
-| **Energie** | PV, Batterie, Netz, Jahres-Skyline in 3D, Wallboxen mit „Laden mit Sonne“ |
-| **Heizung** | Speicher, Zirkulation, Heizkreis, Räume |
+| **Zuhause** (`index.html`) | Übersicht: Energie jetzt, Warmwasser, Szenen, Schalter, Hausgeräte, Meldungen, Wetter über die volle Breite mit 24 Stunden und 7 Tagen (zeichnet sich ins Hausbild), Müllabfuhr |
+| **Energie** | PV, Batterie, Netz, Jahres-Skyline in 3D mit Vorjahren zum Vergleich (+/−), Wallboxen mit „Laden mit Sonne“ |
+| **Heizung** | Speicher, Zirkulation, Heizkreis, Räume, Wärmejahr mit Vorjahren |
 | **Geräte** | Waschmaschine, Trockner, Spülmaschine, Echos |
-| **Einfahrt** | Kamera mit Bewegungs-Popup, Autos, Fahrtenbuch, Garage, Besucher, Abfuhrkalender mit Restmüll-Gebühr |
+| **Einfahrt** | Kamera mit Bewegungs-Popup, Autos, Fahrtenbuch, Garage, Besucher, Abfuhrkalender zum Durchblättern mit Leerungen (✓ Uhrzeit, nicht rausgestellt durchgestrichen), Restmüll-Gebühr |
 | **Haus** | Isometrisches 3D-Modell aller Geschosse mit jedem Gerät, Geräteliste (Shelly, Zigbee, WLED) |
 | **Zimmer** | Jedes Zimmer in 3D mit Lampen, Heizung, Meldern; Einrichten-Modus zum Verschieben von Möbeln, Fenstern, Türen, Lampen |
 
@@ -45,6 +45,10 @@ Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhig
 | ![Energie](screenshots/energie.png) | ![Hell](screenshots/start-hell.png) |
 
 Hell und dunkel folgen dem System, oben rechts lässt es sich umschalten. Auf dem Wand-Tablet gibt es Bildschirmschoner, Nachtmodus und Anruf-/Bewegungs-Popups.
+
+**Standby:** Uhr links unten, rechts die wichtigsten Werte als Kacheln (Dach, Batterie, Haus, Warmwasser, Außen mit Tiefst-/Höchstwert, Garage, Müll, laufende Geräte). Antippen öffnet die passende Seite; am Vortag der Abfuhr leuchtet die Müll-Kachel in der Farbe der Tonne, auch nachts.
+
+![Standby](screenshots/standby.png)
 
 ## Schnellstart
 
@@ -92,6 +96,13 @@ Dieses Repository enthält bewusst **kein echtes Haus**: Grundriss, Hausansicht,
 ## Mitmachen
 
 Jeder darf das Projekt forken, verändern und Verbesserungen als Pull Request vorschlagen, siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Versionen
+
+| Version | Inhalt |
+|---|---|
+| 1.1.0 | Standby mit Info-Kacheln, Jahres-Skyline mit Vorjahren als Streifen, Wetter mit 24 Stunden und 7 Tagen, Abfuhrkalender mit Monaten und Leerungen, offene Türen bei Waschmaschine und Trockner, Version in der Fußzeile |
+| 1.0.0 | Erste Fassung: sieben Seiten, Beispielhaus, englische Oberfläche, Wetter im Hausbild |
 
 ## Lizenz
 

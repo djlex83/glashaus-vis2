@@ -287,7 +287,7 @@
   </article>
 
   <div class="s-12" id="jahr">
-    <div class="sec-h"><h2>Das Jahr in <span class="it">Zahlen.</span></h2><span class="small">Tageswerte der letzten 12 Monate</span></div>
+    <div class="sec-h"><h2>Das Jahr in <span class="it">Zahlen.</span></h2><div class="sec-r"><span class="small">Tageswerte der letzten 12 Monate</span><span class="skyctl" data-skyctl></span></div></div>
   </div>
   <article class="glass tile s-12" style="--i:2"><div id="sky"></div></article>
 
@@ -601,12 +601,13 @@ setInterval(()=>{for(let k=0;k<6;k++){const i=Math.floor(Math.random()*96);if(i=
 /* Wechselrichter: Netzfrequenz als Lebenszeichen */
 setInterval(()=>{tween($('[data-hz]'),50+(Math.random()-.5)*.05,2,'',600);tween($('[data-v]'),231+(Math.random()-.5)*2.4,1,'',600)},1500);
 
-GlasSkyline($('#sky'),{endMs:YEAR.endMs,locale:'de-DE',weekStart:1,datasets:[
+/* „+“ / „−“ legt Vorjahre als Streifen ins selbe Diagramm */
+skyStack({key:'energie',first:YEAR.PV[0].date,build:(el,st)=>GlasSkyline(el,{endMs:YEAR.endMs,years:st.n,locale:'de-DE',weekStart:1,datasets:[
   {label:'Sonnenertrag',unit:'kWh',decimals:1,totalLabel:'Jahresertrag',streakLabel:'über 25 kWh',streakTest:v=>v>=25,data:YEAR.PV,palette:PAL.sun,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> Sonnenertrag in den letzten 12 Monaten'},
   {label:'Einspeisung',unit:'kWh',decimals:1,totalLabel:'Eingespeist',streakLabel:'über 10 kWh',streakTest:v=>v>=10,data:YEAR.EXP,palette:PAL.violet,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> ins Netz eingespeist'},
   {label:'Netzbezug',unit:'kWh',decimals:1,totalLabel:'Bezogen',streakLabel:'unter 1 kWh',streakTest:v=>v<1,data:YEAR.IMP,palette:PAL.blue,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> aus dem Netz bezogen'}
-]});
+]})});
 </script>

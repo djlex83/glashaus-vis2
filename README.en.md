@@ -32,11 +32,11 @@ The interface comes in English and German (the German version is the default; **
 
 | Page | Content |
 |---|---|
-| **Home** (Zuhause, `index.html`) | Overview: energy now, hot water, scenes, switches, appliances, notifications, weather (drawn into the house picture), waste collection |
-| **Energy** (Energie) | PV, battery, grid, 3D yearly skyline, wallboxes with solar charging |
-| **Heating** (Heizung) | Hot-water tank, circulation pump, heating circuit, rooms |
+| **Home** (Zuhause, `index.html`) | Overview: energy now, hot water, scenes, switches, appliances, notifications, full-width weather with 24 hours and 7 days (drawn into the house picture), waste collection |
+| **Energy** (Energie) | PV, battery, grid, 3D yearly skyline with previous years for comparison (+/−), wallboxes with solar charging |
+| **Heating** (Heizung) | Hot-water tank, circulation pump, heating circuit, rooms, heating year with previous years |
 | **Appliances** (Geräte) | Washing machine, dryer, dishwasher, Echo speakers |
-| **Driveway** (Einfahrt) | Camera with motion pop-up, cars, logbook, garage, visitors, waste calendar with fee calculator |
+| **Driveway** (Einfahrt) | Camera with motion pop-up, cars, logbook, garage, visitors, waste calendar to browse by month with collections (✓ time, not put out struck through), fee calculator |
 | **House** (Haus) | Isometric 3D model of all floors with every device, device list (Shelly, Zigbee, WLED) |
 | **Rooms** (Zimmer) | Each room in 3D with lights, heating, motion sensors; edit mode to move furniture, windows, doors and lights |
 
@@ -47,6 +47,10 @@ The interface comes in English and German (the German version is the default; **
 | ![Energy](screenshots/energie.png) | ![Light theme](screenshots/start-hell.png) |
 
 Light and dark follow the system setting and can be toggled top right. On a wall tablet there is a screensaver, a night mode and pop-ups for calls and motion.
+
+**Standby:** clock bottom left, the key values as tiles on the right (roof, battery, house, hot water, outdoor with today's low/high, garage, bins, running appliances). Tapping a tile opens its page; the day before collection the bin tile lights up in the bin's colour, even at night.
+
+![Standby](screenshots/standby.png)
 
 ## Quick start
 
@@ -96,6 +100,13 @@ This repository deliberately contains **no real house**: floor plan, street view
 ## Contributing
 
 Anyone is welcome to fork the project, change it and propose improvements as a pull request, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Versions
+
+| Version | Changes |
+|---|---|
+| 1.1.0 | Standby with info tiles, yearly skyline with previous years as strips, weather with 24 hours and 7 days, waste calendar by month with collections, open doors on washer and dryer, version in the footer |
+| 1.0.0 | First release: seven pages, sample house, English interface, weather in the house picture |
 
 ## License
 

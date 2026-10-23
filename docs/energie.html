@@ -187,6 +187,10 @@ pre.css{margin:0 0 10px;max-height:320px;overflow:auto;font-family:var(--mono);f
 .foot a:hover{color:var(--fg)}
 
 /* Skyline */
+.sk-cmp{display:flex;flex-wrap:wrap;gap:6px 18px;margin:-6px 2px 14px;font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.sk-cmp[hidden]{display:none}
+.sk-cmp b{color:var(--fg);font-weight:550;margin-right:4px}
+.sk-cmp em{font-style:normal;margin-left:4px}.sk-cmp em.up{color:var(--sk-accent,var(--ok))}.sk-cmp em.dn{color:var(--fg-2)}
 .sk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;margin-bottom:16px}
 .sk-title{margin:0;font-size:15.5px;font-weight:450}
 .sk-title b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -248,6 +252,31 @@ body.night .screen{color:var(--fg-2)}
 .sclock{font-weight:300;font-size:clamp(84px,17vw,224px);line-height:.84;letter-spacing:-.065em;font-variant-numeric:tabular-nums}
 .sdate{font-family:var(--serif);font-style:italic;font-size:clamp(26px,3.4vw,46px);margin-top:12px;letter-spacing:-.01em}
 .schips{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+/* Standby-Kacheln: wichtigste Werte, Antippen öffnet die Seite */
+/* Uhr links unten, Kacheln rechts daneben; erst auf schmalen Bildschirmen darunter */
+.screen-in{flex-wrap:nowrap}
+.stiles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;width:min(480px,44vw)}
+@media (min-width:1600px){.stiles{grid-template-columns:repeat(3,minmax(150px,1fr));width:min(720px,46vw)}}
+@media (max-width:900px){.screen-in{flex-wrap:wrap}.stiles{width:100%}}
+.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:2px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
+.stile:active{transform:scale(.97)}
+.stile[hidden]{display:none}
+.stile svg{grid-row:1/4;width:24px;height:24px;color:var(--c,var(--fg-2))}
+.stile small{font-size:12.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stile b{font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.night .stile:not([data-night]){display:none}
+.stile .sbins{grid-row:1/4;display:flex;align-items:flex-end;gap:2px}
+.stile .sbins i{display:block}
+.stile svg.tonne{width:24px;height:28px;overflow:visible;transform-origin:50% 100%}
+.stile.soon svg.tonne{width:32px;height:37px}
+.stile.soon{grid-column:1/-1;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
+.stile.soon svg{width:30px;height:30px;color:var(--c)}
+.stile.soon b{font-size:28px}
+body.night .stile.soon{color:var(--fg)}
+@media (prefers-reduced-motion:no-preference){.stile.soon svg{animation:binwob 2.4s ease-in-out infinite}}
+@keyframes binwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-8deg)}86%{transform:rotate(6deg)}94%{transform:rotate(-3deg)}}
+body.night .stile{color:var(--fg-2)}
+@media (max-width:640px){.stiles{width:100%}.stile b{font-size:20px}}
 .schip{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 18px;border-radius:99px;font-size:15px;font-variant-numeric:tabular-nums;color:var(--fg)}
 body.night .schip{color:var(--fg-2)}
 .schip svg{width:19px;height:19px;color:var(--c,var(--fg-2))}
@@ -341,10 +370,47 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 @media (max-width:640px){body:not(.idle) .cam{left:12px;right:12px;flex-direction:column;align-items:stretch}body:not(.idle) .cam .cframe{width:100%}}
 @media (prefers-reduced-motion:reduce){.cam{transition:opacity .3s}}
 
+/* Live-Bild im Bewegungs-Popup */
+.cam .cframe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cam .cframe img[hidden],.cam .cframe canvas[hidden]{display:none}
+/* Batterien */
+.batts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+.batt{display:grid;grid-template-columns:minmax(0,1fr) 120px 64px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--track);font-size:13.5px}
+.batt b{font-weight:550;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.batt small{color:var(--fg-3);font-size:12px}
+.batt .bar{height:8px;border-radius:5px;background:var(--track);overflow:hidden}
+.batt .bar i{display:block;height:100%;border-radius:5px;background:var(--c);transition:width .8s var(--ease)}
+.batt .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg-2)}
+.batt.low .v{color:var(--c);font-weight:600}
+.batt.off{opacity:.55}
+@media (max-width:900px){.batts{grid-template-columns:minmax(0,1fr)}}
+/* Unwetter-Band unter der Navigation */
+.warnband{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 16px;border-radius:var(--r-m);background:color-mix(in srgb,var(--crit) 16%,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--crit) 60%,transparent);font-size:14px;animation:rise .7s var(--ease) both}
+.warnband b{font-weight:600}
+.warnband .ico{--c:var(--crit);flex:none}
 /* Wetter-Kachel */
 .wx-now{display:flex;align-items:baseline;gap:12px;margin:2px 0 4px}
 .wx-now b{font-size:44px;font-weight:550;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
 .wx-now span{font-size:16px;color:var(--fg-2)}
+.wx-now small{font-size:12.5px;color:var(--fg-2);margin-left:auto}
+/* Wetter über die volle Breite: oben jetzt + Werte, darunter 24 Stunden und 7 Tage (Open-Meteo) */
+.wx-top{display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:12px 40px;align-items:start}
+.wx-top .wx-now{flex-wrap:wrap}
+.wx-kv{grid-template-columns:repeat(3,max-content minmax(0,1fr));gap:9px 14px;align-self:center}
+.wx-kv dd{text-align:left}
+.wx-hours{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin:18px 0 8px;font-variant-numeric:tabular-nums}
+.wx-h{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--fg-2);min-width:0}
+.wx-h b{font-size:12.5px;font-weight:500;color:var(--fg)}
+.wx-h.n b{color:var(--fg-2)}
+.wx-h.m span{visibility:hidden}
+.wx-h i{display:block;width:6px;height:30px;border-radius:3px;background:linear-gradient(to top,var(--cool) calc(var(--p)*1%),color-mix(in srgb,var(--fg) 10%,transparent) 0)}
+.wx-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:14px;font-size:13px}
+.wx-days div{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 5%,transparent);min-width:0}
+.wx-days div.today{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 25%,transparent)}
+.wx-days b{font-weight:550}.wx-days span{color:var(--fg-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx-days em{font-style:normal;font-variant-numeric:tabular-nums;font-size:15px}.wx-days small{color:var(--fg-2)}.wx-days small.wet{color:var(--cool)}
+@media (max-width:1000px){.wx-top{grid-template-columns:1fr}.wx-kv{grid-template-columns:repeat(2,max-content minmax(0,1fr))}.wx-days{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.wx-kv{grid-template-columns:minmax(0,1fr) auto}.wx-kv dd{text-align:right}.wx-hours{grid-template-columns:repeat(12,1fr)}.wx-h:nth-child(2n){display:none}.wx-h.m span{visibility:visible}.wx-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .wx-kinds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 .wx-kinds button{height:28px;padding:0 11px;border-radius:99px;border:0;background:var(--track);color:var(--fg-2);font-size:12.5px;font-weight:500;cursor:pointer;transition:background .3s,color .3s}
 .wx-kinds button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
@@ -368,6 +434,16 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
 .mhint b{color:var(--fg);font-weight:550}
 @media (max-width:900px){.bins{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.bin,.bin.soon svg.tonne{animation:none}}
+
+/* Jahres-Skylines: + / − weitere Jahre */
+.sec-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.skyctl{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-2)}
+.skyctl .circ{width:30px;height:30px;font-size:17px;line-height:1}
+.skyctl .circ:disabled{opacity:.3;cursor:default;background:transparent;color:inherit}
+.skyctl span{min-width:56px;text-align:center}
+
+/* Im Live-Betrieb (NAS/Tablet) nur echte Bedienung: Test- und Demo-Knöpfe, Entwickler-Abschnitte aus */
+html.live .demo-only{display:none!important}
 
 /* Energiefluss */
 .flow{position:relative;width:100%;aspect-ratio:1000/620;max-width:100%}
@@ -699,7 +775,7 @@ body.idle.motion .screen-in{opacity:.12;filter:blur(6px)}
   </article>
 
   <div class="s-12" id="jahr">
-    <div class="sec-h"><h2>Das Jahr in <span class="it">Zahlen.</span></h2><span class="small">Tageswerte der letzten 12 Monate</span></div>
+    <div class="sec-h"><h2>Das Jahr in <span class="it">Zahlen.</span></h2><div class="sec-r"><span class="small">Tageswerte der letzten 12 Monate</span><span class="skyctl" data-skyctl></span></div></div>
   </div>
   <article class="glass tile s-12" style="--i:2"><div id="sky"></div></article>
 
@@ -988,11 +1064,12 @@ function buildGrid(data, endMs, weekStart, test) {
 
 function monthLabels(cells, weeks, locale) {
   const fmt = new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" });
-  const out = []; let prev = -1;
+  const out = []; let prev = -1, multi = weeks > 60;
   for (let w = 0; w < weeks; w++) {
     const c = cells[w * 7]; if (!c) break;
     const m = +c.date.slice(5, 7);
-    if (m !== prev) out.push({ week: w, label: fmt.format(dayMs(c.date)).replace(".", "") });
+    /* über mehrere Jahre: nur Quartale, Januar als Jahreszahl */
+    if (m !== prev && (!multi || m % 3 === 1)) out.push({ week: w, label: multi && m === 1 ? c.date.slice(0, 4) : fmt.format(dayMs(c.date)).replace(".", "") });
     prev = m;
   }
   if (out.length > 1 && out[1].week - out[0].week < 3) out.shift();
@@ -1002,7 +1079,7 @@ function monthLabels(cells, weeks, locale) {
 const ICON_GRID = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="9" y="9" width="5.5" height="5.5" rx="1" fill="currentColor"/></svg>';
 const ICON_CUBE = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.2 14.2 4.6v6.8L8 14.8 1.8 11.4V4.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M1.8 4.6 8 8l6.2-3.4M8 8v6.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
 
-/* opts: endMs, locale, weekStart, datasets: [{key,label,title,unit,decimals,palette:{light,dark},data:[{date,value}],
+/* opts: endMs, years (Anzahl Jahre als parallele Streifen, Standard 1), locale, weekStart, datasets: [{key,label,title,unit,decimals,palette:{light,dark},data:[{date,value}],
  *        streakLabel, streakTest(v), totalLabel, totalIsMean}] */
 window.GlasSkyline = function mount(root, opts) {
   const locale = opts.locale || "de-DE", weekStart = opts.weekStart ?? 1, duration = opts.duration || 1400;
@@ -1018,7 +1095,7 @@ window.GlasSkyline = function mount(root, opts) {
     '<div class="sk-toggle" role="group" aria-label="Ansicht"><span class="sk-knob" aria-hidden="true"></span>' +
     '<button type="button" data-v="2d" aria-label="Flache Heatmap" title="Flache Heatmap">' + ICON_GRID + "</button>" +
     '<button type="button" data-v="3d" aria-label="3D-Skyline" title="3D-Skyline">' + ICON_CUBE + "</button></div></div></header>" +
-    '<div class="sk-frame"><div class="sk-pad"><div class="sk-stage"><canvas tabindex="0" role="img"></canvas>' +
+    '<div class="sk-cmp" aria-live="polite"></div><div class="sk-frame"><div class="sk-pad"><div class="sk-stage"><canvas tabindex="0" role="img"></canvas>' +
     '<div class="sk-corner sk-tr"></div><div class="sk-corner sk-bl"></div></div>' +
     '<div class="sk-tip" role="tooltip" aria-hidden="true"><span></span><i></i></div></div>' +
     '<div class="sk-rowwrap"><div class="sk-row"></div></div>' +
@@ -1027,7 +1104,7 @@ window.GlasSkyline = function mount(root, opts) {
     '<p class="sk-sr" aria-live="polite"></p>';
   const $ = (s) => root.querySelector(s);
   const stage = $(".sk-stage"), canvas = $("canvas"), tip = $(".sk-tip"), ctx = canvas.getContext("2d");
-  const titleEl = $(".sk-title"), trEl = $(".sk-tr"), blEl = $(".sk-bl"), rowEl = $(".sk-row"), rowWrap = $(".sk-rowwrap");
+  const cmpEl = $(".sk-cmp"), titleEl = $(".sk-title"), trEl = $(".sk-tr"), blEl = $(".sk-bl"), rowEl = $(".sk-row"), rowWrap = $(".sk-rowwrap");
   const hintEl = $(".sk-hint"), sr = $(".sk-sr"), swatches = [...root.querySelectorAll(".sk-legend button")];
 
   let dsi = 0, ds = opts.datasets[0], model = null, view = opts.defaultView || "3d", legendLevel = -1, accent = "#000";
@@ -1046,8 +1123,21 @@ window.GlasSkyline = function mount(root, opts) {
   const describe = (i) => { const c = model.cells[i]; return c ? (c.v ? fmtV(c.v) : "Kein Wert") + " am " + dfl.format(dayMs(c.date)) : ""; };
 
   function computeModel() {
-    const g = buildGrid(ds.data, opts.endMs, weekStart, ds.streakTest);
+    /* mehrere Jahre: je 12 Monate (52 Wochen versetzt, damit Wochen und Monate übereinanderliegen) als eigener Streifen,
+       das jüngste vorn; Statistik oben bleibt beim jüngsten Jahr, Stufen und Höhen gelten für alle gemeinsam */
+    const N = Math.max(1, opts.years || 1), gs = [];
+    for (let k = 0; k < N; k++) gs.push(buildGrid(ds.data, opts.endMs - k * 364 * DAY, weekStart, ds.streakTest));
+    const g = gs[0];
     g.months = monthLabels(g.cells, g.weeks, locale);
+    g.N = N; g.rows = N * 8 - 1;
+    g.strips = gs.map((x, k) => ({ y: (N - 1 - k) * 8, total: x.stats.total, days: x.cells.length, first: x.stats.first, last: x.stats.last,
+      label: x.stats.first && x.stats.last ? x.stats.first.slice(2, 4) + "/" + x.stats.last.slice(2, 4) : "" }));
+    if (N > 1) {
+      const all = gs.flatMap((x, k) => x.cells.map((c) => Object.assign({}, c, { day: c.day + (N - 1 - k) * 8 })));
+      const nz = all.map((c) => c.v).filter((v) => v > 0).sort((a, b) => a - b), busy = nz.length ? nz[Math.floor(0.95 * (nz.length - 1))] : 0;
+      for (const c of all) c.level = levelOf(c.v, busy);
+      g.cells = all; g.max = nz.length ? nz[nz.length - 1] : 0;
+    }
     return g;
   }
 
@@ -1067,6 +1157,12 @@ window.GlasSkyline = function mount(root, opts) {
 
   function renderText() {
     const b = statBlocks();
+    if (model.N > 1) {
+      const nf0 = nfFor(0), val = (x) => (ds.totalIsMean ? x.total / Math.max(1, x.days) : x.total);
+      cmpEl.innerHTML = model.strips.map((x, k) => { const v = val(x), p = model.strips[k + 1], pv = p ? val(p) : 0, d = p && pv ? Math.round((v / pv - 1) * 100) : null;
+        return '<span><b>' + x.label + "</b> " + nf0.format(v) + " " + (ds.totalUnit || ds.unit) + (d !== null ? ' <em class="' + (d >= 0 ? "up" : "dn") + '">' + (d > 0 ? "+" : d < 0 ? "−" : "±") + Math.abs(d) + " %</em>" : "") + "</span>"; }).join("");
+      cmpEl.hidden = false;
+    } else { cmpEl.innerHTML = ""; cmpEl.hidden = true; }
     titleEl.innerHTML = ds.title(model.stats, nfFor(0));
     trEl.innerHTML = statHTML(b[0], "end") + statHTML(b[1], "end");
     blEl.innerHTML = statHTML(b[2], "start") + statHTML(b[3], "start");
@@ -1099,15 +1195,16 @@ window.GlasSkyline = function mount(root, opts) {
     for (let i = 0; i < n; i++) {
       const c = model.cells[i];
       wk[i] = c.week; dy[i] = c.day; lv[i] = c.level;
-      hFrom[i] = animate && prevN === n ? hgt[i] : barHeight(c.v, model.max);
-      hTo[i] = barHeight(c.v, model.max);
+      const hs = model.N > 1 ? 0.7 : 1;
+      hFrom[i] = animate && prevN === n ? hgt[i] : barHeight(c.v, model.max, hs);
+      hTo[i] = barHeight(c.v, model.max, hs);
       if (!animate || prevN !== n) hgt[i] = hTo[i];
     }
     blend = animate && prevN === n && !reduced ? 0 : 1;
     months = model.months;
     const wf = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
     weekdayRows = [];
-    for (let d = 0; d < 7 && d < n; d++) {
+    if (model.N === 1) for (let d = 0; d < 7 && d < n; d++) {
       const dow = new Date(dayMs(model.cells[d].date)).getUTCDay();
       if (dow === 1 || dow === 3 || dow === 5) weekdayRows.push({ day: d, label: wf.format(dayMs(model.cells[d].date)).replace(".", "") });
     }
@@ -1126,7 +1223,7 @@ window.GlasSkyline = function mount(root, opts) {
     for (let k = 0; k < 5; k++) for (let ch = 0; ch < 3; ch++) colGoal[k * 3 + ch] = all[k][ch];
     if (!colReady || reduced) { col.set(colGoal); colReady = true; }
     ctx.font = font;
-    labelW = Math.ceil(Math.max(20, ...weekdayRows.map((r) => ctx.measureText(r.label).width))) + 8;
+    labelW = Math.ceil(Math.max(20, ...weekdayRows.map((r) => ctx.measureText(r.label).width), ...(model && model.N > 1 ? model.strips.map((x) => ctx.measureText(x.label).width) : []))) + 8;
     const sw = all.map((c) => rgbS(c[0], c[1], c[2]));
     swatches.forEach((s, i) => (s.style.background = sw[i]));
     accent = sw[4];
@@ -1142,7 +1239,9 @@ window.GlasSkyline = function mount(root, opts) {
       const x0 = wk[i] + off, y0 = dy[i] + off, z = full ? Math.max(hgt[i], hTo[i]) * e : zs[i];
       add(x0, y0, z); add(x0 + w, y0, z); add(x0, y0 + w, z); add(x0 + w, y0 + w, 0); add(x0, y0 + w, 0); add(x0 + w, y0, 0);
     }
-    add(0, 7 + 1.5 * e, 0); add(weeks, 7 + 1.5 * e, 0);
+    const R = (model && model.rows) || 7;
+    add(0, R + 1.5 * e, 0); add(weeks, R + 1.5 * e, 0);
+    if (model && model.N > 1) for (const st of model.strips) add(-3 * e, st.y + 3.5, 0);  // Platz für die Jahreszahl links
     return { minx, maxx, miny, maxy };
   }
 
@@ -1213,11 +1312,14 @@ window.GlasSkyline = function mount(root, opts) {
       for (const m of months) { const x = px(m.week + off, -0.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + off, -0.3, 0) - 3); edge = x + tw + 6; }
       ctx.textAlign = "right"; ctx.textBaseline = "middle";
       if (gutter > 0) for (const r of weekdayRows) ctx.fillText(r.label, px(0, r.day + 0.5) - 6, py(0, r.day + 0.5, 0));
+      if (model.N > 1 && gutter > 0) for (const st of model.strips) ctx.fillText(st.label, px(0, st.y + 3.5) - 6, py(0, st.y + 3.5, 0));
     }
     if (a3 > 0.004) {
       ctx.fillStyle = mc(a3); ctx.textAlign = "left"; ctx.textBaseline = "top";
       let edge = -Infinity;
-      for (const m of months) { const x = px(m.week + 0.5, 7.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + 0.5, 7.3, 0) + 2); edge = x + tw + 10; }
+      const R = model.rows || 7;
+      for (const m of months) { const x = px(m.week + 0.5, R + 0.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + 0.5, R + 0.3, 0) + 2); edge = x + tw + 10; }
+      if (model.N > 1) { ctx.textAlign = "right"; ctx.textBaseline = "middle"; for (const st of model.strips) ctx.fillText(st.label, px(-0.4, st.y + 3.5), py(-0.4, st.y + 3.5, 0)); }
     }
     if (activeIdx >= 0 && activeIdx < n) {
       const i = activeIdx, z = zs[i] + hover[i] * lift, tx = px(wk[i] + 0.5, dy[i] + 0.5);
@@ -1361,7 +1463,9 @@ window.GlasSkyline = function mount(root, opts) {
   new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   reduceMq.addEventListener && reduceMq.addEventListener("change", () => { reduced = reduceMq.matches; kick(); });
   darkMq.addEventListener && darkMq.addEventListener("change", retheme);
-  return { replay() { t = 0; target = 0; setTarget(); kick(); } };
+  return { replay() { t = 0; target = 0; setTarget(); kick(); },
+    /* Zeitraum ändern: years × 12 Monate bis endMs, gleiches Diagramm */
+    setYears(y) { opts.years = y; load(true); relayout(); refreshActive(); kick(); } };
 };
 })();
 
@@ -1805,6 +1909,14 @@ function camScene(cv, opt = {}) {
   };
 }
 
+/* Standby-Kacheln: [Schlüssel, Icon, Farbe, Ziel-Seite(#Anker), auch nachts] */
+const STILES = [
+  ["pv", "sun", "--sun", "energie", false], ["batt", "byd", "--batt", "energie", true], ["home", "home", "--home", "energie", false],
+  ["ww", "drop", "--heat", "heizung", false], ["out", "thermo", "--cool", "zuhause", true], ["gar", "garage", "--ok", "einfahrt", true],
+  ["muell", "trash", "--fg-2", "einfahrt#tonnen", false],
+  ["wm", "washer", "--cool", "geraete", false], ["dr", "dryer", "--cool", "geraete", false], ["sp", "dish", "--cool", "geraete", false],
+];
+
 /* Wand-Tablet: Bildschirmschoner, Nachtmodus 22–06 Uhr, Alarm-Banner, Display wach halten */
 function initTablet() {
   const KEY = "glashaus.tablet";
@@ -1817,11 +1929,9 @@ function initTablet() {
     '<div class="tint" aria-hidden="true"></div>' +
     '<div class="screen" aria-hidden="true"><span class="shint" data-shint></span><div class="screen-in">' +
     '<div><div class="sclock" data-clock>00:00</div><div class="sdate" data-date></div></div>' +
-    '<div class="schips">' +
-    '<span class="schip glass" style="--c:var(--cool)"><svg><use href="#i-thermo"/></svg><span>9,4 °C außen</span></span>' +
-    '<span class="schip glass" data-sgar style="--c:var(--ok)"><svg><use href="#i-garage"/></svg><span>Garage zu</span></span>' +
-    '<span class="schip glass" style="--c:var(--batt)"><svg><use href="#i-byd"/></svg><span data-ssoc>Batterie –</span></span>' +
-    "</div></div></div>" +
+    '<div class="schips"><div class="stiles">' + STILES.map(([k, ico, c, go, night]) =>
+      '<button class="stile glass" type="button" data-st="' + k + '" data-go="' + go + '"' + (night ? " data-night" : "") + ' style="--c:var(' + c + ')"><svg><use href="#i-' + ico + '"/></svg><small></small><b>–</b><small></small></button>').join("") +
+    "</div></div></div></div>" +
     '<div class="alarm glass" role="alert" aria-live="assertive"><span class="ico"><svg><use href="#i-bell"/></svg></span>' +
     '<div><b data-at></b><small data-ad></small></div><button class="btn" type="button" data-ack>Quittieren</button></div>');
 
@@ -1831,9 +1941,9 @@ function initTablet() {
     '<div class="tcfg">' +
     '<div><h3>Bildschirmschoner</h3><div class="segs" data-seg="saver"><button type="button" data-v="30">30 s</button><button type="button" data-v="60">1 min</button><button type="button" data-v="300">5 min</button><button type="button" data-v="0">Aus</button></div>' +
     '<div class="btns"><button class="btn" type="button" data-saver-now>Jetzt zeigen</button></div>' +
-    "<p>Ohne Berührung bleibt nur die Skulptur mit Uhr. <b>Antippen</b> öffnet das Dashboard, <b>Wischen</b> spielt mit der Form.</p></div>" +
+    "<p>Ohne Berührung zeigt der Standby Uhr und die wichtigsten Werte. <b>Eine Kachel antippen</b> öffnet ihre Seite, sonst öffnet Antippen das Dashboard, <b>Wischen</b> spielt mit der Form.</p></div>" +
     '<div><h3>Nachtmodus</h3><div class="segs" data-seg="night"><button type="button" data-v="auto">22–06 Uhr</button><button type="button" data-v="on">Immer</button><button type="button" data-v="off">Aus</button></div>' +
-    "<p>Dunkel und gedimmt. Schon nach <b>20 Sekunden</b> nur noch Uhr, Außentemperatur, Garage und Batterie.</p></div>" +
+    "<p>Dunkel und gedimmt. Schon nach <b>20 Sekunden</b> nur noch Uhr, Außentemperatur, Garage, Batterie und am Vortag der Abfuhr die Mülltonne.</p></div>" +
     '<div><h3>Alarm testen</h3><div class="btns"><button class="btn" type="button" data-alarm="info">Info</button><button class="btn" type="button" data-alarm="warn">Warnung</button><button class="btn" type="button" data-alarm="crit">Kritisch</button></div>' +
     '<p>Stufen wie im PV-Überwachungsscript. Kritisch färbt die Seite rot und hält das Display wach. <span data-wl></span></p>' +
     '<h3 style="margin-top:18px">Anruf testen</h3><div class="btns"><button class="btn" type="button" data-calltest="oma">Opa ruft an</button><button class="btn" type="button" data-calltest="fremd">Unbekannte Nummer</button></div>' +
@@ -1867,14 +1977,41 @@ function initTablet() {
 
   /* Bildschirmschoner */
   let idle = false, last = Date.now(), crit = false;
+  /* Standby-Kacheln: die wichtigsten Werte (Demo), Antippen öffnet die passende Seite */
+  const kw = (v) => de(Math.abs(v), Math.abs(v) < 10 ? 1 : 0) + " kW";
+  const tile = (k, top, val, sub, c) => { const b = $('[data-st="' + k + '"]'); if (!b) return; const sm = b.querySelectorAll("small");
+    sm[0].textContent = top; b.querySelector("b").textContent = val; sm[1].textContent = sub || ""; if (c) b.style.setProperty("--c", "var(" + c + ")"); };
   const status = () => {
-    $("[data-ssoc]").textContent = "Batterie " + Math.round(D[nowIdx()].soc) + " %";
-    const g = window.GH_GARAGE || "zu", gc = $("[data-sgar]");
-    gc.style.setProperty("--c", g === "zu" ? "var(--ok)" : "var(--warn)");
-    gc.querySelector("span").textContent = "Garage " + ({ zu: "zu", offen: "offen", oeffnet: "öffnet", schliesst: "schließt" }[g] || g);
+    const e = D[nowIdx()];
+    tile("pv", "Vom Dach", e.pv < 0.05 ? "0 kW" : kw(e.pv), "heute " + de(e.gen, 1) + " kWh", e.pv < 0.05 ? "--fg-2" : "--sun");
+    tile("batt", "Batterie", Math.round(e.soc) + " %", e.batt > 0.05 ? "lädt " + kw(e.batt) : e.batt < -0.05 ? "entlädt " + kw(e.batt) : "ruht");
+    tile("home", "Haus", kw(e.home), e.grid > 0.05 ? "speist " + kw(e.grid) + " ein" : e.grid < -0.05 ? "Netz " + kw(e.grid) : "Netz ruht", e.grid < -0.05 ? "--grid" : "--home");
+    tile("ww", "Warmwasser", "52 °C", "Speicher oben", "--heat");
+    tile("out", "Außen", "9,4 °C", "↓ 7°  ↑ 14° · Heiter");
+    const g = window.GH_GARAGE || "zu";
+    tile("gar", "Garage", { zu: "zu", offen: "offen", oeffnet: "öffnet", schliesst: "schließt" }[g] || g, "Tor", g === "zu" ? "--ok" : "--warn");
+    /* Müll: am Vortag und am Abfuhrtag vormittags groß hervorheben (auch im Nachtmodus), Symbol = Tonnen in ihren Farben */
+    const nx = TONNEN.map((x) => ({ x, d: muellNext(x.k) })).filter((o) => o.d).sort((a, b) => a.d - b.d)[0], mb = $('[data-st="muell"]');
+    if (nx) { const n = tageBis(nx.d), ts = muellAm(nx.d), all = ts.map((x) => x.n).join(", "), soon = n <= 1;
+      if (soon) tile("muell", n === 0 ? "Heute Abfuhr" : "Morgen Abfuhr", all, n === 0 ? "Tonne steht draußen?" : "heute Abend rausstellen");
+      else tile("muell", "Müll " + (n <= 2 ? inTagen(n) : fmtTag(nx.d)), all, "");
+      mb.style.setProperty("--c", soon ? ts[0].c : "var(--fg-2)"); mb.classList.toggle("soon", soon); mb.toggleAttribute("data-night", soon);
+      const key = ts.map((x) => x.k).join(); if (mb.dataset.bins !== key) { mb.dataset.bins = key;
+        mb.firstElementChild.outerHTML = '<span class="sbins">' + ts.map((x) => '<i style="--c:' + x.c + '">' + tonneSvg(x) + "</i>").join("") + "</span>"; } }
+    /* Hausgeräte: je Gerät eine Kachel, solange es läuft (Demo: Waschmaschine) */
+    const bis = new Date(Date.now() + 42 * 6e4).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    tile("wm", "Waschmaschine", "noch 42 min", "Baumwolle · 40 °C · bis " + bis, "--cool");
+    ["dr", "sp"].forEach((k) => { $('[data-st="' + k + '"]').hidden = true; });
   };
+  /* Kachel antippen: passende Seite öffnen (Zuhause = nur aufwachen) */
+  const goTo = (page, hash) => { const a = $$(".nav .links a").find((x) => new RegExp("(^|/)" + (page === "zuhause" ? "index" : page) + "\\.html").test(x.getAttribute("href") || ""));
+    if (page === "zuhause" || !a || window.top !== window) { exit(); if (hash) $(hash)?.scrollIntoView({ block: "start" }); return; }
+    location.href = a.href.split("#")[0] + (hash || ""); };
   function enter() {
     if (idle || crit) return;
+    /* Standby ist immer die Zuhause-Seite: von anderen Seiten dorthin wechseln */
+    const home = $(".nav a.brand"), cur = $('.nav [aria-current="page"]');
+    if (cur && home && !/^#?$/.test(home.getAttribute("href") || "") && window.top === window && /^https?:/.test(home.href)) { location.href = home.href.split("#")[0] + "#standby"; return; }
     idle = true; scrollTo(0, 0); status(); clock();
     body.classList.add("idle"); $(".screen").setAttribute("aria-hidden", "false");
     SCULPT.place(); SCULPT.setAmbient(true, night ? 0.45 : 0.7);
@@ -1891,8 +2028,10 @@ function initTablet() {
   let down = null;
   const scr = $(".screen");
   scr.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
-  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return; if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) exit(); down = null; });
+  scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return;
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
+  if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
   setInterval(() => {
     applyNight();
     if (idle) { status(); return; }
@@ -2063,9 +2202,11 @@ function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>>
 const YEAR = (function () {
   const today = new Date(), endMs = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   const r = rng(21), Y = { endMs, PV: [], USE: [], AUT: [], EXP: [], IMP: [] };
+  /* Demo-Tage ab 1. Januar vor drei Jahren, damit „+“ in der Jahres-Skyline Vorjahre zeigen kann */
+  const N = Math.round((endMs - Date.UTC(today.getFullYear() - 3, 0, 1)) / 864e5);
   let cloud = 0.5;
-  for (let i = 0; i < 371; i++) {
-    const ms = endMs - (370 - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
+  for (let i = 0; i <= N; i++) {
+    const ms = endMs - (N - i) * 864e5, d = new Date(ms), date = d.toISOString().slice(0, 10);
     const doy = (ms - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5, s = (1 - Math.cos(2 * Math.PI * (doy - 172) / 365)) / 2;
     cloud = cloud * 0.55 + r() * 0.45;
     const w = Math.min(1, Math.max(0.05, 1.12 - cloud * 1.15));
@@ -2195,6 +2336,26 @@ function tonneSvg(t) {
     ? '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><path class="lid" d="M15 9 20 13 25 9 23 6 20 8 17 6Z"/><path class="body" d="M14 12Q20 9 26 12L33 38Q34 44 20 44 6 44 7 38Z"/><path class="line" d="M14 22Q20 25 27 21M11 32Q20 36 30 31"/></svg>'
     : '<svg class="tonne" viewBox="0 0 40 46" aria-hidden="true"><rect class="lid" x="4" y="4" width="32" height="6" rx="2"/><rect class="lid" x="15" y="1.5" width="10" height="3" rx="1.5"/><path class="body" d="M6 11H34L31.5 41H8.5Z"/><path class="line" d="M15 16 15.6 36M20 16V36M25 16 24.4 36"/><circle class="wheel" cx="11" cy="42" r="3.4"/></svg>';
 }
+
+/* Jahres-Skyline über mehrere Jahre: „+“ / „−“ (im Abschnittskopf, [data-skyctl]) legen je 12 Monate früher als weiteren
+   Streifen ins selbe Diagramm (Monat neben Monat), höchstens bis zum ersten Datum mit Werten. o = { key, first: "YYYY-MM-DD", build(el, st) → Skyline },
+   st = { n, lbl() }; die Anzahl merkt sich jede Seite im Browser */
+function skyStack(o) {
+  const ctl = $("[data-skyctl]"), K = "glashaus.skyjahre." + o.key;
+  const max = Math.max(1, Math.ceil((YEAR.endMs - Date.parse(o.first)) / (365.25 * 864e5) - 0.02));
+  const st = { n: 1, lbl: () => "in den letzten 12 Monaten" };
+  try { st.n = Math.min(max, Math.max(1, +localStorage.getItem(K) || 1)); } catch (e) {}
+  const sky = o.build($("#sky"), st);
+  ctl.innerHTML = '<button class="circ" type="button" data-skym aria-label="Ein Jahr weniger vergleichen">−</button><span data-skyn></span><button class="circ" type="button" data-skyp aria-label="Ein Jahr mehr vergleichen">+</button>';
+  const sync = () => { $("[data-skyn]", ctl).textContent = st.n + (st.n > 1 ? " Jahre" : " Jahr"); $("[data-skym]", ctl).disabled = st.n <= 1; $("[data-skyp]", ctl).disabled = st.n >= max; try { localStorage.setItem(K, st.n); } catch (e) {} };
+  $("[data-skyp]", ctl).addEventListener("click", () => { if (st.n < max) { st.n++; sky.setYears(st.n); sync(); } });
+  $("[data-skym]", ctl).addEventListener("click", () => { if (st.n > 1) { st.n--; sky.setYears(st.n); sync(); } });
+  sync();
+}
+
+/* Version (README „Versionen“) – erscheint in der Fußzeile */
+const GLASHAUS_VERSION = "1.1.0";
+document.addEventListener("DOMContentLoaded", () => { const f = document.querySelector(".foot span"); if (f) f.textContent += " · v" + GLASHAUS_VERSION; });
 
 initSculpture('energie');
 
@@ -2440,12 +2601,13 @@ setInterval(()=>{for(let k=0;k<6;k++){const i=Math.floor(Math.random()*96);if(i=
 /* Wechselrichter: Netzfrequenz als Lebenszeichen */
 setInterval(()=>{tween($('[data-hz]'),50+(Math.random()-.5)*.05,2,'',600);tween($('[data-v]'),231+(Math.random()-.5)*2.4,1,'',600)},1500);
 
-GlasSkyline($('#sky'),{endMs:YEAR.endMs,locale:'de-DE',weekStart:1,datasets:[
+/* „+“ / „−“ legt Vorjahre als Streifen ins selbe Diagramm */
+skyStack({key:'energie',first:YEAR.PV[0].date,build:(el,st)=>GlasSkyline(el,{endMs:YEAR.endMs,years:st.n,locale:'de-DE',weekStart:1,datasets:[
   {label:'Sonnenertrag',unit:'kWh',decimals:1,totalLabel:'Jahresertrag',streakLabel:'über 25 kWh',streakTest:v=>v>=25,data:YEAR.PV,palette:PAL.sun,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> Sonnenertrag in den letzten 12 Monaten'},
   {label:'Einspeisung',unit:'kWh',decimals:1,totalLabel:'Eingespeist',streakLabel:'über 10 kWh',streakTest:v=>v>=10,data:YEAR.EXP,palette:PAL.violet,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> ins Netz eingespeist'},
   {label:'Netzbezug',unit:'kWh',decimals:1,totalLabel:'Bezogen',streakLabel:'unter 1 kWh',streakTest:v=>v<1,data:YEAR.IMP,palette:PAL.blue,
    title:(s,nf)=>'<b>'+nf.format(s.total)+' kWh</b> aus dem Netz bezogen'}
-]});
+]})});
 </script>

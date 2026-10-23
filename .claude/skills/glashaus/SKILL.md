@@ -25,7 +25,7 @@ src/common.js     Helfer ($, $$, de, tween, ring, toast), ART-Motive je Seite, i
                   camScene, GH_MOTION (Bewegungs-Popup), GH_CALL (Anruf), Demo-Tag D, YEAR, PLAN/ROOMS,
                   MUELL/TONNEN (Abfuhrkalender, tonneSvg, muellNext/muellAm)
 src/sculpture.js  Partikel-Hintergrund (Canvas 2D): GlasSculpture({stage,img,srcs,band,…}) → {retheme, place, setAmbient}
-src/skyline.js    3D-Jahres-Skyline
+src/skyline.js    3D-Jahres-Skyline; Option years = Anzahl Jahre als parallele Streifen, sky.setYears(n)
 src/rooms.js      Zimmer-Konfiguration ZC + Speichern/Laden der Einrichtung, für Zimmer UND Haus
 src/<seite>.html  zuhause, energie, heizung, geraete, einfahrt, haus, zimmer
 ```
@@ -33,6 +33,20 @@ src/<seite>.html  zuhause, energie, heizung, geraete, einfahrt, haus, zimmer
 Markierungen in den Seiten, die `build.py` ersetzt: `<!--LANG-->` (Sprachumschalter DE | EN in der Navigation), `/*BASE_CSS*/`, `<!--SPRITE-->`, `/*COMMON_JS*/`, `/*SCULPTURE_JS*/`, `/*SKYLINE_JS*/`, `/*ROOMS_JS*/`, Links `__URL_<SEITE>__`. Achtung: Ein Kommentar in einer eingesetzten Datei darf weder `*/` noch eine dieser Markierungen enthalten.
 
 Seiten nach System: **Zuhause** = nur Übersicht · **Energie** = PV, Batterie, Wallboxen · **Heizung** = Speicher, Zirkulation, Heizkreis, Räume · **Geräte** = Waschmaschine, Trockner, Spülmaschine, Echos · **Einfahrt** = Kamera, Autos, Fahrtenbuch, Garage, Besucher, Tonnen · **Haus** = 3D-Modell + Geräteliste · **Zimmer** = Räume in 3D mit Einrichten-Modus. Neue Funktionen gehören auf die Seite ihres Systems; Zuhause zeigt höchstens eine Zusammenfassung.
+
+## Neu in 1.1.0 (Version: `GLASHAUS_VERSION` in common.js, steht in jeder Fußzeile; bei größeren Änderungen erhöhen und in beiden READMEs unter „Versionen“ eintragen)
+
+- **Mehrere Jahre in der Skyline:** `skyStack({key, first, build(el, st)})` (common.js) setzt „− n Jahre +“ in `[data-skyctl]` im Abschnittskopf.
+  - Jedes weitere Jahr wird ein eigener Streifen im selben Diagramm, um 52 Wochen versetzt, damit die Monate übereinanderliegen. Das jüngste Jahr steht vorn.
+  - Die Vergleichszeile `.sk-cmp` zeigt die Summe je Jahr und ± zum Vorjahr. Die Statistik oben bleibt beim jüngsten Jahr. `YEAR` reicht ab 1. Januar vor drei Jahren.
+- **Standby-Kacheln:** `STILES` + `status()` in initTablet.
+  - Layout: Uhr links unten, Kacheln rechts (`.stiles`).
+  - Antippen öffnet die Seite (`goTo`, sucht den Link per `href`, damit es auch auf Englisch klappt). Der Standby wechselt immer zur Startseite (`#standby`).
+  - Nachts bleiben nur Kacheln mit `data-night`. Am Vortag der Abfuhr wird die Müll-Kachel breit (`.soon`) in der Tonnenfarbe, mit `tonneSvg`-Symbolen.
+- **Wetter-Kachel** (Zuhause, s-12): oben jetzt und Werte (`.wx-top`, `.wx-kv`), darunter 24 Stunden mit Regenbalken (`.wx-hours`) und 7 Tage (`.wx-days`). Demo-Daten `wxDemoH`, `wxDemoT`.
+- **Abfuhrkalender** (Einfahrt): Monate blättern (`calOff`, ‹ › Heute). Leerungen ordnet `leerMatch` dem Termin zu (bis 2 Tage danach): „✓ 09:30“ = geleert, durchgestrichen = nicht rausgestellt. In der Demo kommen die Leerungen aus „rausgestellt“.
+- **Geräte:** Trommel, Wäsche und Wasser sitzen fest im Gehäuse, `.door` ist nur Ring und Glas. Offen = `scaleX(-.17)` am linken Scharnier. Bei der Spülmaschine bleiben die Körbe sichtbar.
+- **Testen der Skyline headless:** Chrome headless startet die 3D-Animation nicht zuverlässig (bleibt flach). 3D im echten Browser prüfen.
 
 ## Ändern, bauen, prüfen
 

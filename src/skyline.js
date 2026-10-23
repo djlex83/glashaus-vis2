@@ -88,11 +88,12 @@ function buildGrid(data, endMs, weekStart, test) {
 
 function monthLabels(cells, weeks, locale) {
   const fmt = new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" });
-  const out = []; let prev = -1;
+  const out = []; let prev = -1, multi = weeks > 60;
   for (let w = 0; w < weeks; w++) {
     const c = cells[w * 7]; if (!c) break;
     const m = +c.date.slice(5, 7);
-    if (m !== prev) out.push({ week: w, label: fmt.format(dayMs(c.date)).replace(".", "") });
+    /* über mehrere Jahre: nur Quartale, Januar als Jahreszahl */
+    if (m !== prev && (!multi || m % 3 === 1)) out.push({ week: w, label: multi && m === 1 ? c.date.slice(0, 4) : fmt.format(dayMs(c.date)).replace(".", "") });
     prev = m;
   }
   if (out.length > 1 && out[1].week - out[0].week < 3) out.shift();
@@ -102,7 +103,7 @@ function monthLabels(cells, weeks, locale) {
 const ICON_GRID = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="1.5" y="9" width="5.5" height="5.5" rx="1" fill="currentColor"/><rect x="9" y="9" width="5.5" height="5.5" rx="1" fill="currentColor"/></svg>';
 const ICON_CUBE = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.2 14.2 4.6v6.8L8 14.8 1.8 11.4V4.6Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M1.8 4.6 8 8l6.2-3.4M8 8v6.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
 
-/* opts: endMs, locale, weekStart, datasets: [{key,label,title,unit,decimals,palette:{light,dark},data:[{date,value}],
+/* opts: endMs, years (Anzahl Jahre als parallele Streifen, Standard 1), locale, weekStart, datasets: [{key,label,title,unit,decimals,palette:{light,dark},data:[{date,value}],
  *        streakLabel, streakTest(v), totalLabel, totalIsMean}] */
 window.GlasSkyline = function mount(root, opts) {
   const locale = opts.locale || "de-DE", weekStart = opts.weekStart ?? 1, duration = opts.duration || 1400;
@@ -118,7 +119,7 @@ window.GlasSkyline = function mount(root, opts) {
     '<div class="sk-toggle" role="group" aria-label="Ansicht"><span class="sk-knob" aria-hidden="true"></span>' +
     '<button type="button" data-v="2d" aria-label="Flache Heatmap" title="Flache Heatmap">' + ICON_GRID + "</button>" +
     '<button type="button" data-v="3d" aria-label="3D-Skyline" title="3D-Skyline">' + ICON_CUBE + "</button></div></div></header>" +
-    '<div class="sk-frame"><div class="sk-pad"><div class="sk-stage"><canvas tabindex="0" role="img"></canvas>' +
+    '<div class="sk-cmp" aria-live="polite"></div><div class="sk-frame"><div class="sk-pad"><div class="sk-stage"><canvas tabindex="0" role="img"></canvas>' +
     '<div class="sk-corner sk-tr"></div><div class="sk-corner sk-bl"></div></div>' +
     '<div class="sk-tip" role="tooltip" aria-hidden="true"><span></span><i></i></div></div>' +
     '<div class="sk-rowwrap"><div class="sk-row"></div></div>' +
@@ -127,7 +128,7 @@ window.GlasSkyline = function mount(root, opts) {
     '<p class="sk-sr" aria-live="polite"></p>';
   const $ = (s) => root.querySelector(s);
   const stage = $(".sk-stage"), canvas = $("canvas"), tip = $(".sk-tip"), ctx = canvas.getContext("2d");
-  const titleEl = $(".sk-title"), trEl = $(".sk-tr"), blEl = $(".sk-bl"), rowEl = $(".sk-row"), rowWrap = $(".sk-rowwrap");
+  const cmpEl = $(".sk-cmp"), titleEl = $(".sk-title"), trEl = $(".sk-tr"), blEl = $(".sk-bl"), rowEl = $(".sk-row"), rowWrap = $(".sk-rowwrap");
   const hintEl = $(".sk-hint"), sr = $(".sk-sr"), swatches = [...root.querySelectorAll(".sk-legend button")];
 
   let dsi = 0, ds = opts.datasets[0], model = null, view = opts.defaultView || "3d", legendLevel = -1, accent = "#000";
@@ -146,8 +147,21 @@ window.GlasSkyline = function mount(root, opts) {
   const describe = (i) => { const c = model.cells[i]; return c ? (c.v ? fmtV(c.v) : "Kein Wert") + " am " + dfl.format(dayMs(c.date)) : ""; };
 
   function computeModel() {
-    const g = buildGrid(ds.data, opts.endMs, weekStart, ds.streakTest);
+    /* mehrere Jahre: je 12 Monate (52 Wochen versetzt, damit Wochen und Monate übereinanderliegen) als eigener Streifen,
+       das jüngste vorn; Statistik oben bleibt beim jüngsten Jahr, Stufen und Höhen gelten für alle gemeinsam */
+    const N = Math.max(1, opts.years || 1), gs = [];
+    for (let k = 0; k < N; k++) gs.push(buildGrid(ds.data, opts.endMs - k * 364 * DAY, weekStart, ds.streakTest));
+    const g = gs[0];
     g.months = monthLabels(g.cells, g.weeks, locale);
+    g.N = N; g.rows = N * 8 - 1;
+    g.strips = gs.map((x, k) => ({ y: (N - 1 - k) * 8, total: x.stats.total, days: x.cells.length, first: x.stats.first, last: x.stats.last,
+      label: x.stats.first && x.stats.last ? x.stats.first.slice(2, 4) + "/" + x.stats.last.slice(2, 4) : "" }));
+    if (N > 1) {
+      const all = gs.flatMap((x, k) => x.cells.map((c) => Object.assign({}, c, { day: c.day + (N - 1 - k) * 8 })));
+      const nz = all.map((c) => c.v).filter((v) => v > 0).sort((a, b) => a - b), busy = nz.length ? nz[Math.floor(0.95 * (nz.length - 1))] : 0;
+      for (const c of all) c.level = levelOf(c.v, busy);
+      g.cells = all; g.max = nz.length ? nz[nz.length - 1] : 0;
+    }
     return g;
   }
 
@@ -167,6 +181,12 @@ window.GlasSkyline = function mount(root, opts) {
 
   function renderText() {
     const b = statBlocks();
+    if (model.N > 1) {
+      const nf0 = nfFor(0), val = (x) => (ds.totalIsMean ? x.total / Math.max(1, x.days) : x.total);
+      cmpEl.innerHTML = model.strips.map((x, k) => { const v = val(x), p = model.strips[k + 1], pv = p ? val(p) : 0, d = p && pv ? Math.round((v / pv - 1) * 100) : null;
+        return '<span><b>' + x.label + "</b> " + nf0.format(v) + " " + (ds.totalUnit || ds.unit) + (d !== null ? ' <em class="' + (d >= 0 ? "up" : "dn") + '">' + (d > 0 ? "+" : d < 0 ? "−" : "±") + Math.abs(d) + " %</em>" : "") + "</span>"; }).join("");
+      cmpEl.hidden = false;
+    } else { cmpEl.innerHTML = ""; cmpEl.hidden = true; }
     titleEl.innerHTML = ds.title(model.stats, nfFor(0));
     trEl.innerHTML = statHTML(b[0], "end") + statHTML(b[1], "end");
     blEl.innerHTML = statHTML(b[2], "start") + statHTML(b[3], "start");
@@ -199,15 +219,16 @@ window.GlasSkyline = function mount(root, opts) {
     for (let i = 0; i < n; i++) {
       const c = model.cells[i];
       wk[i] = c.week; dy[i] = c.day; lv[i] = c.level;
-      hFrom[i] = animate && prevN === n ? hgt[i] : barHeight(c.v, model.max);
-      hTo[i] = barHeight(c.v, model.max);
+      const hs = model.N > 1 ? 0.7 : 1;
+      hFrom[i] = animate && prevN === n ? hgt[i] : barHeight(c.v, model.max, hs);
+      hTo[i] = barHeight(c.v, model.max, hs);
       if (!animate || prevN !== n) hgt[i] = hTo[i];
     }
     blend = animate && prevN === n && !reduced ? 0 : 1;
     months = model.months;
     const wf = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
     weekdayRows = [];
-    for (let d = 0; d < 7 && d < n; d++) {
+    if (model.N === 1) for (let d = 0; d < 7 && d < n; d++) {
       const dow = new Date(dayMs(model.cells[d].date)).getUTCDay();
       if (dow === 1 || dow === 3 || dow === 5) weekdayRows.push({ day: d, label: wf.format(dayMs(model.cells[d].date)).replace(".", "") });
     }
@@ -226,7 +247,7 @@ window.GlasSkyline = function mount(root, opts) {
     for (let k = 0; k < 5; k++) for (let ch = 0; ch < 3; ch++) colGoal[k * 3 + ch] = all[k][ch];
     if (!colReady || reduced) { col.set(colGoal); colReady = true; }
     ctx.font = font;
-    labelW = Math.ceil(Math.max(20, ...weekdayRows.map((r) => ctx.measureText(r.label).width))) + 8;
+    labelW = Math.ceil(Math.max(20, ...weekdayRows.map((r) => ctx.measureText(r.label).width), ...(model && model.N > 1 ? model.strips.map((x) => ctx.measureText(x.label).width) : []))) + 8;
     const sw = all.map((c) => rgbS(c[0], c[1], c[2]));
     swatches.forEach((s, i) => (s.style.background = sw[i]));
     accent = sw[4];
@@ -242,7 +263,9 @@ window.GlasSkyline = function mount(root, opts) {
       const x0 = wk[i] + off, y0 = dy[i] + off, z = full ? Math.max(hgt[i], hTo[i]) * e : zs[i];
       add(x0, y0, z); add(x0 + w, y0, z); add(x0, y0 + w, z); add(x0 + w, y0 + w, 0); add(x0, y0 + w, 0); add(x0 + w, y0, 0);
     }
-    add(0, 7 + 1.5 * e, 0); add(weeks, 7 + 1.5 * e, 0);
+    const R = (model && model.rows) || 7;
+    add(0, R + 1.5 * e, 0); add(weeks, R + 1.5 * e, 0);
+    if (model && model.N > 1) for (const st of model.strips) add(-3 * e, st.y + 3.5, 0);  // Platz für die Jahreszahl links
     return { minx, maxx, miny, maxy };
   }
 
@@ -313,11 +336,14 @@ window.GlasSkyline = function mount(root, opts) {
       for (const m of months) { const x = px(m.week + off, -0.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + off, -0.3, 0) - 3); edge = x + tw + 6; }
       ctx.textAlign = "right"; ctx.textBaseline = "middle";
       if (gutter > 0) for (const r of weekdayRows) ctx.fillText(r.label, px(0, r.day + 0.5) - 6, py(0, r.day + 0.5, 0));
+      if (model.N > 1 && gutter > 0) for (const st of model.strips) ctx.fillText(st.label, px(0, st.y + 3.5) - 6, py(0, st.y + 3.5, 0));
     }
     if (a3 > 0.004) {
       ctx.fillStyle = mc(a3); ctx.textAlign = "left"; ctx.textBaseline = "top";
       let edge = -Infinity;
-      for (const m of months) { const x = px(m.week + 0.5, 7.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + 0.5, 7.3, 0) + 2); edge = x + tw + 10; }
+      const R = model.rows || 7;
+      for (const m of months) { const x = px(m.week + 0.5, R + 0.3), tw = ctx.measureText(m.label).width; if (x < edge || x + tw > W) continue; ctx.fillText(m.label, x, py(m.week + 0.5, R + 0.3, 0) + 2); edge = x + tw + 10; }
+      if (model.N > 1) { ctx.textAlign = "right"; ctx.textBaseline = "middle"; for (const st of model.strips) ctx.fillText(st.label, px(-0.4, st.y + 3.5), py(-0.4, st.y + 3.5, 0)); }
     }
     if (activeIdx >= 0 && activeIdx < n) {
       const i = activeIdx, z = zs[i] + hover[i] * lift, tx = px(wk[i] + 0.5, dy[i] + 0.5);
@@ -461,6 +487,8 @@ window.GlasSkyline = function mount(root, opts) {
   new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   reduceMq.addEventListener && reduceMq.addEventListener("change", () => { reduced = reduceMq.matches; kick(); });
   darkMq.addEventListener && darkMq.addEventListener("change", retheme);
-  return { replay() { t = 0; target = 0; setTarget(); kick(); } };
+  return { replay() { t = 0; target = 0; setTarget(); kick(); },
+    /* Zeitraum ändern: years × 12 Monate bis endMs, gleiches Diagramm */
+    setYears(y) { opts.years = y; load(true); relayout(); refreshActive(); kick(); } };
 };
 })();
