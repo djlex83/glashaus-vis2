@@ -310,7 +310,10 @@ function planArt(g, o, fi) {
 function initSculpture(motiv, draw) {
   $(".hint").textContent = matchMedia("(hover: none), (pointer: coarse)").matches ? "Zeichnung berühren" : "Über die Zeichnung streichen";
   const so = { stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(draw || ART[motiv] || ART.haus), parallax: 0.3,
-    band: () => { const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
+    /* Standby: Zeichnung nur über Uhr und Kacheln, damit nichts verdeckt wird */
+    band: () => { if (document.body.classList.contains("idle")) { const t = Math.min(...[".sclock", ".stiles"].map((q) => { const e = $(q); return e ? e.getBoundingClientRect().top : innerHeight; }));
+        return { top: 56 + scrollY, bottom: Math.max(200, t - 18) + scrollY }; }
+      const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
     bg: () => cssv("--bg"), dark: isDark };
   const s = GlasSculpture(so);
   /* Motiv austauschen (z. B. Wetter): neue Zeichnung, die Partikel blenden über */
@@ -547,7 +550,7 @@ function initTablet() {
     if (!idle) return;
     idle = false; last = Date.now();
     body.classList.remove("idle"); $(".screen").setAttribute("aria-hidden", "true");
-    SCULPT.setAmbient(false);
+    SCULPT.setAmbient(false); SCULPT.place();
   }
   const activity = () => { if (!idle) last = Date.now(); };
   ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"].forEach((ev) => addEventListener(ev, activity, { passive: true }));
@@ -559,9 +562,10 @@ function initTablet() {
     if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
   if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
+  let tilesTop = 0;
   setInterval(() => {
     applyNight();
-    if (idle) { status(); return; }
+    if (idle) { status(); const t = Math.round($(".stiles").getBoundingClientRect().top); if (Math.abs(t - tilesTop) > 4) { tilesTop = t; SCULPT.place(); } return; }
     const lim = (night ? 20 : cfg.saver) * 1000;
     if (cfg.saver > 0 && !crit && Date.now() - last > lim) enter();
   }, 1000);

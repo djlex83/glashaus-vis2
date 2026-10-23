@@ -255,15 +255,16 @@ body.night .screen{color:var(--fg-2)}
 /* Standby-Kacheln: wichtigste Werte, Antippen öffnet die Seite */
 /* Uhr links unten, Kacheln rechts daneben; erst auf schmalen Bildschirmen darunter */
 .screen-in{flex-wrap:nowrap}
-.stiles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;width:min(480px,44vw)}
-@media (min-width:1600px){.stiles{grid-template-columns:repeat(3,minmax(150px,1fr));width:min(720px,46vw)}}
+.stiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(620px,50vw)}
+@media (min-width:1600px){.stiles{width:min(760px,46vw)}}
+@media (max-width:1100px){.stiles{grid-template-columns:repeat(2,minmax(0,1fr));width:min(440px,48vw)}}
 @media (max-width:900px){.screen-in{flex-wrap:wrap}.stiles{width:100%}}
-.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:2px;align-items:center;text-align:left;padding:14px 16px;border-radius:20px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
+.stile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:10px;row-gap:1px;align-items:center;text-align:left;padding:9px 12px;border-radius:16px;border:0;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:transform .3s var(--spring)}
 .stile:active{transform:scale(.97)}
 .stile[hidden]{display:none}
-.stile svg{grid-row:1/4;width:24px;height:24px;color:var(--c,var(--fg-2))}
-.stile small{font-size:12.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.stile b{font-size:24px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stile svg{grid-row:1/4;width:20px;height:20px;color:var(--c,var(--fg-2))}
+.stile small{font-size:11.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.stile b{font-size:20px;font-weight:500;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.night .stile:not([data-night]){display:none}
 .stile .sbins{grid-row:1/4;display:flex;align-items:flex-end;gap:2px}
 .stile .sbins i{display:block}
@@ -271,7 +272,7 @@ body.night .stile:not([data-night]){display:none}
 .stile.soon svg.tonne{width:32px;height:37px}
 .stile.soon{grid-column:1/-1;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 70%,transparent)}
 .stile.soon svg{width:30px;height:30px;color:var(--c)}
-.stile.soon b{font-size:28px}
+.stile.soon b{font-size:22px}
 body.night .stile.soon{color:var(--fg)}
 @media (prefers-reduced-motion:no-preference){.stile.soon svg{animation:binwob 2.4s ease-in-out infinite}}
 @keyframes binwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-8deg)}86%{transform:rotate(6deg)}94%{transform:rotate(-3deg)}}
@@ -1196,7 +1197,10 @@ function planArt(g, o, fi) {
 function initSculpture(motiv, draw) {
   $(".hint").textContent = matchMedia("(hover: none), (pointer: coarse)").matches ? "Touch the drawing" : "Swipe across the drawing";
   const so = { stage: $(".stage"), img: $(".sc-fallback"), backdrop: $(".backdrop"), hint: $(".hint"), srcs: makeArt(draw || ART[motiv] || ART.haus), parallax: 0.3,
-    band: () => { const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
+    /* Standby: Zeichnung nur über Uhr und Kacheln, damit nichts verdeckt wird */
+    band: () => { if (document.body.classList.contains("idle")) { const t = Math.min(...[".sclock", ".stiles"].map((q) => { const e = $(q); return e ? e.getBoundingClientRect().top : innerHeight; }));
+        return { top: 56 + scrollY, bottom: Math.max(200, t - 18) + scrollY }; }
+      const n = $(".nav").getBoundingClientRect(), c = $(".hero-copy").getBoundingClientRect(); return { top: n.bottom + scrollY + 8, bottom: c.top + scrollY - 8 }; },
     bg: () => cssv("--bg"), dark: isDark };
   const s = GlasSculpture(so);
   /* Motiv austauschen (z. B. Wetter): neue Zeichnung, die Partikel blenden über */
@@ -1433,7 +1437,7 @@ function initTablet() {
     if (!idle) return;
     idle = false; last = Date.now();
     body.classList.remove("idle"); $(".screen").setAttribute("aria-hidden", "true");
-    SCULPT.setAmbient(false);
+    SCULPT.setAmbient(false); SCULPT.place();
   }
   const activity = () => { if (!idle) last = Date.now(); };
   ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"].forEach((ev) => addEventListener(ev, activity, { passive: true }));
@@ -1445,9 +1449,10 @@ function initTablet() {
     if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
   if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
+  let tilesTop = 0;
   setInterval(() => {
     applyNight();
-    if (idle) { status(); return; }
+    if (idle) { status(); const t = Math.round($(".stiles").getBoundingClientRect().top); if (Math.abs(t - tilesTop) > 4) { tilesTop = t; SCULPT.place(); } return; }
     const lim = (night ? 20 : cfg.saver) * 1000;
     if (cfg.saver > 0 && !crit && Date.now() - last > lim) enter();
   }, 1000);
