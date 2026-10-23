@@ -105,6 +105,7 @@ Anyone is welcome to fork the project, change it and propose improvements as a p
 
 | Version | Changes |
 |---|---|
+| 1.1.1 | Standby: tiles respond reliably to a quick tap on touch tablets |
 | 1.1.0 | Standby with info tiles, yearly skyline with previous years as strips, weather with 24 hours and 7 days, waste calendar by month with collections, open doors on washer and dryer, version in the footer |
 | 1.0.0 | First release: seven pages, sample house, English interface, weather in the house picture |
 

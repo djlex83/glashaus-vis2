@@ -40,6 +40,7 @@ Seiten nach System: **Zuhause** = nur Übersicht · **Energie** = PV, Batterie, 
   - Jedes weitere Jahr wird ein eigener Streifen im selben Diagramm, um 52 Wochen versetzt, damit die Monate übereinanderliegen. Das jüngste Jahr steht vorn.
   - Die Vergleichszeile `.sk-cmp` zeigt die Summe je Jahr und ± zum Vorjahr. Die Statistik oben bleibt beim jüngsten Jahr. `YEAR` reicht ab 1. Januar vor drei Jahren.
 - **Standby-Kacheln:** `STILES` + `status()` in initTablet.
+  - Antippen läuft über `click` (nicht pointerup), dazu `.stile{touch-action:manipulation}`. Sonst kommen kurze Touch-Taps manchmal nicht an, weil der Browser sie als Wischen beginnt (1.1.1).
   - Layout: Uhr links unten, Kacheln rechts (`.stiles`).
   - Antippen öffnet die Seite (`goTo`, sucht den Link per `href`, damit es auch auf Englisch klappt). Der Standby wechselt immer zur Startseite (`#standby`).
   - Nachts bleiben nur Kacheln mit `data-night`. Am Vortag der Abfuhr wird die Müll-Kachel breit (`.soon`) in der Tonnenfarbe, mit `tonneSvg`-Symbolen.

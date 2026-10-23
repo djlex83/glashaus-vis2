@@ -559,7 +559,12 @@ function initTablet() {
   const scr = $(".screen");
   scr.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
   scr.addEventListener("pointerup", (e) => { if (callBox && callBox.classList.contains("show")) return;
-    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) { const t = e.target.closest("[data-go]"); if (t) { const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); } else exit(); } down = null; });
+    if (e.target.closest("[data-go]")) { down = null; return; } /* Kacheln laufen über „click“ (unten) */
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 12) exit(); down = null; });
+  /* Kacheln über „click“: den erzeugt der Browser bei jedem kurzen Tippen zuverlässig, auch wenn ein Touch-Ereignis als Wischen beginnt */
+  scr.addEventListener("click", (e) => { const t = e.target.closest("[data-go]"); if (!t || !idle) return; e.stopPropagation();
+    if (callBox && callBox.classList.contains("show")) return;
+    const [n, h] = t.dataset.go.split("#"); goTo(n, h ? "#" + h : ""); });
   $("[data-saver-now]").addEventListener("click", () => setTimeout(enter, 150));
   if (location.hash === "#standby") { history.replaceState(null, "", location.pathname + location.search); setTimeout(enter, 400); }
   let tilesTop = 0;
@@ -885,5 +890,5 @@ function skyStack(o) {
 }
 
 /* Version (README „Versionen“) – erscheint in der Fußzeile */
-const GLASHAUS_VERSION = "1.1.0";
+const GLASHAUS_VERSION = "1.1.1";
 document.addEventListener("DOMContentLoaded", () => { const f = document.querySelector(".foot span"); if (f) f.textContent += " · v" + GLASHAUS_VERSION; });

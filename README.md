@@ -101,6 +101,7 @@ Jeder darf das Projekt forken, verändern und Verbesserungen als Pull Request vo
 
 | Version | Inhalt |
 |---|---|
+| 1.1.1 | Standby: Kacheln reagieren zuverlässig auf kurzes Antippen am Touch-Tablet |
 | 1.1.0 | Standby mit Info-Kacheln, Jahres-Skyline mit Vorjahren als Streifen, Wetter mit 24 Stunden und 7 Tagen, Abfuhrkalender mit Monaten und Leerungen, offene Türen bei Waschmaschine und Trockner, Version in der Fußzeile |
 | 1.0.0 | Erste Fassung: sieben Seiten, Beispielhaus, englische Oberfläche, Wetter im Hausbild |
 
