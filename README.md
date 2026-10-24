@@ -14,6 +14,8 @@ Ein Dashboard-Entwurf für ein Smart Home mit ioBroker: Milchglas-Kacheln, ruhig
 
 > Alle Werte sind Demo-Werte, das Haus ist erfunden. Die Tabelle „In VIS 2 übernehmen“ auf jeder Seite zeigt, welcher ioBroker-Datenpunkt wohin gehört (mit Beispiel-IDs).
 
+> **Neu: Glashaus als echtes Widget-Set für VIS 2.** 14 Widgets im gleichen Design für die VIS-2-Palette, eigene Datenpunkte im Editor wählen, Beispielprojekt zum Importieren: **[ioBroker.vis-2-widgets-glashaus](https://github.com/djlex83/ioBroker.vis-2-widgets-glashaus)** (auf npm als `iobroker.vis-2-widgets-glashaus`). Wer Glashaus in VIS 2 nutzen will, nimmt am besten das Widget-Set; dieses Repository bleibt der Design-Entwurf mit den sieben fertigen Seiten.
+
 ![Partikel: Über die Zeichnung streichen](screenshots/partikel.gif)
 
 | Hausmodell drehen und aufklappen | Zimmer mit Lichtszenen |

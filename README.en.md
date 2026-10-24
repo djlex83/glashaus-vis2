@@ -14,6 +14,8 @@ A dashboard design for a smart home running ioBroker: frosted-glass tiles, calm 
 
 > All values are demo values and the house is fictional. The table “Use in VIS 2” on every page lists which ioBroker data point belongs where (with sample IDs).
 
+> **New: Glashaus as a real widget set for VIS 2.** 14 widgets in the same design for the VIS 2 palette, choose your own data points in the editor, demo project to import: **[ioBroker.vis-2-widgets-glashaus](https://github.com/djlex83/ioBroker.vis-2-widgets-glashaus)** (on npm as `iobroker.vis-2-widgets-glashaus`). To use Glashaus in VIS 2, the widget set is the way to go; this repository stays the design draft with the seven finished pages.
+
 ![Particles: move the pointer across the drawing](screenshots/partikel.gif)
 
 | Rotate and explode the house model | Rooms with light scenes |
